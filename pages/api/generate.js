@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     }
 
     const output = await replicate.run(
-      "tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570e55",
+      "tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570e55"
       {
         input: {
           input_image: image,
