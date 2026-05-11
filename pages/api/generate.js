@@ -1,3 +1,19 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+}
+
+import Replicate from "replicate";
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
+});
+
+export default async function handler(req, res) {
+  // ... el resto de tu código aquí abajo
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
