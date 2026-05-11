@@ -1,7 +1,7 @@
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
-  auth: 'r8_cgX6In5d9eQkUMK1B61l2uBdAxPpy6y13kZNH',
+     auth: process.env.REPLICATE_API_TOKEN,
 });
 
 export default async function handler(req, res) {
