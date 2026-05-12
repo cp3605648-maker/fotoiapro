@@ -4,28 +4,23 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-// Función para mejorar el prompt del cliente automáticamente
 function enhancePrompt(userInput) {
   const base = userInput.toLowerCase();
   
-  // Plantillas para mejorar prompts en inglés que Replicate entiende mejor
-  const templates = {
-    logo: `professional logo design, ${userInput}, vector style, clean background, high quality, 8k`,
-    fondo: `change background to ${userInput}, keep the main subject unchanged, realistic lighting, high detail, photorealistic`,
-    ropa: `change clothes to ${userInput}, keep face and pose same, realistic fabric texture, high quality`,
-    branding: `professional branding shot, ${userInput}, studio lighting, commercial photography, 8k`,
-    producto: `professional product photography of ${userInput}, white background, studio lighting, commercial, 8k`,
-    default: `${userInput}, high quality, photorealistic, 8k, detailed, professional photography`
-  };
-
-  // Detecta qué tipo de edición quiere
-  if (base.includes('logo')) return templates.logo;
-  if (base.includes('fondo') || base.includes('background')) return templates.fondo;
-  if (base.includes('ropa') || base.includes('camisa') || base.includes('vestido')) return templates.ropa;
-  if (base.includes('marca') || base.includes('branding')) return templates.branding;
-  if (base.includes('producto')) return templates.producto;
+  if (base.includes('logo')) {
+    return `professional logo design, ${userInput}, vector style, clean background, high quality, 8k`;
+  }
+  if (base.includes('fondo') || base.includes('background') || base.includes('playa') || base.includes('atardecer')) {
+    return `change background to ${userInput}, keep the main subject unchanged, realistic lighting, high detail, photorealistic, 8k`;
+  }
+  if (base.includes('ropa') || base.includes('camisa') || base.includes('vestido')) {
+    return `change clothes to ${userInput}, keep face and pose same, realistic fabric texture, high quality`;
+  }
+  if (base.includes('marca') || base.includes('branding')) {
+    return `professional branding shot, ${userInput}, studio lighting, commercial photography, 8k`;
+  }
   
-  return templates.default;
+  return `${userInput}, high quality, photorealistic, 8k, detailed, professional photography`;
 }
 
 export default async function handler(req, res) {
@@ -40,10 +35,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Mejoramos el prompt automáticamente
     const enhancedPrompt = enhancePrompt(prompt);
-    console.log('Original:', prompt);
-    console.log('Enhanced:', enhancedPrompt);
 
     const output = await replicate.run(
       "philz1337x/clarity-upscaler:dfad41707589d68ecdccd1dfa600d55a208f9310748e44bfe35b4a6291453d5e",
@@ -51,9 +43,9 @@ export default async function handler(req, res) {
         input: {
           image: image,
           prompt: enhancedPrompt,
-          negative_prompt: "blurry, low quality, text, watermark, distorted, deformed, bad anatomy",
+          negative_prompt: "blurry, low quality, text, watermark, distorted, deformed",
           scale_factor: 1,
-          scheduler: "DPM++ Karras",
+          scheduler: "DPM++ 2M Karras", // ← ESTE ERA EL ERROR, ya arreglado
           creativity: 0.35,
           resemblance: 0.7,
           guidance_scale: 7,
@@ -64,7 +56,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ 
       output: output,
-      usedPrompt: enhancedPrompt // Para debug
+      usedPrompt: enhancedPrompt
     });
   } catch (error) {
     console.error('Replicate error:', error);
