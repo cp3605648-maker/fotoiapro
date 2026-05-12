@@ -14,8 +14,8 @@ export default function Home() {
       return;
     }
 
-    // 4MB = 4 * 1024 * 1024 bytes
-    if (file.size > 4 * 1024) {
+    // CORREGIDO: 4MB = 4 * 1024 bytes
+    if (file.size > 4 * 1024 * 1024) {
       setError("La foto es muy pesada. Máximo 4MB. Usa una captura de pantalla");
       return;
     }
@@ -35,7 +35,7 @@ export default function Home() {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || 'Error al generar');
+          throw new Error(data.error || data.detail || 'Error al generar');
         }
 
         setPhotos(data.photos || []);
@@ -72,7 +72,7 @@ export default function Home() {
 
       <div style={{marginTop:30}}>
         {photos.map((p,i) => (
-          <img key={i} src={p} width={180} style={{borderRadius:8, margin:5}} />
+          <img key={i} src={p} width={180} style={{borderRadius:8, margin:5}} alt="generada" />
         ))}
       </div>
     </div>
