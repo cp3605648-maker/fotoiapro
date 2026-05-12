@@ -1,12 +1,37 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
+const CATEGORIES = [
+  { 
+    id: 'linkedin', 
+    name: '💼 LinkedIn', 
+    example: 'Con traje formal, fondo gris de oficina, sonriendo profesional'
+  },
+  { 
+    id: 'casual', 
+    name: '😎 Casual Pro', 
+    example: 'Ropa casual elegante, en cafetería, luz natural, look confiado'
+  },
+  { 
+    id: 'creativo', 
+    name: '🎨 Creativo', 
+    example: 'Fondo colorido, luz artística, estilo moderno y creativo'
+  },
+  { 
+    id: 'dating', 
+    name: '❤️ Tinder', 
+    example: 'Sonrisa natural, al aire libre, ropa que te favorece, atractivo'
+  }
+];
+
 export default function Home() {
   const [packCount, setPackCount] = useState(0);
   const [freeUsed, setFreeUsed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     setPackCount(parseInt(localStorage.getItem('fotoia_pack') || '0'));
@@ -25,11 +50,16 @@ export default function Home() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setPhoto(file);
+    setErrorMsg('');
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCategoryClick = (example) => {
+    setCustomPrompt(example);
   };
 
   const handleCheckout = async () => {
@@ -39,14 +69,21 @@ export default function Home() {
       const { url } = await res.json();
       window.location.href = url;
     } catch (e) {
-      alert('Error: ' + e.message);
+      setErrorMsg('Error: ' + e.message);
       setLoading(false);
     }
   };
 
   const handleGenerate = async () => {
+    setErrorMsg('');
+    
     if (!photo) {
-      alert('Sube una foto primero');
+      setErrorMsg('Sube una foto primero');
+      return;
+    }
+
+    if (!customPrompt.trim()) {
+      setErrorMsg('Describe qué quieres que haga la IA con tu foto');
       return;
     }
 
@@ -57,11 +94,9 @@ export default function Home() {
 
     setLoading(true);
 
-    // Guardar estado antes por si falla
     const prevFreeUsed = freeUsed;
     const prevPackCount = packCount;
 
-    // Restar foto
     if (!freeUsed) {
       localStorage.setItem('fotoia_free_used', 'true');
       setFreeUsed(true);
@@ -82,7 +117,7 @@ export default function Home() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             image: base64,
-            prompt: "professional corporate headshot, wearing business suit, neutral background, studio lighting, sharp focus, 8k"
+            prompt: customPrompt
           })
         });
         
@@ -95,13 +130,12 @@ export default function Home() {
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          alert('¡Lista! Tu foto pro se descargó');
+          setCustomPrompt('');
         } else {
           throw new Error(data.error || 'Error desconocido');
         }
       } catch (e) {
-        alert('Error generando: ' + e.message);
-        // Regresar el crédito si falló
+        setErrorMsg(e.message);
         localStorage.setItem('fotoia_free_used', String(prevFreeUsed));
         localStorage.setItem('fotoia_pack', String(prevPackCount));
         setFreeUsed(prevFreeUsed);
@@ -111,7 +145,7 @@ export default function Home() {
     };
   };
 
-  const canGenerate =!freeUsed || packCount > 0;
+  const canGenerate = !freeUsed || packCount > 0;
   const showPayButton = freeUsed && packCount <= 0;
 
   return (
@@ -142,16 +176,16 @@ export default function Home() {
           <div style={{ 
             margin: '20px 0', 
             padding: '16px', 
-            background: packCount > 0 ||!freeUsed? '#e8f5e9' : '#fff3e0', 
+            background: packCount > 0 || !freeUsed ? '#e8f5e9' : '#fff3e0', 
             borderRadius: '12px', 
-            color: packCount > 0 ||!freeUsed? '#2e7d32' : '#e65100',
-            border: `2px solid ${packCount > 0 ||!freeUsed? '#4caf50' : '#ff9800'}`
+            color: packCount > 0 || !freeUsed ? '#2e7d32' : '#e65100',
+            border: `2px solid ${packCount > 0 || !freeUsed ? '#4caf50' : '#ff9800'}`
           }}>
-            {packCount > 0? (
+            {packCount > 0 ? (
               <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
                 Pack Activo: {packCount} fotos restantes
               </p>
-            ) :!freeUsed? (
+            ) : !freeUsed ? (
               <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
                 Tienes 1 foto GRATIS para probar
               </p>
@@ -168,7 +202,7 @@ export default function Home() {
               alt="Preview" 
               style={{
                 width: '100%',
-                maxHeight: '300px',
+                maxHeight: '250px',
                 objectFit: 'cover',
                 borderRadius: '12px',
                 margin: '16px 0'
@@ -189,30 +223,93 @@ export default function Home() {
               borderRadius: '8px'
             }} 
           />
+
+          <div style={{ margin: '20px 0', textAlign: 'left' }}>
+            <label style={{ fontWeight: 'bold', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+              1. ¿Qué tipo de foto quieres? Toca para usar de ejemplo:
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat.example)}
+                  style={{
+                    padding: '12px 8px',
+                    borderRadius: '8px',
+                    border: '1px solid #ddd',
+                    background: 'white',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    textAlign: 'left'
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold' }}>{cat.name}</div>
+                  <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>Toca para copiar</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ margin: '16px 0', textAlign: 'left' }}>
+            <label style={{ fontWeight: 'bold', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
+              2. Describe qué quieres que haga la IA *OBLIGATORIO*:
+            </label>
+            <textarea
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              placeholder="Ej: Con traje azul marino, fondo de oficina moderna, sonriendo, luz profesional..."
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: errorMsg && !customPrompt ? '2px solid #f44336' : '1px solid #ddd',
+                fontSize: '14px',
+                minHeight: '80px',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit'
+              }}
+            />
+            <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 0 0' }}>
+              Sé específico: ropa, fondo, expresión, iluminación
+            </p>
+          </div>
+
+          {errorMsg && (
+            <div style={{
+              padding: '12px',
+              background: '#ffebee',
+              color: '#c62828',
+              borderRadius: '8px',
+              fontSize: '14px',
+              margin: '16px 0'
+            }}>
+              {errorMsg}
+            </div>
+          )}
           
           <button 
-            onClick={showPayButton? handleCheckout : handleGenerate}
+            onClick={showPayButton ? handleCheckout : handleGenerate}
             disabled={loading}
             style={{
               padding: '16px 24px',
-              background: loading? '#ccc' : showPayButton? '#9C27B0' : '#4CAF50',
+              background: loading ? '#ccc' : showPayButton ? '#9C27B0' : '#4CAF50',
               color: 'white',
               border: 'none',
               borderRadius: '12px',
-              cursor: loading? 'not-allowed' : 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '16px',
               fontWeight: 'bold',
               width: '100%',
               marginTop: '8px'
             }}
           >
-            {loading? 'Generando foto... 30 seg' : 
-             showPayButton? 'Comprar Pack 10 Fotos - $9 USD' : 
+            {loading ? 'Generando... 30-40 seg' : 
+             showPayButton ? 'Comprar Pack 10 Fotos - $9 USD' : 
              'Generar Foto Pro'}
           </button>
 
           <p style={{ fontSize: '12px', color: '#999', marginTop: '16px' }}>
-            Tarda 20-40 seg en generar. La foto se descarga automática.
+            💡 Tip: Usa selfies claras, de frente, con buena luz y sin objetos en la cara
           </p>
         </div>
       </div>
