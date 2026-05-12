@@ -1,12 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [style, setStyle] = useState('profesional');
+  const [hasPaid, setHasPaid] = useState(false);
+  const [freeUsed, setFreeUsed] = useState(false);
 
-  // COMPRIME CUALQUIER IMAGEN A <4MB AUTOMÁTICAMENTE
+  // Checa si ya pagó o si ya usó el gratis
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('paid') === 'true') {
+      setHasPaid(true);
+      localStorage.setItem('fotoia_paid', 'true');
+    }
+    if (localStorage.getItem('fotoia_paid') === 'true') setHasPaid(true);
+    if (localStorage.getItem('fotoia_free_used') === 'true') setFreeUsed(true);
+  }, []);
+
   const compressImage = (file) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -18,8 +31,6 @@ export default function Home() {
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-
-          // Máximo 1024px del lado más largo
           const MAX_SIZE = 1024;
           if (width > height && width > MAX_SIZE) {
             height = Math.round((height * MAX_SIZE) / width);
@@ -28,13 +39,10 @@ export default function Home() {
             width = Math.round((width * MAX_SIZE) / height);
             height = MAX_SIZE;
           }
-
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-
-          // Empieza con calidad 0.9 y baja hasta que pese <3.5MB
           let quality = 0.9;
           const tryCompress = () => {
             canvas.toBlob(
@@ -58,18 +66,19 @@ export default function Home() {
 
   const handleGenerate = async () => {
     setError('');
-
     if (!file) {
       setError("Primero sube una foto");
       return;
     }
 
+    if (!hasPaid && freeUsed) {
+      setError("Ya usaste tu foto gratis. Compra el pack para continuar.");
+      return;
+    }
+
     setLoading(true);
-
     try {
-      // COMPRIMIMOS AQUÍ. Ya no importa el peso original
       const compressedBlob = await compressImage(file);
-
       const reader = new FileReader();
       reader.readAsDataURL(compressedBlob);
       reader.onload = async () => {
@@ -77,16 +86,20 @@ export default function Home() {
           const res = await fetch('/api/generate', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ image: reader.result })
+            body: JSON.stringify({
+              image: reader.result,
+              style: style,
+              paid: hasPaid
+            })
           });
-
           const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.detail || data.error || 'Error al generar');
-          }
+          if (!res.ok) throw new Error(data.detail || data.error || 'Error al generar');
 
           setPhotos(data.photos || []);
+          if (!hasPaid) {
+            localStorage.setItem('fotoia_free_used', 'true');
+            setFreeUsed(true);
+          }
         } catch (err) {
           setError(err.message);
         } finally {
@@ -99,33 +112,67 @@ export default function Home() {
     }
   };
 
+  const handleCheckout = async () => {
+    setLoading(true);
+    const res = await fetch('/api/checkout', { method: 'POST' });
+    const data = await res.json();
+    window.location.href = data.url;
+  };
+
   return (
     <div style={{fontFamily:'Arial', maxWidth:600, margin:'40px auto', padding:20}}>
       <h1>FotoIA.pro</h1>
       <h2>Convierte tus fotos en dinero</h2>
-      <h3>Prueba GRATIS con 1 foto</h3>
-      <p style={{color:'#666', fontSize:14}}>Sube cualquier foto. La optimizamos automáticamente.</p>
+
+      {!hasPaid &&!freeUsed && <h3 style={{color:'green'}}>Prueba GRATIS con 1 foto</h3>}
+      {freeUsed &&!hasPaid && <h3 style={{color:'#ff6b00'}}>Ya usaste tu foto gratis</h3>}
+      {hasPaid && <h3 style={{color:'blue'}}>Pack Activo: 10 fotos</h3>}
+
+      <p style={{color:'#666', fontSize:14}}>1. Sube tu foto 2. Elige el estilo 3. Genera</p>
 
       <input
         type="file"
         accept="image/*"
         onChange={(e) => setFile(e.target.files[0])}
+        style={{marginBottom:15}}
       />
-      <br/><br/>
 
-      <button
-        onClick={handleGenerate}
-        disabled={loading ||!file}
-        style={{padding:'10px 20px', fontSize:16, background:'#000', color:'white', cursor:'pointer'}}
-      >
-        {loading? 'Optimizando y generando...' : 'Generar 1 foto GRATIS'}
-      </button>
+      <div style={{marginBottom:15}}>
+        <label style={{display:'block', marginBottom:8, fontWeight:'bold'}}>¿Qué quieres hacer?</label>
+        <select
+          value={style}
+          onChange={(e) => setStyle(e.target.value)}
+          style={{padding:'10px', fontSize:16, width:'100%', borderRadius:6, border:'1px solid #ccc'}}
+        >
+          <option value="profesional">Foto Profesional - LinkedIn/CV</option>
+          <option value="producto">Foto para Productos - Ecommerce</option>
+          <option value="negocio">Foto para Negocios - Branding</option>
+        </select>
+      </div>
+
+      {(!freeUsed || hasPaid)? (
+        <button
+          onClick={handleGenerate}
+          disabled={loading ||!file}
+          style={{padding:'12px 20px', fontSize:16, background:'#000', color:'white', cursor:'pointer', width:'100%', border:'none', borderRadius:6}}
+        >
+          {loading? 'Generando...' : 'Generar Foto'}
+        </button>
+      ) : (
+        <button
+          onClick={handleCheckout}
+          disabled={loading}
+          style={{padding:'12px 20px', fontSize:16, background:'#635bff', color:'white', cursor:'pointer', width:'100%', border:'none', borderRadius:6}}
+        >
+          {loading? 'Cargando...' : 'Comprar Pack 10 Fotos - $9 USD'}
+        </button>
+      )}
 
       {error && <p style={{color:'red', marginTop:20}}>{error}</p>}
 
-      <div style={{marginTop:30}}>
+      <div style={{marginTop:30, display:'flex', flexWrap:'wrap', gap:10}}>
         {photos.map((p,i) => (
-          <img key={i} src={p} width={180} style={{borderRadius:8, margin:5}} alt="generada" />
+          <img key={i} src={p} width={180} style={{borderRadius:8}} alt="generada" />
         ))}
       </div>
     </div>
