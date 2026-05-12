@@ -5,13 +5,12 @@ export default function Home() {
   const [packCount, setPackCount] = useState(0);
   const [freeUsed, setFreeUsed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [photo, setPhoto] = useState(null);
 
   useEffect(() => {
-    // Carga estado del localStorage
     setPackCount(parseInt(localStorage.getItem('fotoia_pack') || '0'));
     setFreeUsed(localStorage.getItem('fotoia_free_used') === 'true');
     
-    // Detecta pago exitoso de Stripe
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('paid') === 'true') {
       localStorage.setItem('fotoia_pack', 10);
@@ -22,22 +21,33 @@ export default function Home() {
     }
   }, []);
 
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/checkout', { method: 'POST' });
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch (e) {
+      alert('Error: ' + e.message);
+      setLoading(false);
+    }
+  };
+
   const handleGenerate = async () => {
-    if (packCount <= 0 && freeUsed) {
-      // Ya usó la gratis y no tiene pack -> mandar a pagar
-      setLoading(true);
-      try {
-        const res = await fetch('/api/checkout', { method: 'POST' });
-        const { url } = await res.json();
-        window.location.href = url;
-      } catch (e) {
-        alert('Error: ' + e.message);
-        setLoading(false);
-      }
+    if (!photo) {
+      alert('Sube una foto primero');
       return;
     }
 
-    // Restar foto
+    // Si ya gastó la gratis y no tiene pack, mandar a pagar
+    if (freeUsed && packCount <= 0) {
+      handleCheckout();
+      return;
+    }
+
+    setLoading(true);
+
+    // Restar foto ANTES de generar
     if (!freeUsed) {
       localStorage.setItem('fotoia_free_used', 'true');
       setFreeUsed(true);
@@ -47,10 +57,13 @@ export default function Home() {
       setPackCount(newCount);
     }
 
-    alert('Generando foto... Aquí va tu lógica de Replicate');
+    // Aquí va tu lógica de Replicate
+    alert('Generando foto... Aquí conectas con /api/generate');
+    setLoading(false);
   };
 
-  const canGenerate = !freeUsed || packCount > 0;
+  const canGenerate =!freeUsed || packCount > 0;
+  const showPayButton = freeUsed && packCount <= 0;
 
   return (
     <>
@@ -72,29 +85,53 @@ export default function Home() {
         <h1>FotolA.pro</h1>
         <p>Convierte tus fotos en dinero</p>
         
-        <div style={{ margin: '20px 0', padding: '10px', background: '#e8f5e9', borderRadius: '4px', color: '#2e7d32' }}>
-          <p style={{ fontWeight: 'bold', color: '#1976d2', margin: 0 }}>
-            Pack Activo: {packCount} fotos restantes
-          </p>
-          {!freeUsed && <p style={{ margin: '5px 0 0 0' }}>Tienes 1 foto gratis</p>}
+        <div style={{ 
+          margin: '20px 0', 
+          padding: '15px', 
+          background: packCount > 0? '#e8f5e9' : '#fff3e0', 
+          borderRadius: '8px', 
+          color: packCount > 0? '#2e7d32' : '#e65100'
+        }}>
+          {packCount > 0? (
+            <p style={{ fontWeight: 'bold', margin: 0 }}>
+              Pack Activo: {packCount} fotos restantes
+            </p>
+          ) :!freeUsed? (
+            <p style={{ fontWeight: 'bold', margin: 0 }}>
+              Tienes 1 foto GRATIS para probar
+            </p>
+          ) : (
+            <p style={{ fontWeight: 'bold', margin: 0 }}>
+              Sin créditos. Compra un pack para seguir
+            </p>
+          )}
         </div>
         
-        <input type="file" accept="image/*" style={{ margin: '20px 0' }} />
+        <input 
+          type="file" 
+          accept="image/*" 
+          onChange={(e) => setPhoto(e.target.files[0])}
+          style={{ margin: '20px 0', display: 'block', width: '100%' }} 
+        />
         
         <button 
-          onClick={handleGenerate}
+          onClick={showPayButton? handleCheckout : handleGenerate}
           disabled={loading}
           style={{
-            padding: '12px 24px',
-            background: canGenerate ? '#4CAF50' : '#9C27B0',
+            padding: '14px 28px',
+            background: showPayButton? '#9C27B0' : '#4CAF50',
             color: 'white',
             border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '16px'
+            borderRadius: '8px',
+            cursor: loading? 'not-allowed' : 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            width: '100%'
           }}
         >
-          {loading ? 'Cargando...' : canGenerate ? 'Generar Foto' : 'Comprar Pack 10 Fotos - $9 USD'}
+          {loading? 'Cargando...' : 
+           showPayButton? 'Comprar Pack 10 Fotos - $9 USD' : 
+           'Generar Foto Pro'}
         </button>
       </div>
     </>
