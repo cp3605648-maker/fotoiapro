@@ -33,13 +33,13 @@ export default async function handler(req, res) {
       }
     );
 
-    res.status(200).json({ photos: output });
+    return res.status(200).json({ photos: output });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Error de Replicate",
       detail: error.message
     });
   }
-}
 }
