@@ -1,47 +1,40 @@
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
-  token: process.env.REPLICATE_API_TOKEN,
+  auth: process.env.REPLICATE_API_TOKEN,
 });
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+  if (req.method!== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { image, prompt } = req.body;
 
-  if (!image || !prompt) {
-    return res.status(400).json({ message: 'Image and prompt are required' });
+  if (!image ||!prompt) {
+    return res.status(400).json({ error: 'Image and prompt are required' });
   }
 
   try {
     const output = await replicate.run(
-      "tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4",
+      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
       {
         input: {
-          input_image: image,
+          image: image,
           prompt: prompt,
-          num_steps: 50,
-          guidance_scale: 5,
-          style_name: "Photographic (Default)",
-          negative_prompt: "ugly, blurry, poor quality",
-          seed: 0,
-          num_outputs: 1,
-          output_quality: 95,
-          background_type: "Auto",
-          style_strength: 30,
-          output_format: "webp",
-          enhancement_option: "Face & Skin & Clothing & Everything",
-          super_resolution: true,
-          upscale_by_ratio: 2,
+          refine: "expert_ensemble_refiner",
+          scheduler: "K_EULER",
+          num_inference_steps: 25,
+          guidance_scale: 7.5,
+          strength: 0.6, // Qué tanto cambia la imagen. 0.1 = poco, 1 = mucho
+          negative_prompt: "blurry, bad quality, distorted"
         }
       }
     );
 
-    return res.status(200).json({ output });
+    return res.status(200).json({ output: output[0] });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Replicate error:', error);
+    return res.status(500).json({ error: 'Error al generar imagen', details: error.message });
   }
 }
