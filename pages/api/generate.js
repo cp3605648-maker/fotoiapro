@@ -17,17 +17,14 @@ export default async function handler(req, res) {
 
   try {
     const output = await replicate.run(
-      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+      "timbrooks/instruct-pix2pix:30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f",
       {
         input: {
           image: image,
           prompt: prompt,
-          refine: "expert_ensemble_refiner",
-          scheduler: "K_EULER",
-          num_inference_steps: 25,
-          guidance_scale: 7.5,
-          strength: 0.6, // Qué tanto cambia la imagen. 0.1 = poco, 1 = mucho
-          negative_prompt: "blurry, bad quality, distorted"
+          num_inference_steps: 20,
+          image_guidance_scale: 1.5,
+          guidance_scale: 7.5
         }
       }
     );
@@ -35,6 +32,9 @@ export default async function handler(req, res) {
     return res.status(200).json({ output: output[0] });
   } catch (error) {
     console.error('Replicate error:', error);
-    return res.status(500).json({ error: 'Error al generar imagen', details: error.message });
+    return res.status(500).json({ 
+      error: 'Error al generar imagen', 
+      details: error.message 
+    });
   }
 }
