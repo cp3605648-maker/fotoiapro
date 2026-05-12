@@ -1,50 +1,43 @@
 import Replicate from "replicate";
 
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
-
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  // 1. DEBUG: Checa si el token existe
+  if (!process.env.REPLICATE_API_TOKEN) {
+    return res.status(500).json({
+      error: "TOKEN_NO_ENCONTRADO",
+      debug: "Ve a Vercel > Settings > Environment Variables y agrega REPLICATE_API_TOKEN"
+    });
   }
+
+  // 2. Si sí existe el token, seguimos
+  const replicate = new Replicate({
+    auth: process.env.REPLICATE_API_TOKEN,
+  });
 
   try {
     const { image } = req.body;
 
     if (!image) {
-      return res.status(400).json({ error: 'No image provided' });
+      return res.status(400).json({ error: "No enviaste imagen" });
     }
 
     const output = await replicate.run(
-      "tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570e55",
+      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
       {
         input: {
-          input_image: image,
-          prompt: "a photo of a person img as an influencer in Tulum, beach, professional photo, 8k",
-          negative_prompt: "blurry, ugly, deformed, noisy, lowres, text, watermark",
-          num_steps: 50,
-          style_strength_ratio: 20,
-          num_outputs: 1,
-          guidance_scale: 5,
-          style_name: "Photographic"
+          image: image,
+          prompt: "professional headshot, linkedin photo, studio lighting, 4k",
         }
       }
     );
 
-    return res.status(200).json({ output });
-
+    res.status(200).json({ photos: output });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Failed to generate image' });
+    res.status(500).json({
+      error: "Error de Replicate",
+      detail: error.message
+    });
   }
 }
 }
