@@ -17,36 +17,33 @@ export default async function handler(req, res) {
     }
 
     if (!prompt || prompt.trim() === '') {
-      return res.status(400).json({ error: 'Escribe qué quieres que haga la IA' });
+      return res.status(400).json({ error: 'Describe qué quieres cambiar en la imagen' });
     }
 
+    // SDXL + ControlNet: Acepta CUALQUIER imagen y la edita con texto
     const output = await replicate.run(
-      "tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4",
+      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
       {
         input: {
-          input_image: image,
-          prompt: `professional portrait, ${prompt}, 8k, ultra realistic, sharp focus, studio quality`,
-          negative_prompt: "blurry, low quality, cartoon, anime, painting, distorted face, bad anatomy, nsfw, nude, ugly, deformed",
-          num_outputs: 1,
-          style_strength: 20,
-          num_steps: 20,
-          guidance_scale: 5,
-          style_name: "Photographic (Default)"
+          image: image, // Acepta cualquier imagen
+          prompt: `${prompt}, high quality, detailed, 8k`,
+          negative_prompt: "blurry, low quality, distorted, ugly, bad anatomy",
+          strength: 0.6, // Qué tanto cambiar la imagen original. 0.1 = cambios sutiles, 0.9 = cambio total
+          num_inference_steps: 25,
+          guidance_scale: 7.5
         }
       }
     );
 
     if (!output || !output[0]) {
-      throw new Error('La IA no pudo procesar esta foto. Usa una selfie clara, de frente y con buena luz.');
+      throw new Error('La IA no pudo procesar esta imagen');
     }
 
     res.status(200).json({ image: output[0] });
   } catch (error) {
     console.error('Error Replicate:', error);
     res.status(500).json({ 
-      error: error.message.includes('NSFW') 
-        ? 'La imagen fue rechazada por contenido. Usa una foto normal.' 
-        : 'No se pudo procesar. Usa una selfie clara, de frente, sin objetos en la cara.'
+      error: 'No se pudo editar la imagen. Intenta con otra descripción o imagen.'
     });
   }
 }
