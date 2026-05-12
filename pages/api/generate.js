@@ -4,65 +4,75 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-function enhancePrompt(userInput, isPaid = false) {
-  const base = userInput.toLowerCase();
-  
-  // Pagada = cambios fuertes. Demo = cambios sutiles + marca de agua
-  const strength = isPaid? 'completely' : 'slightly';
-  const quality = isPaid? '8k, professional' : 'demo quality';
+// Prompt automático según lo que escriba el cliente
+function autoPrompt(userInput, isPaid) {
+  const text = userInput.toLowerCase();
+  const quality = isPaid? '8k, professional, detailed' : 'demo quality';
 
-  if (base.includes('playa') || base.includes('fondo') || base.includes('background')) {
-    return `${strength} change the background to ${userInput}, keep the person identical, photorealistic, ${quality}`;
+  if (text.includes('playa') || text.includes('beach')) {
+    return `change background to tropical beach with ocean and palm trees, sunny day, keep the person identical, photorealistic, ${quality}`;
   }
-  if (base.includes('ropa') || base.includes('camisa') || base.includes('vestido')) {
-    return `${strength} change the clothes to ${userInput}, keep face and pose same, ${quality}`;
+  if (text.includes('atardecer') || text.includes('sunset')) {
+    return `change background to beautiful sunset sky with orange clouds, keep the person identical, photorealistic, ${quality}`;
   }
-  
-  return `${strength} ${userInput}, keep the main subject unchanged, photorealistic, ${quality}`;
+  if (text.includes('oficina') || text.includes('office')) {
+    return `change background to modern office, professional lighting, keep the person identical, photorealistic, ${quality}`;
+  }
+  if (text.includes('camisa') || text.includes('ropa') || text.includes('clothes')) {
+    return `change clothes to ${userInput}, keep face and body pose identical, realistic fabric, ${quality}`;
+  }
+  if (text.includes('logo')) {
+    return `professional logo design, ${userInput}, vector style, clean background, ${quality}`;
+  }
+
+  // Default: asume que es cambio de fondo
+  return `change background to ${userInput}, keep the person identical, photorealistic, ${quality}`;
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  const { image, prompt, userEmail, credits } = req.body;
+
+  if (!image ||!prompt) {
+    return res.status(400).json({ error: 'Falta imagen o descripción' });
   }
 
-  const { image, prompt, userEmail } = req.body; // ← Recibimos el email para verificar pago
-
-  if (!image || !prompt) {
-    return res.status(400).json({ error: 'Image and prompt are required' });
+  // Verificar créditos
+  if (credits <= 0) {
+    return res.status(403).json({
+      error: 'Sin créditos',
+      details: 'No tienes créditos. Compra más para continuar.'
+    });
   }
 
   try {
-    // AQUÍ VERIFICAS SI EL USUARIO YA PAGÓ CON STRIPE
-    // Por ahora lo simulamos. Después conectas con tu DB de Stripe
-    const isPaid = userEmail === 'test@pagado.com'; // Temporal para pruebas
-    
-    const enhancedPrompt = enhancePrompt(prompt, isPaid);
+    // Si tiene email es porque pagó = versión Pro
+    const isPaid =!!userEmail;
+    const finalPrompt = autoPrompt(prompt, isPaid);
 
-    // MODELO CORRECTO PARA EDITAR
     const output = await replicate.run(
-      "timbrooks/instruct-pix2pix:30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f",
+      "timbrooks/instruct-pix2pix:30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23d",
       {
         input: {
           image: image,
-          prompt: enhancedPrompt,
+          prompt: finalPrompt,
           num_inference_steps: isPaid? 50 : 20,
-          image_guidance_scale: isPaid? 2.5 : 1.2,
+          image_guidance_scale: isPaid? 2.5 : 1.5,
           guidance_scale: 7.5
         }
       }
     );
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       output: output[0],
-      isDemo: !isPaid,
-      usedPrompt: enhancedPrompt
+      isDemo:!isPaid,
+      usedPrompt: finalPrompt,
+      creditsLeft: credits - 1 // Restamos 1 crédito
     });
+
   } catch (error) {
-    console.error('Replicate error:', error);
-    return res.status(500).json({ 
-      error: 'Error al generar imagen', 
-      details: error.message 
+    return res.status(500).json({
+      error: 'Error al generar',
+      details: error.message
     });
   }
 }
