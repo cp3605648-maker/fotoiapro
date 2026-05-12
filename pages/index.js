@@ -6,20 +6,18 @@ export default function Home() {
   const [output, setOutput] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [credits, setCredits] = useState(1); // 1 crédito gratis al inicio
-  const [userEmail, setUserEmail] = useState('');
+  const [credits, setCredits] = useState(1); // 1 crédito gratis
+  const [isPaid, setIsPaid] = useState(false);
 
-  // Detecta si vino de Stripe con créditos nuevos
+  // Detecta pago de Stripe
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    const newCredits = params.get('credits');
-
-    if (sessionId && newCredits) {
-      setCredits(parseInt(newCredits));
-      setUserEmail('pro@fotoia.com'); // Aquí pondrías el email real de Stripe
-      alert(`¡Pago exitoso! Tienes ${newCredits} créditos nuevos`);
-      window.history.replaceState({}, '', '/'); // Limpia la URL
+    if (params.get('paid') === 'true') {
+      const newCredits = parseInt(params.get('credits') || '10');
+      setCredits(credits + newCredits);
+      setIsPaid(true);
+      alert(`¡Pago exitoso! +${newCredits} créditos`);
+      window.history.replaceState({}, '', '/');
     }
   }, []);
 
@@ -31,19 +29,13 @@ export default function Home() {
         const canvas = document.createElement('canvas');
         let width = img.width, height = img.height;
         const maxSize = 1024;
-
-        if (width > height) {
-          if (width > maxSize) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
-          }
+        if (width > height && width > maxSize) {
+          height = Math.round((height * maxSize) / width);
+          width = maxSize;
+        } else if (height > maxSize) {
+          width = Math.round((width * maxSize) / height);
+          height = maxSize;
         }
-
         canvas.width = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
@@ -53,8 +45,8 @@ export default function Home() {
   };
 
   const handleGenerate = async () => {
-    if (!image ||!description) return alert('Sube imagen y describe qué hacer');
-    if (credits <= 0) return alert('Sin créditos. Compra más para continuar');
+    if (!image ||!description) return alert('Sube imagen y escribe qué hacer');
+    if (credits <= 0) return;
 
     setLoading(true);
     setError('');
@@ -68,7 +60,7 @@ export default function Home() {
       body: JSON.stringify({
         image: resizedBase64,
         prompt: description,
-        userEmail: userEmail,
+        isPaid: isPaid,
         credits: credits
       })
     });
@@ -79,8 +71,7 @@ export default function Home() {
       setError(data.details || data.error);
     } else {
       setOutput(data.output);
-      setCredits(data.creditsLeft); // Actualizamos créditos
-      console.log('Prompt usado:', data.usedPrompt);
+      setCredits(data.creditsLeft);
     }
     setLoading(false);
   };
@@ -89,7 +80,7 @@ export default function Home() {
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ package: packageType })
+      body: JSON.stringify({ packageType })
     });
     const data = await res.json();
     window.location.href = data.url;
@@ -119,24 +110,17 @@ export default function Home() {
 
       <div className="bg-white p-6 rounded-lg shadow mb-4">
         <h3 className="text-xl font-semibold mb-3">Sube tu imagen</h3>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
-          className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50"
-        />
+        <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} />
         {image && <p className="mt-2 text-sm text-green-600">✓ {image.name}</p>}
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow mb-4">
         <h3 className="text-xl font-semibold mb-3">Describe qué quieres hacer</h3>
-        <p className="text-sm text-gray-600 mb-2">
-          Escribe en pocas palabras. Ej: "playa", "atardecer", "oficina moderna"
-        </p>
+        <p className="text-sm text-gray-600 mb-2">Solo escribe: "playa", "nueva york", "atardecer"</p>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Ej: playa con atardecer"
+          placeholder="Ej: nueva york"
           rows="2"
           className="w-full p-3 border rounded-lg"
         />
@@ -170,6 +154,7 @@ export default function Home() {
         <div className="mt-6 bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-3">Resultado:</h3>
           <img src={output} alt="Resultado" className="w-full rounded-lg mb-3" />
+          {!isPaid && <p className="text-sm text-gray-600 mb-2">Versión Demo - Compra créditos para calidad Pro</p>}
           <a href={output} download="fotoia.jpg" className="bg-green-600 text-white px-6 py-2 rounded inline-block">
             Descargar
           </a>
