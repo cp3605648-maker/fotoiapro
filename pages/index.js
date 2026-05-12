@@ -14,9 +14,8 @@ export default function Home() {
       return;
     }
 
-    // CORREGIDO: 4MB = 4 * 1024 bytes
     if (file.size > 4 * 1024 * 1024) {
-      setError("La foto es muy pesada. Máximo 4MB. Usa una captura de pantalla");
+      setError("La foto esError("La foto es muy pesada. Máximo 4MB. Usa una captura de pantalla");
       return;
     }
 
@@ -35,7 +34,8 @@ export default function Home() {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || data.detail || 'Error al generar');
+          // MOSTRAMOS EL ERROR REAL DE REPLICATE
+          throw new Error(data.detail || data.error || 'Error al generar');
         }
 
         setPhotos(data.photos || []);
@@ -48,33 +48,4 @@ export default function Home() {
   };
 
   return (
-    <div style={{fontFamily:'Arial', maxWidth:600, margin:'40px auto', padding:20}}>
-      <h1>FotoIA.pro</h1>
-      <h2>Convierte tus fotos en dinero</h2>
-      <h3>Prueba GRATIS con 1 foto</h3>
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFile(e.target.files[0])}
-      />
-      <br/><br/>
-
-      <button
-        onClick={handleGenerate}
-        disabled={loading ||!file}
-        style={{padding:'10px 20px', fontSize:16, background:'#000', color:'white', cursor:'pointer'}}
-      >
-        {loading? 'Generando...' : 'Generar 1 foto GRATIS'}
-      </button>
-
-      {error && <p style={{color:'red', marginTop:20}}>{error}</p>}
-
-      <div style={{marginTop:30}}>
-        {photos.map((p,i) => (
-          <img key={i} src={p} width={180} style={{borderRadius:8, margin:5}} alt="generada" />
-        ))}
-      </div>
-    </div>
-  );
-}
+    <div style={{fontFamily
