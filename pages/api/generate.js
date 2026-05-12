@@ -23,25 +23,21 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No enviaste imagen" });
     }
 
-    // PHOTOMAKER: Usa tu foto para generar una versión profesional
+    // SDXL IMG2IMG: Este SÍ acepta base64 y usa tu foto como base
     const output = await replicate.run(
-      "tencentarc/photomaker:ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4",
+      "lucataco/sdxl-img2img:9c3b6fe4f8ada97c95d4cdaf61c6dd59e7fd2b57e4e3e2a1a1d2c3b4c5d6e7f8",
       {
         input: {
-          input_image: image,
-          prompt: "img, professional headshot of a person, studio lighting, neutral background, linkedin photo, 4k, high detail",
-          negative_prompt: "nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry",
-          num_steps: 20,
-          style_name: "Photographic",
-          style_strength_ratio: 20,
-          num_outputs: 1,
-          guidance_scale: 5,
-          seed: Math.floor(Math.random() * 2147483647)
+          image: image, // acepta data:image/jpeg;base64,...
+          prompt: "professional headshot, linkedin photo, studio lighting, neutral background, 4k, high detail, sharp focus",
+          negative_prompt: "nsfw, lowres, bad anatomy, text, watermark, blurry, cartoon, painting, drawing",
+          prompt_strength: 0.4, // 0.4 = mantiene 60% de tu foto original
+          num_inference_steps: 30,
+          guidance_scale: 7.5
         }
       }
     );
 
-    // PhotoMaker regresa array, lo devolvemos tal cual
     return res.status(200).json({ photos: output });
 
   } catch (error) {
