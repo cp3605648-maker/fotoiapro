@@ -6,6 +6,7 @@ export default function Home() {
   const [freeUsed, setFreeUsed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     setPackCount(parseInt(localStorage.getItem('fotoia_pack') || '0'));
@@ -20,6 +21,16 @@ export default function Home() {
       window.location.reload();
     }
   }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setPhoto(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -39,7 +50,6 @@ export default function Home() {
       return;
     }
 
-    // Si ya gastó la gratis y no tiene pack, mandar a pagar
     if (freeUsed && packCount <= 0) {
       handleCheckout();
       return;
@@ -47,7 +57,11 @@ export default function Home() {
 
     setLoading(true);
 
-    // Restar foto ANTES de generar
+    // Guardar estado antes por si falla
+    const prevFreeUsed = freeUsed;
+    const prevPackCount = packCount;
+
+    // Restar foto
     if (!freeUsed) {
       localStorage.setItem('fotoia_free_used', 'true');
       setFreeUsed(true);
@@ -57,9 +71,44 @@ export default function Home() {
       setPackCount(newCount);
     }
 
-    // Aquí va tu lógica de Replicate
-    alert('Generando foto... Aquí conectas con /api/generate');
-    setLoading(false);
+    const reader = new FileReader();
+    reader.readAsDataURL(photo);
+    reader.onloadend = async () => {
+      const base64 = reader.result;
+      
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            image: base64,
+            prompt: "professional corporate headshot, wearing business suit, neutral background, studio lighting, sharp focus, 8k"
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (data.image) {
+          const link = document.createElement('a');
+          link.href = data.image;
+          link.download = `foto-pro-${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          alert('¡Lista! Tu foto pro se descargó');
+        } else {
+          throw new Error(data.error || 'Error desconocido');
+        }
+      } catch (e) {
+        alert('Error generando: ' + e.message);
+        // Regresar el crédito si falló
+        localStorage.setItem('fotoia_free_used', String(prevFreeUsed));
+        localStorage.setItem('fotoia_pack', String(prevPackCount));
+        setFreeUsed(prevFreeUsed);
+        setPackCount(prevPackCount);
+      }
+      setLoading(false);
+    };
   };
 
   const canGenerate =!freeUsed || packCount > 0;
@@ -73,66 +122,99 @@ export default function Home() {
       </Head>
       
       <div style={{
-        fontFamily: 'Arial, sans-serif',
-        maxWidth: '800px',
-        margin: '40px auto',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        maxWidth: '500px',
+        margin: '20px auto',
         padding: '20px',
-        background: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        textAlign: 'center'
+        background: '#f8f9fa',
+        minHeight: '100vh'
       }}>
-        <h1>FotolA.pro</h1>
-        <p>Convierte tus fotos en dinero</p>
-        
-        <div style={{ 
-          margin: '20px 0', 
-          padding: '15px', 
-          background: packCount > 0? '#e8f5e9' : '#fff3e0', 
-          borderRadius: '8px', 
-          color: packCount > 0? '#2e7d32' : '#e65100'
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '24px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          textAlign: 'center'
         }}>
-          {packCount > 0? (
-            <p style={{ fontWeight: 'bold', margin: 0 }}>
-              Pack Activo: {packCount} fotos restantes
-            </p>
-          ) :!freeUsed? (
-            <p style={{ fontWeight: 'bold', margin: 0 }}>
-              Tienes 1 foto GRATIS para probar
-            </p>
-          ) : (
-            <p style={{ fontWeight: 'bold', margin: 0 }}>
-              Sin créditos. Compra un pack para seguir
-            </p>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '28px' }}>FotolA.pro</h1>
+          <p style={{ color: '#666', margin: '0 0 24px 0' }}>Convierte tus fotos en dinero</p>
+          
+          <div style={{ 
+            margin: '20px 0', 
+            padding: '16px', 
+            background: packCount > 0 ||!freeUsed? '#e8f5e9' : '#fff3e0', 
+            borderRadius: '12px', 
+            color: packCount > 0 ||!freeUsed? '#2e7d32' : '#e65100',
+            border: `2px solid ${packCount > 0 ||!freeUsed? '#4caf50' : '#ff9800'}`
+          }}>
+            {packCount > 0? (
+              <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
+                Pack Activo: {packCount} fotos restantes
+              </p>
+            ) :!freeUsed? (
+              <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
+                Tienes 1 foto GRATIS para probar
+              </p>
+            ) : (
+              <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
+                Sin créditos. Compra un pack para seguir
+              </p>
+            )}
+          </div>
+
+          {preview && (
+            <img 
+              src={preview} 
+              alt="Preview" 
+              style={{
+                width: '100%',
+                maxHeight: '300px',
+                objectFit: 'cover',
+                borderRadius: '12px',
+                margin: '16px 0'
+              }}
+            />
           )}
+          
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleFileChange}
+            style={{ 
+              margin: '16px 0', 
+              display: 'block', 
+              width: '100%',
+              padding: '12px',
+              border: '2px dashed #ddd',
+              borderRadius: '8px'
+            }} 
+          />
+          
+          <button 
+            onClick={showPayButton? handleCheckout : handleGenerate}
+            disabled={loading}
+            style={{
+              padding: '16px 24px',
+              background: loading? '#ccc' : showPayButton? '#9C27B0' : '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: loading? 'not-allowed' : 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              width: '100%',
+              marginTop: '8px'
+            }}
+          >
+            {loading? 'Generando foto... 30 seg' : 
+             showPayButton? 'Comprar Pack 10 Fotos - $9 USD' : 
+             'Generar Foto Pro'}
+          </button>
+
+          <p style={{ fontSize: '12px', color: '#999', marginTop: '16px' }}>
+            Tarda 20-40 seg en generar. La foto se descarga automática.
+          </p>
         </div>
-        
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={(e) => setPhoto(e.target.files[0])}
-          style={{ margin: '20px 0', display: 'block', width: '100%' }} 
-        />
-        
-        <button 
-          onClick={showPayButton? handleCheckout : handleGenerate}
-          disabled={loading}
-          style={{
-            padding: '14px 28px',
-            background: showPayButton? '#9C27B0' : '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: loading? 'not-allowed' : 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            width: '100%'
-          }}
-        >
-          {loading? 'Cargando...' : 
-           showPayButton? 'Comprar Pack 10 Fotos - $9 USD' : 
-           'Generar Foto Pro'}
-        </button>
       </div>
     </>
   );
