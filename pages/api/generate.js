@@ -1,15 +1,17 @@
 import Replicate from "replicate";
 
 export default async function handler(req, res) {
-  // 1. DEBUG: Checa si el token existe
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Solo POST" });
+  }
+
   if (!process.env.REPLICATE_API_TOKEN) {
     return res.status(500).json({
       error: "TOKEN_NO_ENCONTRADO",
-      debug: "Ve a Vercel > Settings > Environment Variables y agrega REPLICATE_API_TOKEN"
+      debug: "Agrega REPLICATE_API_TOKEN en Vercel > Settings > Environment Variables"
     });
   }
 
-  // 2. Si sí existe el token, seguimos
   const replicate = new Replicate({
     auth: process.env.REPLICATE_API_TOKEN,
   });
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
       {
         input: {
           image: image,
-          prompt: "professional headshot, linkedin photo, studio lighting, 4k",
+          prompt: "professional headshot, linkedin photo, studio lighting, 4k"
         }
       }
     );
