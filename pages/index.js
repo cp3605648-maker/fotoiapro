@@ -3,24 +3,24 @@ import Head from 'next/head';
 
 const CATEGORIES = [
   { 
-    id: 'linkedin', 
-    name: '💼 LinkedIn', 
-    example: 'Con traje formal, fondo gris de oficina, sonriendo profesional'
+    id: 'retrato', 
+    name: '👤 Retrato', 
+    example: 'Cambiar el fondo a una oficina moderna, mejorar la iluminación, verme más profesional'
   },
   { 
-    id: 'casual', 
-    name: '😎 Casual Pro', 
-    example: 'Ropa casual elegante, en cafetería, luz natural, look confiado'
+    id: 'producto', 
+    name: '🛋️ Productos', 
+    example: 'Cambiar el color del sillón a azul marino, fondo blanco de estudio'
   },
   { 
-    id: 'creativo', 
-    name: '🎨 Creativo', 
-    example: 'Fondo colorido, luz artística, estilo moderno y creativo'
+    id: 'ropa', 
+    name: '👕 Ropa', 
+    example: 'Cambiar la playera a color negro, que se vea de diseñador'
   },
   { 
-    id: 'dating', 
-    name: '❤️ Tinder', 
-    example: 'Sonrisa natural, al aire libre, ropa que te favorece, atractivo'
+    id: 'cuarto', 
+    name: '🏠 Espacios', 
+    example: 'Pintar las paredes de color beige, agregar plantas, luz cálida'
   }
 ];
 
@@ -78,12 +78,12 @@ export default function Home() {
     setErrorMsg('');
     
     if (!photo) {
-      setErrorMsg('Sube una foto primero');
+      setErrorMsg('Sube una imagen primero');
       return;
     }
 
     if (!customPrompt.trim()) {
-      setErrorMsg('Describe qué quieres que haga la IA con tu foto');
+      setErrorMsg('Describe qué cambios quieres hacerle a la imagen');
       return;
     }
 
@@ -126,7 +126,7 @@ export default function Home() {
         if (data.image) {
           const link = document.createElement('a');
           link.href = data.image;
-          link.download = `foto-pro-${Date.now()}.png`;
+          link.download = `foto-editada-${Date.now()}.png`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -151,7 +151,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>FotolA.pro - Convierte tus fotos en dinero</title>
+        <title>FotolA.pro - Edita cualquier foto con IA</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       
@@ -171,7 +171,7 @@ export default function Home() {
           textAlign: 'center'
         }}>
           <h1 style={{ margin: '0 0 8px 0', fontSize: '28px' }}>FotolA.pro</h1>
-          <p style={{ color: '#666', margin: '0 0 24px 0' }}>Convierte tus fotos en dinero</p>
+          <p style={{ color: '#666', margin: '0 0 24px 0' }}>Edita cualquier imagen con texto</p>
           
           <div style={{ 
             margin: '20px 0', 
@@ -183,11 +183,11 @@ export default function Home() {
           }}>
             {packCount > 0 ? (
               <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
-                Pack Activo: {packCount} fotos restantes
+                Pack Activo: {packCount} ediciones restantes
               </p>
             ) : !freeUsed ? (
               <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
-                Tienes 1 foto GRATIS para probar
+                Tienes 1 edición GRATIS para probar
               </p>
             ) : (
               <p style={{ fontWeight: 'bold', margin: 0, fontSize: '16px' }}>
@@ -203,9 +203,10 @@ export default function Home() {
               style={{
                 width: '100%',
                 maxHeight: '250px',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 borderRadius: '12px',
-                margin: '16px 0'
+                margin: '16px 0',
+                background: '#f5f5f5'
               }}
             />
           )}
@@ -226,7 +227,7 @@ export default function Home() {
 
           <div style={{ margin: '20px 0', textAlign: 'left' }}>
             <label style={{ fontWeight: 'bold', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
-              1. ¿Qué tipo de foto quieres? Toca para usar de ejemplo:
+              1. Inspírate - Toca para usar ejemplo:
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {CATEGORIES.map(cat => (
@@ -252,12 +253,12 @@ export default function Home() {
 
           <div style={{ margin: '16px 0', textAlign: 'left' }}>
             <label style={{ fontWeight: 'bold', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
-              2. Describe qué quieres que haga la IA *OBLIGATORIO*:
+              2. Describe los cambios *OBLIGATORIO*:
             </label>
             <textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="Ej: Con traje azul marino, fondo de oficina moderna, sonriendo, luz profesional..."
+              placeholder="Ej: Cambiar el color del sillón a azul marino, fondo blanco minimalista, luz de estudio..."
               style={{
                 width: '100%',
                 padding: '12px',
@@ -270,7 +271,7 @@ export default function Home() {
               }}
             />
             <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 0 0' }}>
-              Sé específico: ropa, fondo, expresión, iluminación
+              Funciona con: personas, ropa, muebles, cuartos, productos, autos...
             </p>
           </div>
 
@@ -303,13 +304,13 @@ export default function Home() {
               marginTop: '8px'
             }}
           >
-            {loading ? 'Generando... 30-40 seg' : 
-             showPayButton ? 'Comprar Pack 10 Fotos - $9 USD' : 
-             'Generar Foto Pro'}
+            {loading ? 'Editando... 30-40 seg' : 
+             showPayButton ? 'Comprar Pack 10 Ediciones - $9 USD' : 
+             'Editar Imagen con IA'}
           </button>
 
           <p style={{ fontSize: '12px', color: '#999', marginTop: '16px' }}>
-            💡 Tip: Usa selfies claras, de frente, con buena luz y sin objetos en la cara
+            💡 Tip: Funciona con cualquier imagen. Sé específico en los cambios que quieres.
           </p>
         </div>
       </div>
