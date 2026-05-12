@@ -1,36 +1,80 @@
-import Replicate from "replicate";
+import { useState } from 'react';
 
-export default async function handler(req, res) {
-  // ESTO ES PARA DEBUGGEAR 👇
-  if (!process.env.REPLICATE_API_TOKEN) {
-    return res.status(500).json({
-      error: "TOKEN_NO_ENCONTRADO",
-      debug: "Revisa Environment Variables en Vercel"
-    });
-  }
-  // HASTA AQUÍ 👆
+export default function Home() {
+  const [file, setFile] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const replicate = new Replicate({
-    auth: process.env.REPLICATE_API_TOKEN,
-  });
+  const handleGenerate = async () => {
+    setError('');
 
-  try {
-    const { image } = req.body;
+    if (!file) {
+      setError("Primero sube una foto");
+      return;
+    }
 
-    const output = await replicate.run(
-      "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
-      {
-        input: {
-          image: image,
-          prompt: "professional headshot, linkedin photo, studio lighting, 4k",
+    // 4MB = 4 * 1024 * 1024 bytes
+    if (file.size > 4 * 1024) {
+      setError("La foto es muy pesada. Máximo 4MB. Usa una captura de pantalla");
+      return;
+    }
+
+    setLoading(true);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ image: reader.result })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Error al generar');
         }
-      }
-    );
 
-    res.status(200).json({ photos: output });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
-}
+        setPhotos(data.photos || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  };
+
+  return (
+    <div style={{fontFamily:'Arial', maxWidth:600, margin:'40px auto', padding:20}}>
+      <h1>FotoIA.pro</h1>
+      <h2>Convierte tus fotos en dinero</h2>
+      <h3>Prueba GRATIS con 1 foto</h3>
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
+      <br/><br/>
+
+      <button
+        onClick={handleGenerate}
+        disabled={loading ||!file}
+        style={{padding:'10px 20px', fontSize:16, background:'#000', color:'white', cursor:'pointer'}}
+      >
+        {loading? 'Generando...' : 'Generar 1 foto GRATIS'}
+      </button>
+
+      {error && <p style={{color:'red', marginTop:20}}>{error}</p>}
+
+      <div style={{marginTop:30}}>
+        {photos.map((p,i) => (
+          <img key={i} src={p} width={180} style={{borderRadius:8, margin:5}} />
+        ))}
+      </div>
+    </div>
+  );
 }
