@@ -12,21 +12,22 @@ export default async function handler(req, res) {
   }
 
   try {
+    // MODELO NUEVO: Flux.1 Kontext - reemplazo de instruct-pix2pix
     const output = await replicate.run(
-      "timbrooks/instruct-pix2pix", // ← Sin hash = usa última versión
+      "black-forest-labs/flux-kontext-pro",
       {
         input: {
-          image: image,
-          prompt: `change the background to ${prompt}, keep the person exactly the same, photorealistic`,
-          num_inference_steps: isPaid? 50 : 20,
-          image_guidance_scale: isPaid? 2.5 : 1.5,
-          guidance_scale: 7.5
+          prompt: `Change the background to: ${prompt}. Keep the person identical, same face, same clothes, same pose. Photorealistic, high detail.`,
+          input_image: image,
+          output_format: "jpg",
+          guidance_scale: isPaid? 3.5 : 2.5,
+          num_inference_steps: isPaid? 30 : 20
         }
       }
     );
 
     return res.status(200).json({
-      output: output[0],
+      output: output,
       isDemo:!isPaid
     });
 
