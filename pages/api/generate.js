@@ -4,58 +4,58 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-function enhancePrompt(userInput) {
+function enhancePrompt(userInput, isPaid = false) {
   const base = userInput.toLowerCase();
   
-  if (base.includes('logo')) {
-    return `professional logo design, ${userInput}, vector style, clean background, high quality, 8k`;
-  }
-  if (base.includes('fondo') || base.includes('background') || base.includes('playa') || base.includes('atardecer')) {
-    return `change background to ${userInput}, keep the main subject unchanged, realistic lighting, high detail, photorealistic, 8k`;
+  // Pagada = cambios fuertes. Demo = cambios sutiles + marca de agua
+  const strength = isPaid? 'completely' : 'slightly';
+  const quality = isPaid? '8k, professional' : 'demo quality';
+
+  if (base.includes('playa') || base.includes('fondo') || base.includes('background')) {
+    return `${strength} change the background to ${userInput}, keep the person identical, photorealistic, ${quality}`;
   }
   if (base.includes('ropa') || base.includes('camisa') || base.includes('vestido')) {
-    return `change clothes to ${userInput}, keep face and pose same, realistic fabric texture, high quality`;
-  }
-  if (base.includes('marca') || base.includes('branding')) {
-    return `professional branding shot, ${userInput}, studio lighting, commercial photography, 8k`;
+    return `${strength} change the clothes to ${userInput}, keep face and pose same, ${quality}`;
   }
   
-  return `${userInput}, high quality, photorealistic, 8k, detailed, professional photography`;
+  return `${strength} ${userInput}, keep the main subject unchanged, photorealistic, ${quality}`;
 }
 
 export default async function handler(req, res) {
-  if (req.method!== 'POST') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { image, prompt } = req.body;
+  const { image, prompt, userEmail } = req.body; // ← Recibimos el email para verificar pago
 
-  if (!image ||!prompt) {
+  if (!image || !prompt) {
     return res.status(400).json({ error: 'Image and prompt are required' });
   }
 
   try {
-    const enhancedPrompt = enhancePrompt(prompt);
+    // AQUÍ VERIFICAS SI EL USUARIO YA PAGÓ CON STRIPE
+    // Por ahora lo simulamos. Después conectas con tu DB de Stripe
+    const isPaid = userEmail === 'test@pagado.com'; // Temporal para pruebas
+    
+    const enhancedPrompt = enhancePrompt(prompt, isPaid);
 
+    // MODELO CORRECTO PARA EDITAR
     const output = await replicate.run(
-      "philz1337x/clarity-upscaler:dfad41707589d68ecdccd1dfa600d55a208f9310748e44bfe35b4a6291453d5e",
+      "timbrooks/instruct-pix2pix:30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f",
       {
         input: {
           image: image,
           prompt: enhancedPrompt,
-          negative_prompt: "blurry, low quality, text, watermark, distorted, deformed",
-          scale_factor: 1,
-          scheduler: "DPM++ 2M Karras", // ← ESTE ERA EL ERROR, ya arreglado
-          creativity: 0.35,
-          resemblance: 0.7,
-          guidance_scale: 7,
-          num_inference_steps: 20
+          num_inference_steps: isPaid? 50 : 20,
+          image_guidance_scale: isPaid? 2.5 : 1.2,
+          guidance_scale: 7.5
         }
       }
     );
 
     return res.status(200).json({ 
-      output: output,
+      output: output[0],
+      isDemo: !isPaid,
       usedPrompt: enhancedPrompt
     });
   } catch (error) {
