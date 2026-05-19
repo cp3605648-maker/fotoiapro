@@ -26,7 +26,9 @@ export default async function handler(req, res) {
       prompt: finalPrompt,
       negativePrompt,
     } = buildPrompt(prompt, isPaid);
-
+    
+console.log(buildPrompt(prompt, isPaid));
+    
     const output = await replicate.run(
       "black-forest-labs/flux-kontext-pro",
       {
