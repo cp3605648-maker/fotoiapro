@@ -33,38 +33,8 @@ export default async function handler(req, res) {
 
     let output;
 
-    // CLOTHING MODE
-    if (selectedModel === "clothing") {
-
-      output = await replicate.run(
-        "black-forest-labs/flux-kontext-pro",
-        {
-          input: {
-            input_image: image,
-            prompt: `
-Change ONLY the clothing or outfit.
-
-${finalPrompt}
-
-Keep SAME face.
-Keep SAME body.
-Keep SAME pose.
-Keep SAME hairstyle.
-Do not modify identity.
-Professional fashion photography.
-`,
-            negative_prompt: negativePrompt,
-            output_format: "jpg",
-            guidance_scale: 3,
-            num_inference_steps: 30,
-          }
-        }
-      );
-
-    }
-
-    // INSTANTID MODE
-    else if (selectedModel === "instantid") {
+    // InstantID → retratos premium
+    if (selectedModel === "instantid") {
 
       output = await replicate.run(
         "zsxkib/instant-id",
@@ -80,7 +50,7 @@ Professional fashion photography.
 
     }
 
-    // FLUX NORMAL
+    // Flux → creatividad / edición general
     else {
 
       output = await replicate.run(
