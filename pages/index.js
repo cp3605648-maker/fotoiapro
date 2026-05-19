@@ -8,6 +8,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [loadingStep, setLoadingStep] = useState(0);
+
   // Presets IA
   const presets = [
     { emoji: '🌴', label: 'Playa', prompt: 'playa tropical de lujo' },
@@ -18,6 +21,15 @@ export default function Home() {
     { emoji: '🎌', label: 'Anime', prompt: 'anime estilo japones' },
     { emoji: '💪', label: 'Fitness', prompt: 'fitness gym profesional' },
     { emoji: '🌅', label: 'Atardecer', prompt: 'atardecer cinematografico' },
+  ];
+
+  // Loading IA
+  const loadingMessages = [
+    '🧠 Analizando rostro...',
+    '🎨 Aplicando iluminación cinematográfica...',
+    '✨ Mejorando detalles faciales...',
+    '🌈 Generando composición profesional...',
+    '🚀 Renderizando imagen final...',
   ];
 
   // Créditos
@@ -43,6 +55,27 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('fotoia_isPaid', isPaid.toString());
   }, [isPaid]);
+
+  // Loading dinámico
+  useEffect(() => {
+    let interval;
+
+    if (loading) {
+      setLoadingMessage(loadingMessages[0]);
+
+      interval = setInterval(() => {
+        setLoadingStep((prev) => {
+          const next = (prev + 1) % loadingMessages.length;
+          setLoadingMessage(loadingMessages[next]);
+          return next;
+        });
+      }, 2200);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [loading]);
 
   // Detectar pago Stripe
   useEffect(() => {
@@ -335,6 +368,32 @@ export default function Home() {
             ? 'Sin créditos'
             : 'Transformar Imagen - 1 crédito'}
         </button>
+
+        {/* Loading IA */}
+        {loading && (
+          <div className="mt-6 bg-white p-8 rounded-2xl shadow text-center border border-blue-100">
+
+            <div className="flex justify-center mb-5">
+              <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              Generando con IA
+            </h3>
+
+            <p className="text-blue-700 font-medium text-lg animate-pulse">
+              {loadingMessage}
+            </p>
+
+            <div className="mt-5 bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="bg-blue-600 h-full animate-pulse w-3/4 rounded-full"></div>
+            </div>
+
+            <p className="text-sm text-gray-500 mt-4">
+              Esto puede tardar unos segundos dependiendo de la calidad
+            </p>
+          </div>
+        )}
 
         {/* Error */}
         {error && (
