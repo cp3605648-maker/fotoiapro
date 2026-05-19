@@ -37,17 +37,17 @@ export default async function handler(req, res) {
     // InstantID para mejor rostro
     if (selectedModel === "instantid") {
 
-      output = await replicate.run(
-        "zsxkib/instant-id"
-        {
-          input: {
-            image: image,
-            prompt: finalPrompt,
-            negative_prompt: negativePrompt,
-            enhance_face_region: true,
-          }
-        }
-      );
+     output = await replicate.run(
+  "zsxkib/instant-id",
+  {
+    input: {
+      image: image,
+      prompt: finalPrompt,
+      negative_prompt: negativePrompt,
+      enhance_face_region: true,
+    }
+  }
+);
 
     } else {
 
