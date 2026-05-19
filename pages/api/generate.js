@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     if (selectedModel === "instantid") {
 
       output = await replicate.run(
-        "fofr/instant-id",
+        "zsxkib/instant-id"
         {
           input: {
             image: image,
