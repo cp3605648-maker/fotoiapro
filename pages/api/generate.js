@@ -1,6 +1,7 @@
 import Replicate from 'replicate';
 import { buildPrompt } from '../../lib/ai/router';
 import { detectModel } from '../../lib/ai/modelRouter';
+import { supabaseAdmin } from '../../lib/supabaseAdmin';
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
@@ -23,7 +24,6 @@ export default async function handler(req, res) {
   }
 
   try {
-
     const {
       prompt: finalPrompt,
       negativePrompt,
@@ -33,26 +33,19 @@ export default async function handler(req, res) {
 
     let output;
 
-    // InstantID → retratos premium
     if (selectedModel === "instantid") {
-
       output = await replicate.run(
         "zsxkib/instant-id",
         {
           input: {
-            image: image,
+            image,
             prompt: finalPrompt,
             negative_prompt: negativePrompt,
             enhance_face_region: true,
           }
         }
       );
-
-    }
-
-    // Flux → creatividad / edición general
-    else {
-
+    } else {
       output = await replicate.run(
         "black-forest-labs/flux-kontext-pro",
         {
@@ -66,11 +59,22 @@ export default async function handler(req, res) {
           }
         }
       );
-
     }
 
+    const imageUrl = Array.isArray(output) ? output[0] : output;
+
+    await supabaseAdmin
+      .from('generations')
+      .insert({
+        prompt,
+        model_used: selectedModel,
+        image_url: imageUrl,
+        credits_used: 1,
+        status: 'completed',
+      });
+
     return res.status(200).json({
-      output,
+      output: imageUrl,
       isDemo: !isPaid,
       creditsLeft: credits - 1,
       usedPrompt: finalPrompt,
@@ -78,13 +82,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-
     console.error(error);
 
     return res.status(500).json({
       error: 'Error al generar',
       details: error.message || 'Error interno al generar imagen',
     });
-
   }
 }
