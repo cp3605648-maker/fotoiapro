@@ -29,29 +29,60 @@ export default async function handler(req, res) {
       negativePrompt,
     } = buildPrompt(prompt, isPaid);
 
-    // Detectar modelo automáticamente
     const selectedModel = detectModel(prompt);
 
     let output;
 
-    // InstantID para mejor rostro
-    if (selectedModel === "instantid") {
+    // CLOTHING MODE
+    if (selectedModel === "clothing") {
 
-     output = await replicate.run(
-  "zsxkib/instant-id",
-  {
-    input: {
-      image: image,
-      prompt: finalPrompt,
-      negative_prompt: negativePrompt,
-      enhance_face_region: true,
+      output = await replicate.run(
+        "black-forest-labs/flux-kontext-pro",
+        {
+          input: {
+            input_image: image,
+            prompt: `
+Change ONLY the clothing or outfit.
+
+${finalPrompt}
+
+Keep SAME face.
+Keep SAME body.
+Keep SAME pose.
+Keep SAME hairstyle.
+Do not modify identity.
+Professional fashion photography.
+`,
+            negative_prompt: negativePrompt,
+            output_format: "jpg",
+            guidance_scale: 3,
+            num_inference_steps: 30,
+          }
+        }
+      );
+
     }
-  }
-);
 
-    } else {
+    // INSTANTID MODE
+    else if (selectedModel === "instantid") {
 
-      // Flux para creatividad extrema
+      output = await replicate.run(
+        "zsxkib/instant-id",
+        {
+          input: {
+            image: image,
+            prompt: finalPrompt,
+            negative_prompt: negativePrompt,
+            enhance_face_region: true,
+          }
+        }
+      );
+
+    }
+
+    // FLUX NORMAL
+    else {
+
       output = await replicate.run(
         "black-forest-labs/flux-kontext-pro",
         {
