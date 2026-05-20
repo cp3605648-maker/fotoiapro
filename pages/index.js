@@ -11,7 +11,6 @@ export default function Home() {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [loadingStep, setLoadingStep] = useState(0);
 
-  // Presets IA
   const presets = [
     { emoji: '🌴', label: 'Playa', prompt: 'playa tropical de lujo' },
     { emoji: '💼', label: 'CEO', prompt: 'oficina corporativa profesional' },
@@ -23,7 +22,6 @@ export default function Home() {
     { emoji: '🌅', label: 'Atardecer', prompt: 'atardecer cinematografico' },
   ];
 
-  // Loading IA
   const loadingMessages = [
     '🧠 Analizando rostro...',
     '🎨 Aplicando iluminación cinematográfica...',
@@ -32,7 +30,6 @@ export default function Home() {
     '🚀 Renderizando imagen final...',
   ];
 
-  // Créditos
   const [credits, setCredits] = useState(() => {
     if (typeof window !== 'undefined') {
       return parseInt(localStorage.getItem('fotoia_credits') || '1');
@@ -47,7 +44,6 @@ export default function Home() {
     return false;
   });
 
-  // Guardar créditos
   useEffect(() => {
     localStorage.setItem('fotoia_credits', credits.toString());
   }, [credits]);
@@ -56,7 +52,6 @@ export default function Home() {
     localStorage.setItem('fotoia_isPaid', isPaid.toString());
   }, [isPaid]);
 
-  // Loading dinámico
   useEffect(() => {
     let interval;
 
@@ -72,12 +67,9 @@ export default function Home() {
       }, 2200);
     }
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [loading]);
 
-  // Detectar pago Stripe
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
@@ -159,31 +151,20 @@ export default function Home() {
 
       const res = await fetch('/api/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          image: resizedBase64,
-          prompt: description,
-          isPaid: isPaid,
-          credits: credits
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: resizedBase64, prompt: description, isPaid, credits })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.details || data.error || 'Error al generar'
-        );
+        throw new Error(data.details || data.error || 'Error al generar');
       }
 
       setOutput(data.output);
       setCredits(data.creditsLeft);
-
     } catch (err) {
       setError(err.message);
-
     } finally {
       setLoading(false);
     }
@@ -195,9 +176,7 @@ export default function Home() {
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packageType })
       });
 
@@ -208,7 +187,6 @@ export default function Home() {
       } else {
         throw new Error('No se pudo crear la sesión de pago');
       }
-
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -218,18 +196,11 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container max-w-4xl mx-auto p-4">
-
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-900">
-            FotoIA Pro
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900">FotoIA Pro</h1>
 
           <div className="bg-blue-100 px-4 py-2 rounded-xl">
-            <span className="font-bold text-blue-900">
-              Créditos: {credits}
-            </span>
-
+            <span className="font-bold text-blue-900">Créditos: {credits}</span>
             {isPaid && (
               <span className="ml-2 text-xs bg-yellow-400 px-2 py-1 rounded">
                 PRO
@@ -238,84 +209,42 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Inspiración */}
         <div className="bg-white p-6 rounded-xl shadow mb-6">
-          <h3 className="text-xl font-semibold mb-3">
-            Inspírate
-          </h3>
-
+          <h3 className="text-xl font-semibold mb-3">Inspírate</h3>
           <p className="text-gray-600 mb-4">
             Transforma tus fotos con inteligencia artificial
           </p>
 
           <div className="flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-              🎨 Branding
-            </span>
-
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-              💼 CEO Profesional
-            </span>
-
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-              🎬 Netflix
-            </span>
-
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-              🎌 Anime
-            </span>
-
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-              💎 Luxury
-            </span>
-
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">
-              🏙 Cyberpunk
-            </span>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">🎨 Branding</span>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">💼 CEO Profesional</span>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">🎬 Netflix</span>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">🎌 Anime</span>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">💎 Luxury</span>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">🏙 Cyberpunk</span>
           </div>
         </div>
 
-        {/* Upload */}
         <div className="bg-white p-6 rounded-xl shadow mb-4">
-          <h3 className="text-xl font-semibold mb-3">
-            Sube tu imagen
-          </h3>
+          <h3 className="text-xl font-semibold mb-3">Sube tu imagen</h3>
 
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="block w-full text-sm text-gray-500
-              file:mr-4
-              file:py-2
-              file:px-4
-              file:rounded-lg
-              file:border-0
-              file:bg-blue-50
-              file:text-blue-700
-              hover:file:bg-blue-100"
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
 
           {imagePreview && (
             <div className="mt-4">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="max-h-64 rounded-xl"
-              />
-
-              <p className="mt-2 text-sm text-green-600">
-                ✓ {image.name}
-              </p>
+              <img src={imagePreview} alt="Preview" className="max-h-64 rounded-xl" />
+              <p className="mt-2 text-sm text-green-600">✓ {image.name}</p>
             </div>
           )}
         </div>
 
-        {/* Presets IA */}
         <div className="bg-white p-6 rounded-xl shadow mb-4">
-          <h3 className="text-xl font-semibold mb-4">
-            Elige un estilo IA
-          </h3>
+          <h3 className="text-xl font-semibold mb-4">Elige un estilo IA</h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             {presets.map((preset) => (
@@ -328,20 +257,13 @@ export default function Home() {
                     : 'border-gray-200 bg-white hover:border-blue-300'
                 }`}
               >
-                <div className="text-2xl mb-2">
-                  {preset.emoji}
-                </div>
-
-                <div className="font-bold text-gray-900">
-                  {preset.label}
-                </div>
+                <div className="text-2xl mb-2">{preset.emoji}</div>
+                <div className="font-bold text-gray-900">{preset.label}</div>
               </button>
             ))}
           </div>
 
-          <h3 className="text-lg font-semibold mb-2">
-            Describe cómo quieres verte
-          </h3>
+          <h3 className="text-lg font-semibold mb-2">Describe cómo quieres verte</h3>
 
           <p className="text-sm text-gray-600 mb-3">
             Ejemplo: “como millonario”, “película futurista”, “anime épico”
@@ -356,7 +278,6 @@ export default function Home() {
           />
         </div>
 
-        {/* Botón generar */}
         <button
           onClick={handleGenerate}
           disabled={loading || credits <= 0 || !image}
@@ -369,10 +290,8 @@ export default function Home() {
             : 'Transformar Imagen - 1 crédito'}
         </button>
 
-        {/* Loading IA */}
         {loading && (
           <div className="mt-6 bg-white p-8 rounded-2xl shadow text-center border border-blue-100">
-
             <div className="flex justify-center mb-5">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
             </div>
@@ -395,20 +314,15 @@ export default function Home() {
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200">
             {error}
           </div>
         )}
 
-        {/* Comprar créditos */}
         {credits <= 0 && (
           <div className="mt-4 p-6 bg-yellow-50 rounded-xl border border-yellow-200">
-            <p className="font-bold mb-3 text-yellow-900">
-              ¡Sin créditos!
-            </p>
-
+            <p className="font-bold mb-3 text-yellow-900">¡Sin créditos!</p>
             <p className="text-sm text-yellow-800 mb-4">
               Compra un paquete para seguir creando imágenes premium
             </p>
@@ -433,18 +347,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* Resultado */}
         {output && (
           <div className="mt-6 bg-white p-6 rounded-xl shadow">
-            <h3 className="text-xl font-semibold mb-4">
-              Resultado IA
-            </h3>
+            <h3 className="text-xl font-semibold mb-4">Resultado IA</h3>
 
-            <img
-              src={output}
-              alt="Resultado"
-              className="w-full rounded-xl mb-4"
-            />
+            <img src={output} alt="Resultado" className="w-full rounded-xl mb-4" />
 
             {!isPaid && (
               <p className="text-sm text-gray-600 mb-3 bg-gray-50 p-3 rounded-lg">
@@ -462,6 +369,16 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <footer className="mt-12 border-t border-gray-200 py-8 text-center text-sm text-gray-500">
+        <p className="mb-3">© 2026 FotoIA Pro — IA para transformar tus fotos</p>
+
+        <div className="flex justify-center gap-6 flex-wrap">
+          <a href="/terms" className="hover:text-blue-600 transition">Términos</a>
+          <a href="/privacy" className="hover:text-blue-600 transition">Privacidad</a>
+          <a href="/refunds" className="hover:text-blue-600 transition">Reembolsos</a>
+        </div>
+      </footer>
     </div>
   );
 }
