@@ -1,65 +1,19 @@
 import { useEffect, useState } from "react";
 
 const presets = [
-  {
-    id: "ceo",
-    name: "CEO / LinkedIn",
-    desc: "Retrato profesional para perfil, CV o marca personal.",
-    emoji: "💼",
-  },
-  {
-    id: "luxury",
-    name: "Luxury",
-    desc: "Look premium, elegante y cinematográfico.",
-    emoji: "✨",
-  },
-  {
-    id: "netflix",
-    name: "Netflix Poster",
-    desc: "Estilo póster dramático de serie o película.",
-    emoji: "🎬",
-  },
-  {
-    id: "anime",
-    name: "Anime",
-    desc: "Transformación artística estilo anime moderno.",
-    emoji: "🌸",
-  },
-  {
-    id: "cyberpunk",
-    name: "Cyberpunk",
-    desc: "Luces neón, futurista y visualmente impactante.",
-    emoji: "🌃",
-  },
-  {
-    id: "fitness",
-    name: "Fitness",
-    desc: "Imagen fuerte, atlética y de alto impacto.",
-    emoji: "🔥",
-  },
+  { id: "ceo", name: "CEO / LinkedIn", desc: "Retrato profesional para perfil, CV o marca personal.", emoji: "💼" },
+  { id: "luxury", name: "Luxury", desc: "Look premium, elegante y cinematográfico.", emoji: "✨" },
+  { id: "netflix", name: "Netflix Poster", desc: "Estilo póster dramático de serie o película.", emoji: "🎬" },
+  { id: "anime", name: "Anime", desc: "Transformación artística estilo anime moderno.", emoji: "🌸" },
+  { id: "cyberpunk", name: "Cyberpunk", desc: "Luces neón, futurista y visualmente impactante.", emoji: "🌃" },
+  { id: "fitness", name: "Fitness", desc: "Imagen fuerte, atlética y de alto impacto.", emoji: "🔥" },
 ];
 
 const creditPackages = [
-  {
-    id: "basic_mxn",
-    name: "10 créditos",
-    price: "$99 MXN",
-  },
-  {
-    id: "pro_mxn",
-    name: "30 créditos",
-    price: "$199 MXN",
-  },
-  {
-    id: "basic_usd",
-    name: "10 credits",
-    price: "$9 USD",
-  },
-  {
-    id: "pro_usd",
-    name: "30 credits",
-    price: "$19 USD",
-  },
+  { id: "basic_mxn", name: "10 créditos", price: "$99 MXN" },
+  { id: "pro_mxn", name: "30 créditos", price: "$199 MXN" },
+  { id: "basic_usd", name: "10 credits", price: "$9 USD" },
+  { id: "pro_usd", name: "30 credits", price: "$19 USD" },
 ];
 
 export default function Home() {
@@ -72,10 +26,14 @@ export default function Home() {
   const [error, setError] = useState("");
   const [credits, setCredits] = useState(0);
   const [notice, setNotice] = useState("");
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
     const savedCredits = Number(localStorage.getItem("fotoia_credits") || 0);
+    const savedHistory = JSON.parse(localStorage.getItem("fotoia_history") || "[]");
+
     setCredits(savedCredits);
+    setHistory(savedHistory);
 
     const params = new URLSearchParams(window.location.search);
     const success = params.get("success");
@@ -150,9 +108,7 @@ export default function Home() {
 
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           image: base64Image,
           prompt: customPrompt.trim() || preset,
@@ -165,12 +121,22 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data?.details || data?.error || "No se pudo generar la imagen."
-        );
+        throw new Error(data?.details || data?.error || "No se pudo generar la imagen.");
       }
 
       setOutput(data.output);
+
+      const newItem = {
+        id: Date.now(),
+        image: data.output,
+        preset,
+        prompt: customPrompt.trim() || preset,
+        createdAt: new Date().toLocaleString(),
+      };
+
+      const updatedHistory = [newItem, ...history].slice(0, 6);
+      setHistory(updatedHistory);
+      localStorage.setItem("fotoia_history", JSON.stringify(updatedHistory));
 
       if (data.creditsLeft !== undefined) {
         setCredits(data.creditsLeft);
@@ -191,9 +157,7 @@ export default function Home() {
 
       const res = await fetch("/api/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ packageType }),
       });
 
@@ -203,12 +167,15 @@ export default function Home() {
         throw new Error(data?.details || data?.error || "No se pudo iniciar el pago.");
       }
 
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      if (data?.url) window.location.href = data.url;
     } catch (err) {
       setError(err.message || "Error al conectar con Stripe.");
     }
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem("fotoia_history");
   };
 
   return (
@@ -234,22 +201,15 @@ export default function Home() {
         <div className="heroGrid">
           <div className="heroText">
             <div className="badge">IA para retratos premium</div>
-
             <h1>Transforma tus fotos en imágenes profesionales con IA.</h1>
-
             <p>
               Sube una foto, elige un estilo, describe los cambios que quieres
-              y genera retratos listos para redes, branding, perfiles
-              profesionales y contenido viral.
+              y genera retratos listos para redes, branding y contenido viral.
             </p>
 
             <div className="heroActions">
-              <a href="#studio" className="primaryBtn">
-                Crear imagen
-              </a>
-              <a href="#credits" className="secondaryBtn">
-                Comprar créditos
-              </a>
+              <a href="#studio" className="primaryBtn">Crear imagen</a>
+              <a href="#credits" className="secondaryBtn">Comprar créditos</a>
             </div>
 
             <div className="trust">
@@ -275,16 +235,13 @@ export default function Home() {
         <div className="sectionHeader">
           <span>Estudio IA</span>
           <h2>Crea tu transformación</h2>
-          <p>
-            Sube una foto clara, elige un preset y escribe instrucciones si
-            quieres un resultado más específico.
-          </p>
+          <p>Sube una foto clara, elige un preset y escribe instrucciones.</p>
         </div>
 
         {notice && <p className="notice">{notice}</p>}
 
         <div className="studioGrid">
-          <div className="panel uploadPanel">
+          <div className="panel">
             <div className="panelTop">
               <h3>1. Sube tu foto</h3>
               <span>{credits} créditos</span>
@@ -302,18 +259,14 @@ export default function Home() {
               <input type="file" accept="image/*" onChange={handleImage} />
             </label>
 
-            <button
-              onClick={generateImage}
-              disabled={loading}
-              className="generateBtn"
-            >
+            <button onClick={generateImage} disabled={loading} className="generateBtn">
               {loading ? "Generando imagen..." : "Generar con IA"}
             </button>
 
             {error && <p className="error">{error}</p>}
           </div>
 
-          <div className="panel presetsPanel">
+          <div className="panel">
             <h3>2. Elige un preset</h3>
 
             <div className="presetGrid">
@@ -335,16 +288,13 @@ export default function Home() {
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Ejemplo: hazlo estilo póster de Netflix, con fondo oscuro, luces dramáticas, rostro profesional y apariencia cinematográfica."
+                placeholder="Ejemplo: hazlo estilo póster de Netflix, fondo oscuro, luces dramáticas y apariencia cinematográfica."
               />
-              <small>
-                Si lo dejas vacío, usaremos automáticamente el preset
-                seleccionado.
-              </small>
+              <small>Si lo dejas vacío, usaremos el preset seleccionado.</small>
             </div>
           </div>
 
-          <div className="panel resultPanel">
+          <div className="panel">
             <h3>3. Resultado</h3>
 
             <div className="resultBox">
@@ -384,12 +334,41 @@ export default function Home() {
             <div key={pack.id} className="creditCard">
               <h3>{pack.name}</h3>
               <strong>{pack.price}</strong>
-              <button onClick={() => buyCredits(pack.id)}>
-                Comprar
-              </button>
+              <button onClick={() => buyCredits(pack.id)}>Comprar</button>
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="historySection">
+        <div className="sectionHeader">
+          <span>Galería</span>
+          <h2>Últimas imágenes generadas</h2>
+          <p>Historial temporal guardado en este dispositivo.</p>
+        </div>
+
+        {history.length === 0 ? (
+          <p className="emptyHistory">Aún no has generado imágenes.</p>
+        ) : (
+          <>
+            <div className="historyGrid">
+              {history.map((item) => (
+                <div key={item.id} className="historyCard">
+                  <img src={item.image} alt="Imagen generada" />
+                  <div>
+                    <strong>{item.preset}</strong>
+                    <small>{item.createdAt}</small>
+                  </div>
+                  <a href={item.image} download>Descargar</a>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={clearHistory} className="clearBtn">
+              Limpiar historial
+            </button>
+          </>
+        )}
       </section>
 
       <section className="features">
@@ -423,10 +402,14 @@ export default function Home() {
           font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        .hero {
+        .hero, .studio, .creditsSection, .historySection {
           position: relative;
+          padding: 80px 6vw;
+        }
+
+        .hero {
           overflow: hidden;
-          padding: 28px 6vw 80px;
+          padding-top: 28px;
         }
 
         .glow {
@@ -439,17 +422,8 @@ export default function Home() {
           pointer-events: none;
         }
 
-        .glowOne {
-          background: #7c3aed;
-          top: 80px;
-          left: -120px;
-        }
-
-        .glowTwo {
-          background: #0ea5e9;
-          right: -140px;
-          top: 140px;
-        }
+        .glowOne { background: #7c3aed; top: 80px; left: -120px; }
+        .glowTwo { background: #0ea5e9; right: -140px; top: 140px; }
 
         .nav {
           position: relative;
@@ -478,10 +452,7 @@ export default function Home() {
           box-shadow: 0 0 35px rgba(139, 92, 246, 0.55);
         }
 
-        .navLinks {
-          display: flex;
-          gap: 22px;
-        }
+        .navLinks { display: flex; gap: 22px; }
 
         .navLinks a {
           color: rgba(255, 255, 255, 0.68);
@@ -525,17 +496,19 @@ export default function Home() {
           margin: 26px 0 34px;
         }
 
-        .heroActions {
+        .heroActions, .trust {
           display: flex;
           gap: 14px;
           flex-wrap: wrap;
         }
 
-        .primaryBtn,
-        .secondaryBtn,
-        .generateBtn,
-        .downloadBtn,
-        .creditCard button {
+        .trust {
+          margin-top: 28px;
+          color: rgba(255, 255, 255, 0.62);
+          font-size: 14px;
+        }
+
+        .primaryBtn, .secondaryBtn, .generateBtn, .downloadBtn, .creditCard button, .clearBtn {
           border: 0;
           cursor: pointer;
           text-decoration: none;
@@ -544,53 +517,43 @@ export default function Home() {
           transition: 0.2s ease;
         }
 
-        .primaryBtn {
+        .primaryBtn, .generateBtn, .creditCard button {
           background: linear-gradient(135deg, #8b5cf6, #06b6d4);
           color: white;
-          padding: 16px 24px;
-          box-shadow: 0 18px 60px rgba(99, 102, 241, 0.35);
         }
 
-        .secondaryBtn {
+        .primaryBtn, .secondaryBtn {
+          padding: 16px 24px;
+        }
+
+        .secondaryBtn, .downloadBtn, .clearBtn {
           background: rgba(255, 255, 255, 0.08);
           color: white;
-          padding: 16px 24px;
           border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
-        .primaryBtn:hover,
-        .secondaryBtn:hover,
-        .generateBtn:hover,
-        .downloadBtn:hover,
-        .creditCard button:hover {
+        .primaryBtn:hover, .secondaryBtn:hover, .generateBtn:hover, .downloadBtn:hover, .creditCard button:hover, .clearBtn:hover {
           transform: translateY(-2px);
         }
 
-        .trust {
-          display: flex;
-          gap: 18px;
-          flex-wrap: wrap;
-          margin-top: 28px;
-          color: rgba(255, 255, 255, 0.62);
-          font-size: 14px;
+        .heroCard, .panel, .feature, .creditCard, .historyCard {
+          background: rgba(255, 255, 255, 0.07);
+          border: 1px solid rgba(255, 255, 255, 0.11);
+          border-radius: 28px;
+          padding: 24px;
+          backdrop-filter: blur(18px);
+          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
         }
 
-        .heroCard {
-          padding: 18px;
-          border-radius: 34px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 30px 100px rgba(0, 0, 0, 0.45);
-          backdrop-filter: blur(20px);
-        }
+        .heroCard { padding: 18px; border-radius: 34px; }
 
         .mockImage {
           height: 460px;
           border-radius: 26px;
           background:
-            linear-gradient(160deg, rgba(255, 255, 255, 0.18), transparent),
-            radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.7), transparent 28%),
-            radial-gradient(circle at 50% 55%, rgba(124, 58, 237, 0.75), transparent 35%),
+            linear-gradient(160deg, rgba(255,255,255,0.18), transparent),
+            radial-gradient(circle at 50% 20%, rgba(14,165,233,0.7), transparent 28%),
+            radial-gradient(circle at 50% 55%, rgba(124,58,237,0.75), transparent 35%),
             #111827;
           display: grid;
           place-items: center;
@@ -606,7 +569,6 @@ export default function Home() {
           border: 1px solid rgba(255, 255, 255, 0.22);
           font-size: 42px;
           font-weight: 900;
-          color: white;
         }
 
         .mockInfo {
@@ -619,11 +581,6 @@ export default function Home() {
         .mockInfo span {
           color: rgba(255, 255, 255, 0.58);
           font-size: 14px;
-        }
-
-        .studio,
-        .creditsSection {
-          padding: 80px 6vw;
         }
 
         .sectionHeader {
@@ -663,17 +620,6 @@ export default function Home() {
           gap: 22px;
         }
 
-        .panel,
-        .feature,
-        .creditCard {
-          background: rgba(255, 255, 255, 0.07);
-          border: 1px solid rgba(255, 255, 255, 0.11);
-          border-radius: 28px;
-          padding: 24px;
-          backdrop-filter: blur(18px);
-          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
-        }
-
         .panelTop {
           display: flex;
           justify-content: space-between;
@@ -690,10 +636,7 @@ export default function Home() {
           font-weight: 800;
         }
 
-        .panel h3 {
-          margin-top: 0;
-          letter-spacing: -0.03em;
-        }
+        .panel h3 { margin-top: 0; letter-spacing: -0.03em; }
 
         .uploadBox {
           min-height: 260px;
@@ -715,11 +658,9 @@ export default function Home() {
           object-fit: cover;
         }
 
-        .uploadBox input {
-          display: none;
-        }
+        .uploadBox input { display: none; }
 
-        .uploadBox small {
+        .uploadBox small, .promptBox small {
           display: block;
           margin-top: 8px;
           color: rgba(255, 255, 255, 0.55);
@@ -728,8 +669,6 @@ export default function Home() {
         .generateBtn {
           width: 100%;
           padding: 16px 18px;
-          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-          color: white;
         }
 
         .generateBtn:disabled {
@@ -763,36 +702,23 @@ export default function Home() {
           transition: 0.2s ease;
         }
 
-        .preset:hover,
-        .preset.active {
+        .preset:hover, .preset.active {
           border-color: rgba(139, 92, 246, 0.75);
           background: rgba(139, 92, 246, 0.18);
           transform: translateY(-2px);
         }
 
-        .preset span {
-          font-size: 24px;
-        }
+        .preset span { font-size: 24px; }
+        .preset strong { display: block; margin: 8px 0 5px; }
+        .preset small { color: rgba(255,255,255,0.55); line-height: 1.4; }
 
-        .preset strong {
-          display: block;
-          margin: 8px 0 5px;
-        }
-
-        .preset small {
-          color: rgba(255, 255, 255, 0.55);
-          line-height: 1.4;
-        }
-
-        .promptBox {
-          margin-top: 18px;
-        }
+        .promptBox { margin-top: 18px; }
 
         .promptBox label {
           display: block;
           margin-bottom: 8px;
           font-weight: 800;
-          color: rgba(255, 255, 255, 0.85);
+          color: rgba(255,255,255,0.85);
         }
 
         .promptBox textarea {
@@ -800,8 +726,8 @@ export default function Home() {
           min-height: 120px;
           resize: vertical;
           border-radius: 18px;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.06);
           color: white;
           padding: 14px;
           font-size: 14px;
@@ -809,16 +735,7 @@ export default function Home() {
           font-family: inherit;
         }
 
-        .promptBox textarea::placeholder {
-          color: rgba(255, 255, 255, 0.4);
-        }
-
-        .promptBox small {
-          display: block;
-          margin-top: 8px;
-          color: rgba(255, 255, 255, 0.45);
-          line-height: 1.4;
-        }
+        .promptBox textarea::placeholder { color: rgba(255,255,255,0.4); }
 
         .resultBox {
           min-height: 390px;
@@ -838,133 +755,119 @@ export default function Home() {
           object-fit: cover;
         }
 
-        .emptyResult,
-        .loading {
+        .emptyResult, .loading {
           text-align: center;
-          color: rgba(255, 255, 255, 0.62);
+          color: rgba(255,255,255,0.62);
           padding: 24px;
         }
 
-        .emptyResult span {
-          font-size: 44px;
-        }
+        .emptyResult span { font-size: 44px; }
 
         .spinner {
           width: 42px;
           height: 42px;
           border-radius: 50%;
-          border: 3px solid rgba(255, 255, 255, 0.15);
+          border: 3px solid rgba(255,255,255,0.15);
           border-top-color: white;
           margin: 0 auto 14px;
           animation: spin 0.9s linear infinite;
         }
 
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .downloadBtn {
           display: block;
           text-align: center;
           margin-top: 16px;
           padding: 15px 18px;
-          color: white;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
-        .creditsGrid {
+        .creditsGrid, .historyGrid, .features {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
           gap: 18px;
         }
 
-        .creditCard {
-          text-align: center;
+        .creditsGrid { grid-template-columns: repeat(4, 1fr); }
+        .historyGrid { grid-template-columns: repeat(3, 1fr); }
+        .features {
+          grid-template-columns: repeat(3, 1fr);
+          padding: 20px 6vw 90px;
         }
 
-        .creditCard h3 {
-          margin: 0 0 10px;
-        }
-
-        .creditCard strong {
-          display: block;
-          font-size: 28px;
-          margin-bottom: 18px;
-        }
+        .creditCard { text-align: center; }
+        .creditCard h3 { margin: 0 0 10px; }
+        .creditCard strong { display: block; font-size: 28px; margin-bottom: 18px; }
 
         .creditCard button {
           width: 100%;
           padding: 14px 18px;
           color: white;
-          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
         }
 
-        .features {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 22px;
-          padding: 20px 6vw 90px;
+        .emptyHistory {
+          text-align: center;
+          color: rgba(255,255,255,0.55);
         }
 
-        .feature span {
-          font-size: 32px;
+        .historyCard { padding: 14px; }
+
+        .historyCard img {
+          width: 100%;
+          height: 240px;
+          object-fit: cover;
+          border-radius: 18px;
         }
 
-        .feature h3 {
-          margin-bottom: 8px;
+        .historyCard div {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          margin: 12px 0;
         }
 
-        .feature p {
-          color: rgba(255, 255, 255, 0.6);
-          line-height: 1.6;
+        .historyCard small { color: rgba(255,255,255,0.45); }
+
+        .historyCard a {
+          display: block;
+          text-align: center;
+          color: white;
+          text-decoration: none;
+          padding: 12px;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.1);
         }
+
+        .clearBtn {
+          display: block;
+          margin: 24px auto 0;
+          padding: 14px 22px;
+        }
+
+        .feature span { font-size: 32px; }
+        .feature h3 { margin-bottom: 8px; }
+        .feature p { color: rgba(255,255,255,0.6); line-height: 1.6; }
 
         @media (max-width: 980px) {
-          .heroGrid,
-          .studioGrid,
-          .features,
-          .creditsGrid {
+          .heroGrid, .studioGrid, .features, .creditsGrid, .historyGrid {
             grid-template-columns: 1fr;
           }
 
-          .nav {
-            align-items: flex-start;
-            gap: 18px;
-          }
-
-          .navLinks {
-            display: none;
-          }
-
-          .mockImage {
-            height: 360px;
-          }
+          .nav { align-items: flex-start; gap: 18px; }
+          .navLinks { display: none; }
+          .mockImage { height: 360px; }
         }
 
         @media (max-width: 620px) {
-          .hero {
-            padding-top: 22px;
-          }
+          .hero { padding-top: 22px; }
+          .presetGrid { grid-template-columns: 1fr; }
+          .heroActions { flex-direction: column; }
 
-          .presetGrid {
-            grid-template-columns: 1fr;
-          }
-
-          .heroActions {
-            flex-direction: column;
-          }
-
-          .primaryBtn,
-          .secondaryBtn {
+          .primaryBtn, .secondaryBtn {
             width: 100%;
             text-align: center;
           }
 
-          .studio,
-          .creditsSection {
+          .studio, .creditsSection, .historySection {
             padding-top: 48px;
           }
         }
