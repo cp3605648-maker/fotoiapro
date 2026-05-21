@@ -1,41 +1,82 @@
+import LegalLayout from '../components/LegalLayout';
+
 export default function Refunds() {
   return (
-    <div style={{ maxWidth: "900px", margin: "40px auto", padding: "20px", fontFamily: "Arial", lineHeight: "1.6" }}>
-      <h1>Política de Reembolsos</h1>
+    <LegalLayout title="Política de Reembolsos" updated="Mayo 2026">
 
-      <p><strong>Última actualización:</strong> Mayo 2026</p>
+      <section>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          1. Naturaleza digital del servicio
+        </h2>
 
-      <h2>1. Naturaleza digital</h2>
-      <p>
-        FotoIA Pro utiliza recursos computacionales e IA.
-      </p>
+        <p>
+          FotoIA Pro utiliza inteligencia artificial y recursos computacionales
+          externos para procesar imágenes. Cada generación puede consumir recursos
+          y créditos digitales.
+        </p>
+      </section>
 
-      <h2>2. Créditos usados</h2>
-      <p>
-        Créditos consumidos normalmente no son reembolsables.
-      </p>
+      <section>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          2. Créditos utilizados
+        </h2>
 
-      <h2>3. Casos revisables</h2>
-      <ul>
-        <li>Cargos duplicados</li>
-        <li>Errores técnicos</li>
-        <li>Cobros incorrectos</li>
-      </ul>
+        <p>
+          Los créditos consumidos normalmente no son reembolsables debido al costo
+          asociado al procesamiento mediante IA.
+        </p>
+      </section>
 
-      <h2>4. Resultados IA</h2>
-      <p>
-        Preferencias creativas no garantizan reembolso automático.
-      </p>
+      <section>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          3. Casos revisables
+        </h2>
 
-      <h2>5. Pagos</h2>
-      <p>
-        Procesados mediante Stripe y servicios externos.
-      </p>
+        <p>
+          Podemos revisar solicitudes relacionadas con:
+        </p>
 
-      <h2>6. Contacto</h2>
-      <p>
-        Soporte mediante canales oficiales.
-      </p>
-    </div>
+        <ul className="list-disc ml-6 mt-2 space-y-1">
+          <li>Cargos duplicados</li>
+          <li>Cobros incorrectos</li>
+          <li>Errores técnicos comprobables</li>
+          <li>Fallos atribuibles directamente a la plataforma</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          4. Resultados IA
+        </h2>
+
+        <p>
+          Los resultados pueden variar según fotografía, estilo y modelo utilizado.
+          Diferencias creativas o preferencias personales no constituyen automáticamente
+          motivo de reembolso.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          5. Pagos externos
+        </h2>
+
+        <p>
+          Los pagos pueden procesarse mediante Stripe u otros proveedores externos
+          sujetos a sus propias políticas.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          6. Contacto
+        </h2>
+
+        <p>
+          Para revisión de pagos o soporte utiliza los canales oficiales de FotoIA Pro.
+        </p>
+      </section>
+
+    </LegalLayout>
   );
 }
