@@ -14,7 +14,7 @@ export default function Contact() {
       <section>
         <h2 className="text-xl font-bold mb-2">Correo de contacto</h2>
         <p>
-          Email: <a className="text-blue-600" href="mailto:americaspd@hotmail.com">americaspd@hotmail.com</a>
+          Email: <a className="text-blue-600" href="mailto:fotoiapro@outlook.com">fotoiapro@outlook.com</a>
         </p>
       </section>
 
