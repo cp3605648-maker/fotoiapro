@@ -382,6 +382,7 @@ export default function Home() {
           <a href="/terms" className="hover:text-blue-600 transition">Términos</a>
           <a href="/privacy" className="hover:text-blue-600 transition">Privacidad</a>
           <a href="/refunds" className="hover:text-blue-600 transition">Reembolsos</a>
+              <a href="/contact" className="text-sm text-gray-500 hover:text-gray-900">Contacto</a>
         </div>
       </footer>
     </div>
