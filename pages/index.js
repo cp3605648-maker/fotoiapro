@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const presets = [
   {
@@ -39,6 +39,29 @@ const presets = [
   },
 ];
 
+const creditPackages = [
+  {
+    id: "basic_mxn",
+    name: "10 créditos",
+    price: "$99 MXN",
+  },
+  {
+    id: "pro_mxn",
+    name: "30 créditos",
+    price: "$199 MXN",
+  },
+  {
+    id: "basic_usd",
+    name: "10 credits",
+    price: "$9 USD",
+  },
+  {
+    id: "pro_usd",
+    name: "30 credits",
+    price: "$19 USD",
+  },
+];
+
 export default function Home() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -47,7 +70,35 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState(null);
   const [error, setError] = useState("");
-  const [credits, setCredits] = useState(3);
+  const [credits, setCredits] = useState(0);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const savedCredits = Number(localStorage.getItem("fotoia_credits") || 0);
+    setCredits(savedCredits);
+
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const cancelled = params.get("cancelled");
+    const purchasedCredits = Number(params.get("credits") || 0);
+
+    if (success === "true" && purchasedCredits > 0) {
+      const newCredits = savedCredits + purchasedCredits;
+      localStorage.setItem("fotoia_credits", String(newCredits));
+      setCredits(newCredits);
+      setNotice(`Pago exitoso. Se agregaron ${purchasedCredits} créditos.`);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
+    if (cancelled === "true") {
+      setNotice("Pago cancelado. No se agregaron créditos.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("fotoia_credits", String(credits));
+  }, [credits]);
 
   const handleImage = (e) => {
     const file = e.target.files?.[0];
@@ -93,6 +144,7 @@ export default function Home() {
     try {
       setLoading(true);
       setError("");
+      setNotice("");
 
       const base64Image = await toBase64(image);
 
@@ -122,6 +174,8 @@ export default function Home() {
 
       if (data.creditsLeft !== undefined) {
         setCredits(data.creditsLeft);
+      } else {
+        setCredits((prev) => Math.max(prev - 1, 0));
       }
     } catch (err) {
       setError(err.message || "Ocurrió un error al generar la imagen.");
@@ -130,21 +184,30 @@ export default function Home() {
     }
   };
 
-  const buyCredits = async () => {
+  const buyCredits = async (packageType) => {
     try {
+      setError("");
+      setNotice("");
+
       const res = await fetch("/api/checkout", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ packageType }),
       });
 
       const data = await res.json();
 
+      if (!res.ok) {
+        throw new Error(data?.details || data?.error || "No se pudo iniciar el pago.");
+      }
+
       if (data?.url) {
         window.location.href = data.url;
-      } else {
-        setError("No se pudo iniciar el pago.");
       }
-    } catch {
-      setError("Error al conectar con Stripe.");
+    } catch (err) {
+      setError(err.message || "Error al conectar con Stripe.");
     }
   };
 
@@ -184,9 +247,9 @@ export default function Home() {
               <a href="#studio" className="primaryBtn">
                 Crear imagen
               </a>
-              <button onClick={buyCredits} className="secondaryBtn">
+              <a href="#credits" className="secondaryBtn">
                 Comprar créditos
-              </button>
+              </a>
             </div>
 
             <div className="trust">
@@ -217,6 +280,8 @@ export default function Home() {
             quieres un resultado más específico.
           </p>
         </div>
+
+        {notice && <p className="notice">{notice}</p>}
 
         <div className="studioGrid">
           <div className="panel uploadPanel">
@@ -304,6 +369,26 @@ export default function Home() {
               </a>
             )}
           </div>
+        </div>
+      </section>
+
+      <section id="credits" className="creditsSection">
+        <div className="sectionHeader">
+          <span>Créditos</span>
+          <h2>Compra paquetes en MXN o USD</h2>
+          <p>1 crédito = 1 imagen generada.</p>
+        </div>
+
+        <div className="creditsGrid">
+          {creditPackages.map((pack) => (
+            <div key={pack.id} className="creditCard">
+              <h3>{pack.name}</h3>
+              <strong>{pack.price}</strong>
+              <button onClick={() => buyCredits(pack.id)}>
+                Comprar
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -449,7 +534,8 @@ export default function Home() {
         .primaryBtn,
         .secondaryBtn,
         .generateBtn,
-        .downloadBtn {
+        .downloadBtn,
+        .creditCard button {
           border: 0;
           cursor: pointer;
           text-decoration: none;
@@ -475,7 +561,8 @@ export default function Home() {
         .primaryBtn:hover,
         .secondaryBtn:hover,
         .generateBtn:hover,
-        .downloadBtn:hover {
+        .downloadBtn:hover,
+        .creditCard button:hover {
           transform: translateY(-2px);
         }
 
@@ -534,7 +621,8 @@ export default function Home() {
           font-size: 14px;
         }
 
-        .studio {
+        .studio,
+        .creditsSection {
           padding: 80px 6vw;
         }
 
@@ -558,6 +646,17 @@ export default function Home() {
           color: rgba(255, 255, 255, 0.6);
         }
 
+        .notice {
+          max-width: 760px;
+          margin: 0 auto 24px;
+          padding: 14px 16px;
+          border-radius: 16px;
+          color: #bbf7d0;
+          background: rgba(34, 197, 94, 0.12);
+          border: 1px solid rgba(34, 197, 94, 0.24);
+          text-align: center;
+        }
+
         .studioGrid {
           display: grid;
           grid-template-columns: 0.85fr 1.15fr 1fr;
@@ -565,7 +664,8 @@ export default function Home() {
         }
 
         .panel,
-        .feature {
+        .feature,
+        .creditCard {
           background: rgba(255, 255, 255, 0.07);
           border: 1px solid rgba(255, 255, 255, 0.11);
           border-radius: 28px;
@@ -775,6 +875,33 @@ export default function Home() {
           border: 1px solid rgba(255, 255, 255, 0.12);
         }
 
+        .creditsGrid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 18px;
+        }
+
+        .creditCard {
+          text-align: center;
+        }
+
+        .creditCard h3 {
+          margin: 0 0 10px;
+        }
+
+        .creditCard strong {
+          display: block;
+          font-size: 28px;
+          margin-bottom: 18px;
+        }
+
+        .creditCard button {
+          width: 100%;
+          padding: 14px 18px;
+          color: white;
+          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+        }
+
         .features {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -798,7 +925,8 @@ export default function Home() {
         @media (max-width: 980px) {
           .heroGrid,
           .studioGrid,
-          .features {
+          .features,
+          .creditsGrid {
             grid-template-columns: 1fr;
           }
 
@@ -835,7 +963,8 @@ export default function Home() {
             text-align: center;
           }
 
-          .studio {
+          .studio,
+          .creditsSection {
             padding-top: 48px;
           }
         }
