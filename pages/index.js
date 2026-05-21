@@ -43,6 +43,7 @@ export default function Home() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [preset, setPreset] = useState("ceo");
+  const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState(null);
   const [error, setError] = useState("");
@@ -52,11 +53,31 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Formato no permitido. Usa JPG, PNG o WEBP.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("La imagen es demasiado pesada. Usa una imagen menor a 5MB.");
+      return;
+    }
+
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setOutput(null);
     setError("");
   };
+
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
 
   const generateImage = async () => {
     if (!image) {
@@ -73,23 +94,35 @@ export default function Home() {
       setLoading(true);
       setError("");
 
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("preset", preset);
+      const base64Image = await toBase64(image);
 
       const res = await fetch("/api/generate", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: base64Image,
+          prompt: customPrompt.trim() || preset,
+          preset,
+          credits,
+          isPaid: true,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "No se pudo generar la imagen.");
+        throw new Error(
+          data?.details || data?.error || "No se pudo generar la imagen."
+        );
       }
 
-      setOutput(data.output || data.image || data.url);
-      setCredits((prev) => Math.max(prev - 1, 0));
+      setOutput(data.output);
+
+      if (data.creditsLeft !== undefined) {
+        setCredits(data.creditsLeft);
+      }
     } catch (err) {
       setError(err.message || "Ocurrió un error al generar la imagen.");
     } finally {
@@ -130,6 +163,7 @@ export default function Home() {
           <div className="navLinks">
             <a href="/terms">Términos</a>
             <a href="/privacy">Privacidad</a>
+            <a href="/refunds">Reembolsos</a>
             <a href="/contact">Contacto</a>
           </div>
         </nav>
@@ -141,8 +175,9 @@ export default function Home() {
             <h1>Transforma tus fotos en imágenes profesionales con IA.</h1>
 
             <p>
-              Sube una foto, elige un estilo y genera retratos listos para redes,
-              branding, perfiles profesionales y contenido viral.
+              Sube una foto, elige un estilo, describe los cambios que quieres
+              y genera retratos listos para redes, branding, perfiles
+              profesionales y contenido viral.
             </p>
 
             <div className="heroActions">
@@ -156,7 +191,7 @@ export default function Home() {
 
             <div className="trust">
               <span>⚡ Generación rápida</span>
-              <span>🔒 Sin prompts visibles</span>
+              <span>🔒 Experiencia protegida</span>
               <span>🎨 Presets premium</span>
             </div>
           </div>
@@ -177,7 +212,10 @@ export default function Home() {
         <div className="sectionHeader">
           <span>Estudio IA</span>
           <h2>Crea tu transformación</h2>
-          <p>Elige una foto clara del rostro para obtener mejores resultados.</p>
+          <p>
+            Sube una foto clara, elige un preset y escribe instrucciones si
+            quieres un resultado más específico.
+          </p>
         </div>
 
         <div className="studioGrid">
@@ -193,7 +231,7 @@ export default function Home() {
               ) : (
                 <div>
                   <strong>Haz clic para subir una imagen</strong>
-                  <small>PNG, JPG o WEBP</small>
+                  <small>JPG, PNG o WEBP · máximo 5MB</small>
                 </div>
               )}
               <input type="file" accept="image/*" onChange={handleImage} />
@@ -225,6 +263,19 @@ export default function Home() {
                   <small>{item.desc}</small>
                 </button>
               ))}
+            </div>
+
+            <div className="promptBox">
+              <label>Describe qué quieres cambiar</label>
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder="Ejemplo: hazlo estilo póster de Netflix, con fondo oscuro, luces dramáticas, rostro profesional y apariencia cinematográfica."
+              />
+              <small>
+                Si lo dejas vacío, usaremos automáticamente el preset
+                seleccionado.
+              </small>
             </div>
           </div>
 
@@ -272,7 +323,7 @@ export default function Home() {
         <div className="feature">
           <span>⚡</span>
           <h3>Simple</h3>
-          <p>Sin edición compleja. Sube, elige estilo y genera.</p>
+          <p>Sin edición compleja. Sube, elige estilo, describe y genera.</p>
         </div>
       </section>
 
@@ -450,9 +501,9 @@ export default function Home() {
           height: 460px;
           border-radius: 26px;
           background:
-            linear-gradient(160deg, rgba(255,255,255,0.18), transparent),
-            radial-gradient(circle at 50% 20%, rgba(14,165,233,0.7), transparent 28%),
-            radial-gradient(circle at 50% 55%, rgba(124,58,237,0.75), transparent 35%),
+            linear-gradient(160deg, rgba(255, 255, 255, 0.18), transparent),
+            radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.7), transparent 28%),
+            radial-gradient(circle at 50% 55%, rgba(124, 58, 237, 0.75), transparent 35%),
             #111827;
           display: grid;
           place-items: center;
@@ -630,6 +681,42 @@ export default function Home() {
 
         .preset small {
           color: rgba(255, 255, 255, 0.55);
+          line-height: 1.4;
+        }
+
+        .promptBox {
+          margin-top: 18px;
+        }
+
+        .promptBox label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 800;
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .promptBox textarea {
+          width: 100%;
+          min-height: 120px;
+          resize: vertical;
+          border-radius: 18px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(255, 255, 255, 0.06);
+          color: white;
+          padding: 14px;
+          font-size: 14px;
+          outline: none;
+          font-family: inherit;
+        }
+
+        .promptBox textarea::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        .promptBox small {
+          display: block;
+          margin-top: 8px;
+          color: rgba(255, 255, 255, 0.45);
           line-height: 1.4;
         }
 
