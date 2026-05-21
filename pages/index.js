@@ -1,461 +1,758 @@
-import { useState, useEffect } from 'react';
+import { useState } from "react";
+
+const presets = [
+  {
+    id: "ceo",
+    name: "CEO / LinkedIn",
+    desc: "Retrato profesional para perfil, CV o marca personal.",
+    emoji: "💼",
+  },
+  {
+    id: "luxury",
+    name: "Luxury",
+    desc: "Look premium, elegante y cinematográfico.",
+    emoji: "✨",
+  },
+  {
+    id: "netflix",
+    name: "Netflix Poster",
+    desc: "Estilo póster dramático de serie o película.",
+    emoji: "🎬",
+  },
+  {
+    id: "anime",
+    name: "Anime",
+    desc: "Transformación artística estilo anime moderno.",
+    emoji: "🌸",
+  },
+  {
+    id: "cyberpunk",
+    name: "Cyberpunk",
+    desc: "Luces neón, futurista y visualmente impactante.",
+    emoji: "🌃",
+  },
+  {
+    id: "fitness",
+    name: "Fitness",
+    desc: "Imagen fuerte, atlética y de alto impacto.",
+    emoji: "🔥",
+  },
+];
 
 export default function Home() {
   const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [description, setDescription] = useState('');
-  const [output, setOutput] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [preset, setPreset] = useState("ceo");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [output, setOutput] = useState(null);
+  const [error, setError] = useState("");
+  const [credits, setCredits] = useState(3);
 
-  const [loadingMessage, setLoadingMessage] = useState('');
-  const [loadingStep, setLoadingStep] = useState(0);
+  const handleImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const presets = [
-    { emoji: '💼', label: 'CEO', prompt: 'oficina corporativa profesional', desc: 'Foto profesional tipo LinkedIn' },
-    { emoji: '🎬', label: 'Netflix', prompt: 'pelicula netflix cinematografica', desc: 'Estilo póster cinematográfico' },
-    { emoji: '💎', label: 'Luxury', prompt: 'lujo millonario elegante', desc: 'Estética premium y elegante' },
-    { emoji: '🏙', label: 'Cyberpunk', prompt: 'cyberpunk futurista neon', desc: 'Neón, ciudad futurista y estilo sci-fi' },
-    { emoji: '🎌', label: 'Anime', prompt: 'anime estilo japones', desc: 'Transformación estilo anime' },
-    { emoji: '💪', label: 'Fitness', prompt: 'fitness gym profesional', desc: 'Look deportivo profesional' },
-    { emoji: '🌴', label: 'Playa', prompt: 'playa tropical de lujo', desc: 'Vacaciones tropicales premium' },
-    { emoji: '🌅', label: 'Atardecer', prompt: 'atardecer cinematografico', desc: 'Luz dorada y fondo cinematográfico' },
-  ];
-
-  const loadingMessages = [
-    '🧠 Analizando imagen...',
-    '🎨 Aplicando estilo profesional...',
-    '✨ Mejorando detalles visuales...',
-    '🌈 Ajustando iluminación...',
-    '🚀 Renderizando resultado final...',
-  ];
-
-  const [credits, setCredits] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return parseInt(localStorage.getItem('fotoia_credits') || '1');
-    }
-    return 1;
-  });
-
-  const [isPaid, setIsPaid] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('fotoia_isPaid') === 'true';
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('fotoia_credits', credits.toString());
-  }, [credits]);
-
-  useEffect(() => {
-    localStorage.setItem('fotoia_isPaid', isPaid.toString());
-  }, [isPaid]);
-
-  useEffect(() => {
-    let interval;
-
-    if (loading) {
-      setLoadingMessage(loadingMessages[0]);
-
-      interval = setInterval(() => {
-        setLoadingStep((prev) => {
-          const next = (prev + 1) % loadingMessages.length;
-          setLoadingMessage(loadingMessages[next]);
-          return next;
-        });
-      }, 2200);
-    }
-
-    return () => clearInterval(interval);
-  }, [loading]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.get('paid') === 'true') {
-      const newCredits = parseInt(params.get('credits') || '10');
-      setCredits(prev => prev + newCredits);
-      setIsPaid(true);
-      alert(`¡Pago exitoso! +${newCredits} créditos`);
-      window.history.replaceState({}, '', '/');
-    }
-
-    if (params.get('cancelled') === 'true') {
-      alert('Pago cancelado');
-      window.history.replaceState({}, '', '/');
-    }
-  }, []);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-
-    if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-      setOutput(null);
-      setError('');
-    }
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+    setOutput(null);
+    setError("");
   };
 
-  const resizeImage = (file) => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-
-        let width = img.width;
-        let height = img.height;
-        const maxSize = 1024;
-
-        if (width > height && width > maxSize) {
-          height = Math.round((height * maxSize) / width);
-          width = maxSize;
-        } else if (height > maxSize) {
-          width = Math.round((width * maxSize) / height);
-          height = maxSize;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
-      };
-    });
-  };
-
-  const handleGenerate = async () => {
-    if (!image || !description) {
-      return alert('Sube una imagen y elige o describe un estilo');
+  const generateImage = async () => {
+    if (!image) {
+      setError("Sube una foto antes de generar.");
+      return;
     }
 
     if (credits <= 0) {
-      return alert('Sin créditos. Compra un paquete para continuar.');
+      setError("No tienes créditos disponibles. Compra un paquete para continuar.");
+      return;
     }
 
-    setLoading(true);
-    setError('');
-    setOutput(null);
-
     try {
-      const resizedBase64 = await resizeImage(image);
+      setLoading(true);
+      setError("");
 
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: resizedBase64, prompt: description, isPaid, credits })
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("preset", preset);
+
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        body: formData,
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.details || data.error || 'Error al generar');
+        throw new Error(data?.error || "No se pudo generar la imagen.");
       }
 
-      setOutput(data.output);
-      setCredits(data.creditsLeft);
+      setOutput(data.output || data.image || data.url);
+      setCredits((prev) => Math.max(prev - 1, 0));
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Ocurrió un error al generar la imagen.");
     } finally {
       setLoading(false);
     }
   };
 
-  const buyCredits = async (packageType) => {
-    setLoading(true);
-
+  const buyCredits = async () => {
     try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageType })
+      const res = await fetch("/api/checkout", {
+        method: "POST",
       });
 
       const data = await res.json();
 
-      if (data.url) {
+      if (data?.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('No se pudo crear la sesión de pago');
+        setError("No se pudo iniciar el pago.");
       }
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
+    } catch {
+      setError("Error al conectar con Stripe.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.25),transparent_35%)] pointer-events-none" />
+    <main className="page">
+      <section className="hero">
+        <div className="glow glowOne" />
+        <div className="glow glowTwo" />
 
-      <main className="relative z-10">
-        <section className="max-w-6xl mx-auto px-4 py-8">
-          <header className="flex justify-between items-center mb-14">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-                FotoIA <span className="text-blue-400">Pro</span>
-              </h1>
-              <p className="text-slate-400 text-sm mt-1">
-                Transformación profesional de fotos con IA
-              </p>
-            </div>
+        <nav className="nav">
+          <div className="brand">
+            <span className="logo">F</span>
+            <span>FotoIA Pro</span>
+          </div>
 
-            <div className="bg-white/10 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur">
-              <span className="font-bold text-blue-200">
-                Créditos: {credits}
-              </span>
+          <div className="navLinks">
+            <a href="/terms">Términos</a>
+            <a href="/privacy">Privacidad</a>
+            <a href="/contact">Contacto</a>
+          </div>
+        </nav>
 
-              {isPaid && (
-                <span className="ml-2 text-xs bg-yellow-400 text-black px-2 py-1 rounded-full font-bold">
-                  PRO
-                </span>
-              )}
-            </div>
-          </header>
+        <div className="heroGrid">
+          <div className="heroText">
+            <div className="badge">IA para retratos premium</div>
 
-          <section className="grid md:grid-cols-2 gap-10 items-center mb-10">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-400/20 text-blue-200 px-4 py-2 rounded-full text-sm mb-5">
-                ✨ IA premium para retratos, estilos virales y branding
-              </div>
+            <h1>Transforma tus fotos en imágenes profesionales con IA.</h1>
 
-              <h2 className="text-5xl md:text-6xl font-black leading-tight mb-5">
-                Convierte tus fotos en imágenes profesionales con IA
-              </h2>
+            <p>
+              Sube una foto, elige un estilo y genera retratos listos para redes,
+              branding, perfiles profesionales y contenido viral.
+            </p>
 
-              <p className="text-slate-300 text-lg mb-8">
-                Sube una foto, elige un estilo y genera una versión profesional, cinematográfica o viral en segundos.
-              </p>
-
-              <a
-                href="#generator"
-                className="inline-block bg-blue-600 hover:bg-blue-500 text-white px-7 py-4 rounded-2xl font-bold transition shadow-lg shadow-blue-600/30"
-              >
-                Transformar mi foto
+            <div className="heroActions">
+              <a href="#studio" className="primaryBtn">
+                Crear imagen
               </a>
+              <button onClick={buyCredits} className="secondaryBtn">
+                Comprar créditos
+              </button>
+            </div>
 
-              <div className="grid grid-cols-3 gap-4 mt-8 text-center">
-                <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                  <p className="text-2xl font-black">8+</p>
-                  <p className="text-xs text-slate-400">Estilos IA</p>
+            <div className="trust">
+              <span>⚡ Generación rápida</span>
+              <span>🔒 Sin prompts visibles</span>
+              <span>🎨 Presets premium</span>
+            </div>
+          </div>
+
+          <div className="heroCard">
+            <div className="mockImage">
+              <div className="mockFace">AI</div>
+            </div>
+            <div className="mockInfo">
+              <strong>Retrato estilo Luxury</strong>
+              <span>Resultado premium generado con FotoIA Pro</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="studio" className="studio">
+        <div className="sectionHeader">
+          <span>Estudio IA</span>
+          <h2>Crea tu transformación</h2>
+          <p>Elige una foto clara del rostro para obtener mejores resultados.</p>
+        </div>
+
+        <div className="studioGrid">
+          <div className="panel uploadPanel">
+            <div className="panelTop">
+              <h3>1. Sube tu foto</h3>
+              <span>{credits} créditos</span>
+            </div>
+
+            <label className="uploadBox">
+              {preview ? (
+                <img src={preview} alt="Vista previa" />
+              ) : (
+                <div>
+                  <strong>Haz clic para subir una imagen</strong>
+                  <small>PNG, JPG o WEBP</small>
                 </div>
-                <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                  <p className="text-2xl font-black">1</p>
-                  <p className="text-xs text-slate-400">Crédito por foto</p>
-                </div>
-                <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                  <p className="text-2xl font-black">Pro</p>
-                  <p className="text-xs text-slate-400">Calidad premium</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/10 border border-white/10 rounded-3xl p-5 shadow-2xl backdrop-blur">
-              <div className="bg-slate-900 rounded-2xl p-6">
-                <p className="text-sm text-slate-400 mb-4">Ejemplos de estilos:</p>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {presets.slice(0, 6).map((preset) => (
-                    <div key={preset.label} className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                      <div className="text-3xl mb-2">{preset.emoji}</div>
-                      <p className="font-bold">{preset.label}</p>
-                      <p className="text-xs text-slate-400 mt-1">{preset.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="generator" className="bg-white text-slate-900 rounded-3xl shadow-2xl p-5 md:p-8 mb-8">
-            <div className="mb-6">
-              <h3 className="text-3xl font-black mb-2">Crea tu imagen IA</h3>
-              <p className="text-slate-600">
-                Sube tu foto, elige un estilo y deja que FotoIA Pro haga la magia.
-              </p>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl mb-6 text-sm text-blue-900">
-              <strong>Aviso IA:</strong> Las imágenes son generadas mediante inteligencia artificial.
-              Los resultados pueden variar según la foto original, el estilo elegido y la disponibilidad del modelo.
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl">
-                <h4 className="text-xl font-bold mb-3">1. Sube tu imagen</h4>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-
-                {imagePreview && (
-                  <div className="mt-4">
-                    <img src={imagePreview} alt="Preview" className="max-h-72 rounded-2xl shadow" />
-                    <p className="mt-2 text-sm text-green-600">✓ {image?.name}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl">
-                <h4 className="text-xl font-bold mb-3">2. Elige un estilo</h4>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {presets.map((preset) => (
-                    <button
-                      key={preset.label}
-                      onClick={() => setDescription(preset.prompt)}
-                      className={`p-4 rounded-2xl border-2 transition text-left hover:scale-[1.02] ${
-                        description === preset.prompt
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-slate-200 bg-white hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="text-2xl mb-1">{preset.emoji}</div>
-                      <div className="font-bold">{preset.label}</div>
-                      <div className="text-xs text-slate-500 mt-1">{preset.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl mb-5">
-              <h4 className="text-xl font-bold mb-2">3. Describe tu transformación</h4>
-
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ejemplo: como millonario elegante, película futurista, anime épico..."
-                rows="3"
-                className="w-full p-4 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+              )}
+              <input type="file" accept="image/*" onChange={handleImage} />
+            </label>
 
             <button
-              onClick={handleGenerate}
-              disabled={loading || credits <= 0 || !image}
-              className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition shadow-lg shadow-blue-600/20"
+              onClick={generateImage}
+              disabled={loading}
+              className="generateBtn"
             >
-              {loading
-                ? 'Generando magia IA...'
-                : credits <= 0
-                ? 'Sin créditos'
-                : 'Transformar Imagen - 1 crédito'}
+              {loading ? "Generando imagen..." : "Generar con IA"}
             </button>
 
-            {loading && (
-              <div className="mt-6 bg-slate-50 p-8 rounded-3xl shadow text-center border border-blue-100">
-                <div className="flex justify-center mb-5">
-                  <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            {error && <p className="error">{error}</p>}
+          </div>
+
+          <div className="panel presetsPanel">
+            <h3>2. Elige un preset</h3>
+
+            <div className="presetGrid">
+              {presets.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setPreset(item.id)}
+                  className={preset === item.id ? "preset active" : "preset"}
+                >
+                  <span>{item.emoji}</span>
+                  <strong>{item.name}</strong>
+                  <small>{item.desc}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel resultPanel">
+            <h3>3. Resultado</h3>
+
+            <div className="resultBox">
+              {loading ? (
+                <div className="loading">
+                  <div className="spinner" />
+                  <p>Creando tu imagen premium...</p>
                 </div>
-
-                <h3 className="text-2xl font-black text-slate-900 mb-3">
-                  Generando con IA
-                </h3>
-
-                <p className="text-blue-700 font-bold text-lg animate-pulse">
-                  {loadingMessage}
-                </p>
-
-                <div className="mt-5 bg-slate-200 rounded-full h-3 overflow-hidden">
-                  <div className="bg-blue-600 h-full animate-pulse w-3/4 rounded-full"></div>
+              ) : output ? (
+                <img src={output} alt="Resultado generado" />
+              ) : (
+                <div className="emptyResult">
+                  <span>✨</span>
+                  <p>Tu imagen generada aparecerá aquí.</p>
                 </div>
-
-                <p className="text-sm text-slate-500 mt-4">
-                  Esto puede tardar unos segundos dependiendo de la calidad.
-                </p>
-              </div>
-            )}
-
-            {error && (
-              <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-2xl border border-red-200">
-                {error}
-              </div>
-            )}
-
-            {credits <= 0 && (
-              <div className="mt-6 p-6 bg-yellow-50 rounded-2xl border border-yellow-200">
-                <p className="font-black mb-2 text-yellow-900">¡Sin créditos!</p>
-                <p className="text-sm text-yellow-800 mb-4">
-                  Compra un paquete para seguir creando imágenes premium.
-                </p>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => buyCredits('basic')}
-                    disabled={loading}
-                    className="flex-1 bg-green-600 text-white px-4 py-3 rounded-2xl font-bold hover:bg-green-700 disabled:bg-slate-400"
-                  >
-                    10 Créditos - $9
-                  </button>
-
-                  <button
-                    onClick={() => buyCredits('pro')}
-                    disabled={loading}
-                    className="flex-1 bg-purple-600 text-white px-4 py-3 rounded-2xl font-bold hover:bg-purple-700 disabled:bg-slate-400"
-                  >
-                    30 Créditos - $19
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {output && (
-              <div className="mt-8 bg-slate-50 p-6 rounded-3xl shadow border border-slate-200">
-                <h3 className="text-2xl font-black mb-4">Resultado IA</h3>
-
-                <img src={output} alt="Resultado" className="w-full rounded-2xl mb-4 shadow" />
-
-                {!isPaid && (
-                  <p className="text-sm text-slate-600 mb-3 bg-white p-3 rounded-xl">
-                    Versión Demo - Compra créditos para calidad Pro.
-                  </p>
-                )}
-
-                <a
-                  href={output}
-                  download="fotoia-editada.jpg"
-                  className="bg-green-600 text-white px-6 py-3 rounded-2xl inline-block font-bold hover:bg-green-700 transition"
-                >
-                  Descargar Imagen
-                </a>
-              </div>
+              <a href={output} download className="downloadBtn">
+                Descargar imagen
+              </a>
             )}
-          </section>
-
-          <section className="grid md:grid-cols-4 gap-4 mb-12">
-            {[
-              ['⚡', 'Rápido', 'Genera imágenes en segundos.'],
-              ['🔒', 'Seguro', 'Tus fotos se procesan para crear resultados.'],
-              ['🎨', 'Creativo', 'Estilos profesionales y virales.'],
-              ['💬', 'Soporte', 'Contacto oficial para ayuda.'],
-            ].map(([icon, title, text]) => (
-              <div key={title} className="bg-white/10 border border-white/10 rounded-2xl p-5 backdrop-blur">
-                <div className="text-3xl mb-2">{icon}</div>
-                <h4 className="font-black mb-1">{title}</h4>
-                <p className="text-sm text-slate-400">{text}</p>
-              </div>
-            ))}
-          </section>
-        </section>
-
-        <footer className="border-t border-white/10 py-8 text-center text-sm text-slate-400">
-          <p className="mb-3">© 2026 FotoIA Pro — IA para transformar tus fotos</p>
-
-          <div className="flex justify-center gap-6 flex-wrap">
-            <a href="/terms" className="hover:text-white transition">Términos</a>
-            <a href="/privacy" className="hover:text-white transition">Privacidad</a>
-            <a href="/refunds" className="hover:text-white transition">Reembolsos</a>
-            <a href="/contact" className="hover:text-white transition">Contacto</a>
           </div>
-        </footer>
-      </main>
-    </div>
+        </div>
+      </section>
+
+      <section className="features">
+        <div className="feature">
+          <span>💼</span>
+          <h3>Profesional</h3>
+          <p>Ideal para LinkedIn, CV, marca personal y perfiles de negocio.</p>
+        </div>
+
+        <div className="feature">
+          <span>🎬</span>
+          <h3>Cinemático</h3>
+          <p>Presets visuales con estética moderna, viral y premium.</p>
+        </div>
+
+        <div className="feature">
+          <span>⚡</span>
+          <h3>Simple</h3>
+          <p>Sin edición compleja. Sube, elige estilo y genera.</p>
+        </div>
+      </section>
+
+      <style jsx>{`
+        .page {
+          min-height: 100vh;
+          background:
+            radial-gradient(circle at top left, rgba(124, 58, 237, 0.25), transparent 35%),
+            radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 30%),
+            #050510;
+          color: white;
+          font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .hero {
+          position: relative;
+          overflow: hidden;
+          padding: 28px 6vw 80px;
+        }
+
+        .glow {
+          position: absolute;
+          width: 360px;
+          height: 360px;
+          border-radius: 999px;
+          filter: blur(90px);
+          opacity: 0.45;
+          pointer-events: none;
+        }
+
+        .glowOne {
+          background: #7c3aed;
+          top: 80px;
+          left: -120px;
+        }
+
+        .glowTwo {
+          background: #0ea5e9;
+          right: -140px;
+          top: 140px;
+        }
+
+        .nav {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 80px;
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+        }
+
+        .logo {
+          width: 38px;
+          height: 38px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+          box-shadow: 0 0 35px rgba(139, 92, 246, 0.55);
+        }
+
+        .navLinks {
+          display: flex;
+          gap: 22px;
+        }
+
+        .navLinks a {
+          color: rgba(255, 255, 255, 0.68);
+          text-decoration: none;
+          font-size: 14px;
+        }
+
+        .heroGrid {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 56px;
+          align-items: center;
+        }
+
+        .badge {
+          display: inline-flex;
+          padding: 8px 14px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.06);
+          color: #c4b5fd;
+          font-size: 14px;
+          margin-bottom: 24px;
+        }
+
+        h1 {
+          max-width: 760px;
+          font-size: clamp(42px, 7vw, 82px);
+          line-height: 0.94;
+          margin: 0;
+          letter-spacing: -0.07em;
+        }
+
+        .heroText p {
+          max-width: 620px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 18px;
+          line-height: 1.7;
+          margin: 26px 0 34px;
+        }
+
+        .heroActions {
+          display: flex;
+          gap: 14px;
+          flex-wrap: wrap;
+        }
+
+        .primaryBtn,
+        .secondaryBtn,
+        .generateBtn,
+        .downloadBtn {
+          border: 0;
+          cursor: pointer;
+          text-decoration: none;
+          font-weight: 800;
+          border-radius: 18px;
+          transition: 0.2s ease;
+        }
+
+        .primaryBtn {
+          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+          color: white;
+          padding: 16px 24px;
+          box-shadow: 0 18px 60px rgba(99, 102, 241, 0.35);
+        }
+
+        .secondaryBtn {
+          background: rgba(255, 255, 255, 0.08);
+          color: white;
+          padding: 16px 24px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .primaryBtn:hover,
+        .secondaryBtn:hover,
+        .generateBtn:hover,
+        .downloadBtn:hover {
+          transform: translateY(-2px);
+        }
+
+        .trust {
+          display: flex;
+          gap: 18px;
+          flex-wrap: wrap;
+          margin-top: 28px;
+          color: rgba(255, 255, 255, 0.62);
+          font-size: 14px;
+        }
+
+        .heroCard {
+          padding: 18px;
+          border-radius: 34px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 30px 100px rgba(0, 0, 0, 0.45);
+          backdrop-filter: blur(20px);
+        }
+
+        .mockImage {
+          height: 460px;
+          border-radius: 26px;
+          background:
+            linear-gradient(160deg, rgba(255,255,255,0.18), transparent),
+            radial-gradient(circle at 50% 20%, rgba(14,165,233,0.7), transparent 28%),
+            radial-gradient(circle at 50% 55%, rgba(124,58,237,0.75), transparent 35%),
+            #111827;
+          display: grid;
+          place-items: center;
+        }
+
+        .mockFace {
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          background: rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          font-size: 42px;
+          font-weight: 900;
+          color: white;
+        }
+
+        .mockInfo {
+          padding: 18px 6px 4px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .mockInfo span {
+          color: rgba(255, 255, 255, 0.58);
+          font-size: 14px;
+        }
+
+        .studio {
+          padding: 80px 6vw;
+        }
+
+        .sectionHeader {
+          text-align: center;
+          margin-bottom: 38px;
+        }
+
+        .sectionHeader span {
+          color: #a78bfa;
+          font-weight: 800;
+        }
+
+        .sectionHeader h2 {
+          font-size: clamp(34px, 5vw, 56px);
+          margin: 10px 0;
+          letter-spacing: -0.05em;
+        }
+
+        .sectionHeader p {
+          color: rgba(255, 255, 255, 0.6);
+        }
+
+        .studioGrid {
+          display: grid;
+          grid-template-columns: 0.85fr 1.15fr 1fr;
+          gap: 22px;
+        }
+
+        .panel,
+        .feature {
+          background: rgba(255, 255, 255, 0.07);
+          border: 1px solid rgba(255, 255, 255, 0.11);
+          border-radius: 28px;
+          padding: 24px;
+          backdrop-filter: blur(18px);
+          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+        }
+
+        .panelTop {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .panelTop span {
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: rgba(139, 92, 246, 0.2);
+          color: #ddd6fe;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .panel h3 {
+          margin-top: 0;
+          letter-spacing: -0.03em;
+        }
+
+        .uploadBox {
+          min-height: 260px;
+          border: 1px dashed rgba(255, 255, 255, 0.22);
+          border-radius: 24px;
+          display: grid;
+          place-items: center;
+          text-align: center;
+          cursor: pointer;
+          overflow: hidden;
+          background: rgba(255, 255, 255, 0.04);
+          margin: 18px 0;
+        }
+
+        .uploadBox img {
+          width: 100%;
+          height: 100%;
+          max-height: 320px;
+          object-fit: cover;
+        }
+
+        .uploadBox input {
+          display: none;
+        }
+
+        .uploadBox small {
+          display: block;
+          margin-top: 8px;
+          color: rgba(255, 255, 255, 0.55);
+        }
+
+        .generateBtn {
+          width: 100%;
+          padding: 16px 18px;
+          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+          color: white;
+        }
+
+        .generateBtn:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+
+        .error {
+          color: #fecaca;
+          background: rgba(239, 68, 68, 0.12);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          padding: 12px 14px;
+          border-radius: 16px;
+          font-size: 14px;
+        }
+
+        .presetGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+        }
+
+        .preset {
+          text-align: left;
+          padding: 16px;
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.055);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: white;
+          cursor: pointer;
+          transition: 0.2s ease;
+        }
+
+        .preset:hover,
+        .preset.active {
+          border-color: rgba(139, 92, 246, 0.75);
+          background: rgba(139, 92, 246, 0.18);
+          transform: translateY(-2px);
+        }
+
+        .preset span {
+          font-size: 24px;
+        }
+
+        .preset strong {
+          display: block;
+          margin: 8px 0 5px;
+        }
+
+        .preset small {
+          color: rgba(255, 255, 255, 0.55);
+          line-height: 1.4;
+        }
+
+        .resultBox {
+          min-height: 390px;
+          border-radius: 24px;
+          overflow: hidden;
+          display: grid;
+          place-items: center;
+          background:
+            radial-gradient(circle at top, rgba(139, 92, 246, 0.2), transparent 35%),
+            rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .resultBox img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .emptyResult,
+        .loading {
+          text-align: center;
+          color: rgba(255, 255, 255, 0.62);
+          padding: 24px;
+        }
+
+        .emptyResult span {
+          font-size: 44px;
+        }
+
+        .spinner {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          border: 3px solid rgba(255, 255, 255, 0.15);
+          border-top-color: white;
+          margin: 0 auto 14px;
+          animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .downloadBtn {
+          display: block;
+          text-align: center;
+          margin-top: 16px;
+          padding: 15px 18px;
+          color: white;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .features {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 22px;
+          padding: 20px 6vw 90px;
+        }
+
+        .feature span {
+          font-size: 32px;
+        }
+
+        .feature h3 {
+          margin-bottom: 8px;
+        }
+
+        .feature p {
+          color: rgba(255, 255, 255, 0.6);
+          line-height: 1.6;
+        }
+
+        @media (max-width: 980px) {
+          .heroGrid,
+          .studioGrid,
+          .features {
+            grid-template-columns: 1fr;
+          }
+
+          .nav {
+            align-items: flex-start;
+            gap: 18px;
+          }
+
+          .navLinks {
+            display: none;
+          }
+
+          .mockImage {
+            height: 360px;
+          }
+        }
+
+        @media (max-width: 620px) {
+          .hero {
+            padding-top: 22px;
+          }
+
+          .presetGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .heroActions {
+            flex-direction: column;
+          }
+
+          .primaryBtn,
+          .secondaryBtn {
+            width: 100%;
+            text-align: center;
+          }
+
+          .studio {
+            padding-top: 48px;
+          }
+        }
+      `}</style>
+    </main>
   );
 }
