@@ -80,7 +80,6 @@ export default function Home() {
       setIsPaid(true);
 
       alert(`¡Pago exitoso! +${newCredits} créditos`);
-
       window.history.replaceState({}, '', '/');
     }
 
@@ -223,6 +222,12 @@ export default function Home() {
             <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">💎 Luxury</span>
             <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">🏙 Cyberpunk</span>
           </div>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-4 text-sm text-blue-900">
+          <strong>Aviso IA:</strong> Las imágenes son generadas mediante inteligencia artificial.
+          Los resultados pueden variar según la foto original, el estilo elegido y la disponibilidad
+          del modelo. FotoIA Pro no garantiza similitud perfecta ni resultados idénticos en cada generación.
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow mb-4">
