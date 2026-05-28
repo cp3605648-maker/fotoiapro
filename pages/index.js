@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 const presets = [
-  { id: "ceo", name: "CEO / LinkedIn", desc: "Retrato profesional para perfil, CV o marca personal.", emoji: "💼" },
-  { id: "luxury", name: "Luxury", desc: "Look premium, elegante y cinematográfico.", emoji: "✨" },
-  { id: "netflix", name: "Netflix Poster", desc: "Estilo póster dramático de serie o película.", emoji: "🎬" },
-  { id: "anime", name: "Anime", desc: "Transformación artística estilo anime moderno.", emoji: "🌸" },
-  { id: "cyberpunk", name: "Cyberpunk", desc: "Luces neón, futurista y visualmente impactante.", emoji: "🌃" },
-  { id: "fitness", name: "Fitness", desc: "Imagen fuerte, atlética y de alto impacto.", emoji: "🔥" },
+  { id: "ceo", name: "CEO / LinkedIn", desc: "Retrato profesional.", emoji: "💼" },
+  { id: "luxury", name: "Luxury", desc: "Look premium y elegante.", emoji: "✨" },
+  { id: "netflix", name: "Netflix Poster", desc: "Póster cinematográfico.", emoji: "🎬" },
+  { id: "anime", name: "Anime", desc: "Estilo anime moderno.", emoji: "🌸" },
+  { id: "cyberpunk", name: "Cyberpunk", desc: "Luces neón futuristas.", emoji: "🌃" },
+  { id: "fitness", name: "Fitness", desc: "Imagen fuerte y atlética.", emoji: "🔥" },
 ];
 
 const creditPackages = [
@@ -17,6 +18,9 @@ const creditPackages = [
 ];
 
 export default function Home() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [preset, setPreset] = useState("ceo");
@@ -29,34 +33,89 @@ export default function Home() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const savedCredits = Number(localStorage.getItem("fotoia_credits") || 0);
-    const savedHistory = JSON.parse(localStorage.getItem("fotoia_history") || "[]");
+    const loadUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    setCredits(savedCredits);
-    setHistory(savedHistory);
+      const currentUser = session?.user || null;
+      setUser(currentUser);
 
-    const params = new URLSearchParams(window.location.search);
-    const success = params.get("success");
-    const cancelled = params.get("cancelled");
-    const purchasedCredits = Number(params.get("credits") || 0);
+      const savedHistory = JSON.parse(
+        localStorage.getItem("fotoia_history") || "[]"
+      );
+      setHistory(savedHistory);
 
-    if (success === "true" && purchasedCredits > 0) {
-      const newCredits = savedCredits + purchasedCredits;
-      localStorage.setItem("fotoia_credits", String(newCredits));
-      setCredits(newCredits);
-      setNotice(`Pago exitoso. Se agregaron ${purchasedCredits} créditos.`);
-      window.history.replaceState({}, "", window.location.pathname);
-    }
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id,email,credits")
+          .eq("id", currentUser.id)
+          .single();
 
-    if (cancelled === "true") {
-      setNotice("Pago cancelado. No se agregaron créditos.");
-      window.history.replaceState({}, "", window.location.pathname);
-    }
+        if (!profile) {
+          await supabase.from("profiles").insert({
+            id: currentUser.id,
+            email: currentUser.email,
+            credits: 0,
+          });
+          setCredits(0);
+        } else {
+          setCredits(profile.credits || 0);
+        }
+      }
+
+      setAuthLoading(false);
+    };
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("fotoia_credits", String(credits));
-  }, [credits]);
+    const handleStripeReturn = async () => {
+      if (!user) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const success = params.get("success");
+      const cancelled = params.get("cancelled");
+      const purchasedCredits = Number(params.get("credits") || 0);
+
+      if (success === "true" && purchasedCredits > 0) {
+        const newCredits = credits + purchasedCredits;
+
+        await supabase
+          .from("profiles")
+          .update({ credits: newCredits })
+          .eq("id", user.id);
+
+        setCredits(newCredits);
+        setNotice(`Pago exitoso. Se agregaron ${purchasedCredits} créditos.`);
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+
+      if (cancelled === "true") {
+        setNotice("Pago cancelado. No se agregaron créditos.");
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    };
+
+    handleStripeReturn();
+  }, [user]);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setCredits(0);
+    setNotice("Sesión cerrada.");
+  };
 
   const handleImage = (e) => {
     const file = e.target.files?.[0];
@@ -89,6 +148,11 @@ export default function Home() {
     });
 
   const generateImage = async () => {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
     if (!image) {
       setError("Sube una foto antes de generar.");
       return;
@@ -126,6 +190,16 @@ export default function Home() {
 
       setOutput(data.output);
 
+      const newCredits =
+        data.creditsLeft !== undefined ? data.creditsLeft : Math.max(credits - 1, 0);
+
+      setCredits(newCredits);
+
+      await supabase
+        .from("profiles")
+        .update({ credits: newCredits })
+        .eq("id", user.id);
+
       const newItem = {
         id: Date.now(),
         image: data.output,
@@ -137,12 +211,6 @@ export default function Home() {
       const updatedHistory = [newItem, ...history].slice(0, 6);
       setHistory(updatedHistory);
       localStorage.setItem("fotoia_history", JSON.stringify(updatedHistory));
-
-      if (data.creditsLeft !== undefined) {
-        setCredits(data.creditsLeft);
-      } else {
-        setCredits((prev) => Math.max(prev - 1, 0));
-      }
     } catch (err) {
       setError(err.message || "Ocurrió un error al generar la imagen.");
     } finally {
@@ -151,6 +219,11 @@ export default function Home() {
   };
 
   const buyCredits = async (packageType) => {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
     try {
       setError("");
       setNotice("");
@@ -196,6 +269,19 @@ export default function Home() {
             <a href="/refunds">Reembolsos</a>
             <a href="/contact">Contacto</a>
           </div>
+
+          <div className="userBox">
+            {authLoading ? (
+              <span>Cargando...</span>
+            ) : user ? (
+              <>
+                <span>{user.email}</span>
+                <button onClick={logout}>Salir</button>
+              </>
+            ) : (
+              <a href="/login">Iniciar sesión</a>
+            )}
+          </div>
         </nav>
 
         <div className="heroGrid">
@@ -214,7 +300,7 @@ export default function Home() {
 
             <div className="trust">
               <span>⚡ Generación rápida</span>
-              <span>🔒 Experiencia protegida</span>
+              <span>🔒 Créditos persistentes</span>
               <span>🎨 Presets premium</span>
             </div>
           </div>
@@ -407,10 +493,7 @@ export default function Home() {
           padding: 80px 6vw;
         }
 
-        .hero {
-          overflow: hidden;
-          padding-top: 28px;
-        }
+        .hero { overflow: hidden; padding-top: 28px; }
 
         .glow {
           position: absolute;
@@ -431,6 +514,7 @@ export default function Home() {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 18px;
           margin-bottom: 80px;
         }
 
@@ -454,10 +538,28 @@ export default function Home() {
 
         .navLinks { display: flex; gap: 22px; }
 
-        .navLinks a {
-          color: rgba(255, 255, 255, 0.68);
+        .navLinks a, .userBox a {
+          color: rgba(255,255,255,0.75);
           text-decoration: none;
           font-size: 14px;
+          font-weight: 700;
+        }
+
+        .userBox {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: rgba(255,255,255,0.7);
+          font-size: 13px;
+        }
+
+        .userBox button {
+          border: 1px solid rgba(255,255,255,0.15);
+          background: rgba(255,255,255,0.08);
+          color: white;
+          border-radius: 999px;
+          padding: 8px 12px;
+          cursor: pointer;
         }
 
         .heroGrid {
@@ -472,9 +574,9 @@ export default function Home() {
         .badge {
           display: inline-flex;
           padding: 8px 14px;
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255,255,255,0.12);
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.06);
+          background: rgba(255,255,255,0.06);
           color: #c4b5fd;
           font-size: 14px;
           margin-bottom: 24px;
@@ -490,7 +592,7 @@ export default function Home() {
 
         .heroText p {
           max-width: 620px;
-          color: rgba(255, 255, 255, 0.68);
+          color: rgba(255,255,255,0.68);
           font-size: 18px;
           line-height: 1.7;
           margin: 26px 0 34px;
@@ -504,7 +606,7 @@ export default function Home() {
 
         .trust {
           margin-top: 28px;
-          color: rgba(255, 255, 255, 0.62);
+          color: rgba(255,255,255,0.62);
           font-size: 14px;
         }
 
@@ -522,27 +624,21 @@ export default function Home() {
           color: white;
         }
 
-        .primaryBtn, .secondaryBtn {
-          padding: 16px 24px;
-        }
+        .primaryBtn, .secondaryBtn { padding: 16px 24px; }
 
         .secondaryBtn, .downloadBtn, .clearBtn {
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(255,255,255,0.08);
           color: white;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .primaryBtn:hover, .secondaryBtn:hover, .generateBtn:hover, .downloadBtn:hover, .creditCard button:hover, .clearBtn:hover {
-          transform: translateY(-2px);
+          border: 1px solid rgba(255,255,255,0.12);
         }
 
         .heroCard, .panel, .feature, .creditCard, .historyCard {
-          background: rgba(255, 255, 255, 0.07);
-          border: 1px solid rgba(255, 255, 255, 0.11);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.11);
           border-radius: 28px;
           padding: 24px;
           backdrop-filter: blur(18px);
-          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+          box-shadow: 0 24px 80px rgba(0,0,0,0.28);
         }
 
         .heroCard { padding: 18px; border-radius: 34px; }
@@ -565,8 +661,8 @@ export default function Home() {
           border-radius: 50%;
           display: grid;
           place-items: center;
-          background: rgba(255, 255, 255, 0.14);
-          border: 1px solid rgba(255, 255, 255, 0.22);
+          background: rgba(255,255,255,0.14);
+          border: 1px solid rgba(255,255,255,0.22);
           font-size: 42px;
           font-weight: 900;
         }
@@ -578,20 +674,10 @@ export default function Home() {
           gap: 6px;
         }
 
-        .mockInfo span {
-          color: rgba(255, 255, 255, 0.58);
-          font-size: 14px;
-        }
+        .mockInfo span { color: rgba(255,255,255,0.58); font-size: 14px; }
 
-        .sectionHeader {
-          text-align: center;
-          margin-bottom: 38px;
-        }
-
-        .sectionHeader span {
-          color: #a78bfa;
-          font-weight: 800;
-        }
+        .sectionHeader { text-align: center; margin-bottom: 38px; }
+        .sectionHeader span { color: #a78bfa; font-weight: 800; }
 
         .sectionHeader h2 {
           font-size: clamp(34px, 5vw, 56px);
@@ -599,9 +685,7 @@ export default function Home() {
           letter-spacing: -0.05em;
         }
 
-        .sectionHeader p {
-          color: rgba(255, 255, 255, 0.6);
-        }
+        .sectionHeader p { color: rgba(255,255,255,0.6); }
 
         .notice {
           max-width: 760px;
@@ -609,8 +693,8 @@ export default function Home() {
           padding: 14px 16px;
           border-radius: 16px;
           color: #bbf7d0;
-          background: rgba(34, 197, 94, 0.12);
-          border: 1px solid rgba(34, 197, 94, 0.24);
+          background: rgba(34,197,94,0.12);
+          border: 1px solid rgba(34,197,94,0.24);
           text-align: center;
         }
 
@@ -630,24 +714,22 @@ export default function Home() {
         .panelTop span {
           padding: 8px 12px;
           border-radius: 999px;
-          background: rgba(139, 92, 246, 0.2);
+          background: rgba(139,92,246,0.2);
           color: #ddd6fe;
           font-size: 13px;
           font-weight: 800;
         }
 
-        .panel h3 { margin-top: 0; letter-spacing: -0.03em; }
-
         .uploadBox {
           min-height: 260px;
-          border: 1px dashed rgba(255, 255, 255, 0.22);
+          border: 1px dashed rgba(255,255,255,0.22);
           border-radius: 24px;
           display: grid;
           place-items: center;
           text-align: center;
           cursor: pointer;
           overflow: hidden;
-          background: rgba(255, 255, 255, 0.04);
+          background: rgba(255,255,255,0.04);
           margin: 18px 0;
         }
 
@@ -659,11 +741,10 @@ export default function Home() {
         }
 
         .uploadBox input { display: none; }
-
         .uploadBox small, .promptBox small {
           display: block;
           margin-top: 8px;
-          color: rgba(255, 255, 255, 0.55);
+          color: rgba(255,255,255,0.55);
         }
 
         .generateBtn {
@@ -671,15 +752,12 @@ export default function Home() {
           padding: 16px 18px;
         }
 
-        .generateBtn:disabled {
-          opacity: 0.65;
-          cursor: not-allowed;
-        }
+        .generateBtn:disabled { opacity: 0.65; cursor: not-allowed; }
 
         .error {
           color: #fecaca;
-          background: rgba(239, 68, 68, 0.12);
-          border: 1px solid rgba(239, 68, 68, 0.2);
+          background: rgba(239,68,68,0.12);
+          border: 1px solid rgba(239,68,68,0.2);
           padding: 12px 14px;
           border-radius: 16px;
           font-size: 14px;
@@ -695,17 +773,15 @@ export default function Home() {
           text-align: left;
           padding: 16px;
           border-radius: 20px;
-          background: rgba(255, 255, 255, 0.055);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255,255,255,0.055);
+          border: 1px solid rgba(255,255,255,0.1);
           color: white;
           cursor: pointer;
-          transition: 0.2s ease;
         }
 
-        .preset:hover, .preset.active {
-          border-color: rgba(139, 92, 246, 0.75);
-          background: rgba(139, 92, 246, 0.18);
-          transform: translateY(-2px);
+        .preset.active, .preset:hover {
+          border-color: rgba(139,92,246,0.75);
+          background: rgba(139,92,246,0.18);
         }
 
         .preset span { font-size: 24px; }
@@ -718,7 +794,6 @@ export default function Home() {
           display: block;
           margin-bottom: 8px;
           font-weight: 800;
-          color: rgba(255,255,255,0.85);
         }
 
         .promptBox textarea {
@@ -735,18 +810,14 @@ export default function Home() {
           font-family: inherit;
         }
 
-        .promptBox textarea::placeholder { color: rgba(255,255,255,0.4); }
-
         .resultBox {
           min-height: 390px;
           border-radius: 24px;
           overflow: hidden;
           display: grid;
           place-items: center;
-          background:
-            radial-gradient(circle at top, rgba(139, 92, 246, 0.2), transparent 35%),
-            rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.1);
         }
 
         .resultBox img {
@@ -760,8 +831,6 @@ export default function Home() {
           color: rgba(255,255,255,0.62);
           padding: 24px;
         }
-
-        .emptyResult span { font-size: 44px; }
 
         .spinner {
           width: 42px;
@@ -789,20 +858,15 @@ export default function Home() {
 
         .creditsGrid { grid-template-columns: repeat(4, 1fr); }
         .historyGrid { grid-template-columns: repeat(3, 1fr); }
+
         .features {
           grid-template-columns: repeat(3, 1fr);
           padding: 20px 6vw 90px;
         }
 
         .creditCard { text-align: center; }
-        .creditCard h3 { margin: 0 0 10px; }
         .creditCard strong { display: block; font-size: 28px; margin-bottom: 18px; }
-
-        .creditCard button {
-          width: 100%;
-          padding: 14px 18px;
-          color: white;
-        }
+        .creditCard button { width: 100%; padding: 14px 18px; color: white; }
 
         .emptyHistory {
           text-align: center;
@@ -844,7 +908,6 @@ export default function Home() {
         }
 
         .feature span { font-size: 32px; }
-        .feature h3 { margin-bottom: 8px; }
         .feature p { color: rgba(255,255,255,0.6); line-height: 1.6; }
 
         @media (max-width: 980px) {
@@ -852,7 +915,7 @@ export default function Home() {
             grid-template-columns: 1fr;
           }
 
-          .nav { align-items: flex-start; gap: 18px; }
+          .nav { align-items: flex-start; flex-wrap: wrap; }
           .navLinks { display: none; }
           .mockImage { height: 360px; }
         }
