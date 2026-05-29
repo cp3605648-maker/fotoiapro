@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { uploadImage } from "../lib/uploadImage";
 
 const presets = [
   { id: "ceo", name: "CEO / LinkedIn", desc: "Retrato profesional.", emoji: "💼" },
@@ -168,7 +169,7 @@ export default function Home() {
     }
 
     try {
-      setLoading(true);
+      
       setError("");
       setNotice("");
 
