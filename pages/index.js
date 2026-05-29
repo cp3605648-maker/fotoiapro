@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabaseClient";
 import { uploadImage } from "../lib/uploadImage";
 
 const presets = [
+  { id: "pose", name: "Pose / Movimiento", desc: "Cambia postura, acción o encuadre.", emoji: "🕺" },
   { id: "fashion", name: "Outfit / Moda", desc: "Cambia ropa, estilo y look.", emoji: "👗" },
   { id: "location", name: "Lugar / Fondo", desc: "Cambia escenario o ciudad.", emoji: "🌆" },
   { id: "luxury", name: "Luxury Branding", desc: "Look premium y elegante.", emoji: "✨" },
@@ -424,7 +425,7 @@ export default function Home() {
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Ejemplo: cámbiale la ropa por traje negro elegante, ponla en Nueva York de noche, agrega luces cinematográficas y un fondo premium."
+                placeholder="Ejemplo: ponla de pie saludando con la mano derecha, cuerpo completo, postura natural, rostro idéntico, fondo premium e iluminación realista."
               />
               <small>Puedes pedir ropa, fondo, lugar, colores, objetos, iluminación o estilo visual.</small>
             </div>
