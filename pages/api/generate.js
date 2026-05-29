@@ -67,29 +67,13 @@ function validateImage(image) {
   return null;
 }
 
-function dataUrlToBuffer(dataUrl) {
-  if (!dataUrl.startsWith("data:")) return dataUrl;
-
-  const base64Data = dataUrl.split(",")[1];
-
-  if (!base64Data) {
-    throw new Error("Imagen base64 inválida.");
-  }
-
-  return Buffer.from(base64Data, "base64");
-}
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Método no permitido",
-    });
+    return res.status(405).json({ error: "Método no permitido" });
   }
 
   if (!process.env.REPLICATE_API_TOKEN) {
-    return res.status(500).json({
-      error: "Replicate no está configurado",
-    });
+    return res.status(500).json({ error: "Replicate no está configurado" });
   }
 
   const ip = getClientIp(req);
@@ -103,6 +87,7 @@ export default async function handler(req, res) {
 
   const {
     image,
+    referenceImage,
     prompt,
     preset,
     userId,
@@ -126,11 +111,18 @@ export default async function handler(req, res) {
   }
 
   const imageError = validateImage(image);
-
   if (imageError) {
-    return res.status(400).json({
-      error: imageError,
-    });
+    return res.status(400).json({ error: imageError });
+  }
+
+  if (referenceImage) {
+    const referenceError = validateImage(referenceImage);
+    if (referenceError) {
+      return res.status(400).json({
+        error: "Imagen de referencia inválida",
+        details: referenceError,
+      });
+    }
   }
 
   try {
@@ -141,9 +133,7 @@ export default async function handler(req, res) {
       .single();
 
     if (profileError || !profile) {
-      return res.status(404).json({
-        error: "Perfil no encontrado",
-      });
+      return res.status(404).json({ error: "Perfil no encontrado" });
     }
 
     const currentCredits = Number(profile.credits || 0);
@@ -155,8 +145,6 @@ export default async function handler(req, res) {
       });
     }
 
-    const replicateImage = dataUrlToBuffer(image);
-
     const { prompt: finalPrompt, negativePrompt } = buildPrompt(
       userPrompt,
       isPaid
@@ -165,11 +153,25 @@ export default async function handler(req, res) {
     const selectedModel = detectModel(userPrompt);
 
     let output;
+    let modelUsed = selectedModel;
 
-    if (selectedModel === "instantid") {
+    if (referenceImage) {
+      modelUsed = "multi-image-kontext-pro";
+
+      output = await replicate.run("flux-kontext-apps/multi-image-kontext-pro", {
+        input: {
+          prompt: finalPrompt,
+          input_image_1: image,
+          input_image_2: referenceImage,
+          aspect_ratio: "match_input_image",
+          output_format: "png",
+          safety_tolerance: 2,
+        },
+      });
+    } else if (selectedModel === "instantid") {
       output = await replicate.run("zsxkib/instant-id", {
         input: {
-          image: replicateImage,
+          image,
           prompt: finalPrompt,
           negative_prompt: negativePrompt,
           enhance_face_region: true,
@@ -180,7 +182,7 @@ export default async function handler(req, res) {
         input: {
           prompt: finalPrompt,
           negative_prompt: negativePrompt,
-          input_image: replicateImage,
+          input_image: image,
           output_format: "jpg",
           guidance_scale: isPaid ? 3.5 : 2.5,
           num_inference_steps: isPaid ? 30 : 20,
@@ -193,9 +195,7 @@ export default async function handler(req, res) {
 
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update({
-        credits: creditsLeft,
-      })
+      .update({ credits: creditsLeft })
       .eq("id", userId);
 
     if (updateError) throw updateError;
@@ -205,7 +205,7 @@ export default async function handler(req, res) {
       .insert({
         user_id: userId,
         prompt: userPrompt,
-        model_used: selectedModel,
+        model_used: modelUsed,
         image_url: imageUrl,
         credits_used: 1,
         status: "completed",
@@ -219,11 +219,10 @@ export default async function handler(req, res) {
       output: imageUrl,
       creditsLeft,
       isDemo: false,
-      modelUsed: selectedModel,
+      modelUsed,
     });
   } catch (error) {
-    console.error("FULL GENERATE ERROR:", JSON.stringify(error, null, 2));
-console.error("RAW ERROR:", error);
+    console.error("Error generate:", error);
 
     return res.status(500).json({
       error: "Error al generar",

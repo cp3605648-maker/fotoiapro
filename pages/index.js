@@ -25,6 +25,8 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(true);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [referenceImage, setReferenceImage] = useState(null);
+  const [referencePreview, setReferencePreview] = useState(null);
   const [preset, setPreset] = useState("ceo");
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -146,6 +148,27 @@ export default function Home() {
     setError("");
   };
 
+  const handleReferenceImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Formato no permitido en referencia. Usa JPG, PNG o WEBP.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("La imagen de referencia es demasiado pesada. Usa una imagen menor a 5MB.");
+      return;
+    }
+
+    setReferenceImage(file);
+    setReferencePreview(URL.createObjectURL(file));
+    setError("");
+  };
+
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -176,12 +199,16 @@ export default function Home() {
       setNotice("");
 
       const uploadedUrl = await uploadImage(image, user.id);
+      const uploadedReferenceUrl = referenceImage
+        ? await uploadImage(referenceImage, `${user.id}/references`)
+        : null;
 
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           image: uploadedUrl,
+          referenceImage: uploadedReferenceUrl,
           prompt: customPrompt.trim() || preset,
           preset,
           credits,
@@ -349,6 +376,23 @@ export default function Home() {
                 </div>
               )}
               <input type="file" accept="image/*" onChange={handleImage} />
+            </label>
+
+            <div className="referenceTitle">
+              <strong>Referencia visual opcional</strong>
+              <small>Sube ropa, fondo, objeto, estilo o escena de ejemplo.</small>
+            </div>
+
+            <label className="uploadBox referenceBox">
+              {referencePreview ? (
+                <img src={referencePreview} alt="Referencia visual" />
+              ) : (
+                <div>
+                  <strong>Subir referencia</strong>
+                  <small>Ejemplo: outfit, auto, fondo, actor, objeto o estilo.</small>
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={handleReferenceImage} />
             </label>
 
             <button onClick={generateImage} disabled={loading} className="generateBtn">
@@ -744,6 +788,27 @@ export default function Home() {
           height: 100%;
           max-height: 320px;
           object-fit: cover;
+        }
+
+        .referenceTitle {
+          margin: 18px 0 10px;
+        }
+
+        .referenceTitle strong {
+          display: block;
+          color: rgba(255,255,255,0.9);
+        }
+
+        .referenceTitle small {
+          display: block;
+          margin-top: 5px;
+          color: rgba(255,255,255,0.55);
+          line-height: 1.4;
+        }
+
+        .referenceBox {
+          min-height: 190px;
+          margin-top: 0;
         }
 
         .uploadBox input { display: none; }
