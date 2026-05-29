@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     if (session.payment_status !== "paid") {
       return res.status(400).json({
-        error: "El pago no está confirmado",
+        error: "Pago no confirmado",
       });
     }
 
@@ -31,23 +31,17 @@ export default async function handler(req, res) {
 
     if (stripeUserId !== userId) {
       return res.status(403).json({
-        error: "El pago no pertenece a este usuario",
+        error: "Pago no pertenece al usuario",
       });
     }
 
-    if (!credits || credits <= 0) {
-      return res.status(400).json({
-        error: "Créditos inválidos",
-      });
-    }
-
-    const { data: existingPurchase } = await supabaseAdmin
+    const { data: existing } = await supabaseAdmin
       .from("purchases")
       .select("id")
       .eq("stripe_session_id", session.id)
       .maybeSingle();
 
-    if (existingPurchase) {
+    if (existing) {
       const { data: profile } = await supabaseAdmin
         .from("profiles")
         .select("credits")
@@ -60,19 +54,19 @@ export default async function handler(req, res) {
       });
     }
 
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("credits")
       .eq("id", userId)
       .single();
 
-    if (profileError) throw profileError;
-
     const newCredits = (profile?.credits || 0) + credits;
 
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update({ credits: newCredits })
+      .update({
+        credits: newCredits,
+      })
       .eq("id", userId);
 
     if (updateError) throw updateError;
@@ -83,9 +77,10 @@ export default async function handler(req, res) {
         user_id: userId,
         stripe_session_id: session.id,
         package_type: packageType,
-        credits,
-        currency: session.currency,
+        credits_added: credits,
+        credits: credits,
         amount: session.amount_total,
+        currency: session.currency,
         status: "completed",
       });
 
@@ -96,8 +91,9 @@ export default async function handler(req, res) {
       addedCredits: credits,
       credits: newCredits,
     });
+
   } catch (err) {
-    console.error("Confirm payment error:", err);
+    console.error(err);
 
     return res.status(500).json({
       error: "No se pudo confirmar el pago",
