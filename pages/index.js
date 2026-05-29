@@ -20,7 +20,6 @@ const creditPackages = [
 export default function Home() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [preset, setPreset] = useState("ceo");
@@ -34,16 +33,11 @@ export default function Home() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user || null;
       setUser(currentUser);
 
-      const savedHistory = JSON.parse(
-        localStorage.getItem("fotoia_history") || "[]"
-      );
+      const savedHistory = JSON.parse(localStorage.getItem("fotoia_history") || "[]");
       setHistory(savedHistory);
 
       if (currentUser) {
@@ -70,9 +64,7 @@ export default function Home() {
 
     loadUser();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
 
@@ -86,19 +78,31 @@ export default function Home() {
       const params = new URLSearchParams(window.location.search);
       const success = params.get("success");
       const cancelled = params.get("cancelled");
-      const purchasedCredits = Number(params.get("credits") || 0);
+      const sessionId = params.get("session_id");
 
-      if (success === "true" && purchasedCredits > 0) {
-        const newCredits = credits + purchasedCredits;
+      if (success === "true" && sessionId) {
+        try {
+          const res = await fetch("/api/confirm-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sessionId,
+              userId: user.id,
+            }),
+          });
 
-        await supabase
-          .from("profiles")
-          .update({ credits: newCredits })
-          .eq("id", user.id);
+          const data = await res.json();
 
-        setCredits(newCredits);
-        setNotice(`Pago exitoso. Se agregaron ${purchasedCredits} créditos.`);
-        window.history.replaceState({}, "", window.location.pathname);
+          if (!res.ok) {
+            throw new Error(data?.details || data?.error || "No se pudo confirmar el pago.");
+          }
+
+          setCredits(data.credits);
+          setNotice("Pago exitoso. Tus créditos fueron agregados.");
+          window.history.replaceState({}, "", window.location.pathname);
+        } catch (err) {
+          setError(err.message || "Error confirmando pago.");
+        }
       }
 
       if (cancelled === "true") {
@@ -179,6 +183,7 @@ export default function Home() {
           preset,
           credits,
           isPaid: true,
+          userId: user.id,
         }),
       });
 
@@ -231,7 +236,10 @@ export default function Home() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageType }),
+        body: JSON.stringify({
+          packageType,
+          userId: user.id,
+        }),
       });
 
       const data = await res.json();
