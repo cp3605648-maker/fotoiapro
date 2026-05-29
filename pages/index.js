@@ -440,7 +440,17 @@ export default function Home() {
                   <p>Creando tu imagen premium...</p>
                 </div>
               ) : output ? (
-                <img src={output} alt="Resultado generado" />
+                <div className="beforeAfter">
+                  <div className="compareCard">
+                    <span>Antes</span>
+                    <img src={preview} alt="Imagen original" />
+                  </div>
+
+                  <div className="compareCard">
+                    <span>Después</span>
+                    <img src={output} alt="Resultado generado" />
+                  </div>
+                </div>
               ) : (
                 <div className="emptyResult">
                   <span>✨</span>
@@ -897,6 +907,42 @@ export default function Home() {
           object-fit: cover;
         }
 
+        .beforeAfter {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          padding: 12px;
+        }
+
+        .compareCard {
+          position: relative;
+          min-height: 360px;
+          overflow: hidden;
+          border-radius: 18px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .compareCard span {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          z-index: 2;
+          padding: 7px 10px;
+          border-radius: 999px;
+          background: rgba(0,0,0,0.55);
+          color: white;
+          font-size: 12px;
+          font-weight: 900;
+        }
+
+        .compareCard img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
         .emptyResult, .loading {
           text-align: center;
           color: rgba(255,255,255,0.62);
@@ -982,7 +1028,7 @@ export default function Home() {
         .feature p { color: rgba(255,255,255,0.6); line-height: 1.6; }
 
         @media (max-width: 980px) {
-          .heroGrid, .studioGrid, .features, .creditsGrid, .historyGrid {
+          .heroGrid, .studioGrid, .features, .creditsGrid, .historyGrid, .beforeAfter {
             grid-template-columns: 1fr;
           }
 
