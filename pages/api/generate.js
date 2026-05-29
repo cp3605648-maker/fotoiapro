@@ -67,6 +67,37 @@ function validateImage(image) {
   return null;
 }
 
+
+function isPoseRequest(prompt = "") {
+  const lower = prompt.toLowerCase();
+
+  return [
+    "pose",
+    "movimiento",
+    "de pie",
+    "parado",
+    "parada",
+    "standing",
+    "sentado",
+    "sentada",
+    "sitting",
+    "caminar",
+    "caminando",
+    "walking",
+    "saludar",
+    "saludando",
+    "mano",
+    "wave",
+    "waving",
+    "girar",
+    "mirando",
+    "perfil",
+    "cuerpo completo",
+    "full body"
+  ].some(word => lower.includes(word));
+}
+
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });
@@ -85,7 +116,9 @@ export default async function handler(req, res) {
     });
   }
 
-  const {
+  const poseRequest = isPoseRequest(userPrompt);
+
+const {
     image,
     referenceImage,
     imageMeta,
