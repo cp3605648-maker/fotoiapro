@@ -222,7 +222,8 @@ export default async function handler(req, res) {
       modelUsed: selectedModel,
     });
   } catch (error) {
-    console.error("Error generate:", error);
+    console.error("FULL GENERATE ERROR:", JSON.stringify(error, null, 2));
+console.error("RAW ERROR:", error);
 
     return res.status(500).json({
       error: "Error al generar",
