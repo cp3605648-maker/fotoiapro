@@ -60,9 +60,16 @@ export default async function handler(req, res) {
     );
 
     let input = {
-      prompt: finalPrompt,
+      prompt: `${finalPrompt}
+
+STRICT FACE LOCK:
+Preserve the exact same face from the original image.
+Do not change facial identity, face shape, eyes, nose, mouth, teeth, smile, skin tone, age or expression.
+Only transform body pose, clothing, background, lighting or objects.
+The person must remain clearly recognizable as the same person.
+Avoid face beautification, face replacement or face redesign.`,
       input_image: image,
-      negative_prompt: negativePrompt,
+      negative_prompt: `${negativePrompt}, changed face, different face, different person, altered identity, face swap, deformed face, distorted eyes, distorted mouth, bad teeth`,
       output_format: "jpg"
     };
 
@@ -72,6 +79,10 @@ export default async function handler(req, res) {
 
     if (poseRequest) {
       input.prompt += `
+
+IMPORTANT:
+When changing pose, keep the original face unchanged.
+Only reconstruct the body pose, arms, hands and composition.
 
 POSE INTERPRETATION MODE:
 Interpret body movement intelligently.
