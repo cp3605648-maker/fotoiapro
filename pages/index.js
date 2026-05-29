@@ -169,17 +169,17 @@ export default function Home() {
     }
 
     try {
-      
+      setLoading(true);
       setError("");
       setNotice("");
 
-      const base64Image = await toBase64(image);
+      const uploadedUrl = await uploadImage(image, user.id);
 
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          image: base64Image,
+          image: uploadedUrl,
           prompt: customPrompt.trim() || preset,
           preset,
           credits,
@@ -200,11 +200,6 @@ export default function Home() {
         data.creditsLeft !== undefined ? data.creditsLeft : Math.max(credits - 1, 0);
 
       setCredits(newCredits);
-
-      await supabase
-        .from("profiles")
-        .update({ credits: newCredits })
-        .eq("id", user.id);
 
       const newItem = {
         id: Date.now(),
