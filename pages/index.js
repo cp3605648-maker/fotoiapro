@@ -3,12 +3,14 @@ import { supabase } from "../lib/supabaseClient";
 import { uploadImage } from "../lib/uploadImage";
 
 const presets = [
-  { id: "ceo", name: "CEO / LinkedIn", desc: "Retrato profesional.", emoji: "💼" },
-  { id: "luxury", name: "Luxury", desc: "Look premium y elegante.", emoji: "✨" },
-  { id: "netflix", name: "Netflix Poster", desc: "Póster cinematográfico.", emoji: "🎬" },
-  { id: "anime", name: "Anime", desc: "Estilo anime moderno.", emoji: "🌸" },
-  { id: "cyberpunk", name: "Cyberpunk", desc: "Luces neón futuristas.", emoji: "🌃" },
-  { id: "fitness", name: "Fitness", desc: "Imagen fuerte y atlética.", emoji: "🔥" },
+  { id: "fashion", name: "Outfit / Moda", desc: "Cambia ropa, estilo y look.", emoji: "👗" },
+  { id: "location", name: "Lugar / Fondo", desc: "Cambia escenario o ciudad.", emoji: "🌆" },
+  { id: "luxury", name: "Luxury Branding", desc: "Look premium y elegante.", emoji: "✨" },
+  { id: "magazine", name: "Portada Revista", desc: "Estilo editorial profesional.", emoji: "📰" },
+  { id: "object", name: "Agregar Objeto", desc: "Añade autos, accesorios u objetos.", emoji: "🏎️" },
+  { id: "cinematic", name: "Cinemático", desc: "Luces, drama y calidad película.", emoji: "🎬" },
+  { id: "anime", name: "Anime", desc: "Transformación artística anime.", emoji: "🌸" },
+  { id: "cyberpunk", name: "Cyberpunk", desc: "Neón, futurista y visual.", emoji: "🌃" },
 ];
 
 const creditPackages = [
@@ -325,7 +327,7 @@ export default function Home() {
         <div className="sectionHeader">
           <span>Estudio IA</span>
           <h2>Crea tu transformación</h2>
-          <p>Sube una foto clara, elige un preset y escribe instrucciones.</p>
+          <p>Sube una foto, elige qué quieres transformar y describe ropa, fondo, lugar, color, objeto o estilo.</p>
         </div>
 
         {notice && <p className="notice">{notice}</p>}
@@ -357,7 +359,7 @@ export default function Home() {
           </div>
 
           <div className="panel">
-            <h3>2. Elige un preset</h3>
+            <h3>2. Elige qué transformar</h3>
 
             <div className="presetGrid">
               {presets.map((item) => (
@@ -374,13 +376,13 @@ export default function Home() {
             </div>
 
             <div className="promptBox">
-              <label>Describe qué quieres cambiar</label>
+              <label>Describe exactamente qué quieres transformar</label>
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Ejemplo: hazlo estilo póster de Netflix, fondo oscuro, luces dramáticas y apariencia cinematográfica."
+                placeholder="Ejemplo: cámbiale la ropa por traje negro elegante, ponla en Nueva York de noche, agrega luces cinematográficas y un fondo premium."
               />
-              <small>Si lo dejas vacío, usaremos el preset seleccionado.</small>
+              <small>Puedes pedir ropa, fondo, lugar, colores, objetos, iluminación o estilo visual.</small>
             </div>
           </div>
 
