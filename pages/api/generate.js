@@ -88,6 +88,7 @@ export default async function handler(req, res) {
   const {
     image,
     referenceImage,
+    imageMeta,
     prompt,
     preset,
     userId,
@@ -147,7 +148,8 @@ export default async function handler(req, res) {
 
     const { prompt: finalPrompt, negativePrompt } = buildPrompt(
       userPrompt,
-      isPaid
+      isPaid,
+      imageMeta
     );
 
     const selectedModel = detectModel(userPrompt);

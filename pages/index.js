@@ -26,6 +26,7 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(true);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [imageMeta, setImageMeta] = useState(null);
   const [referenceImage, setReferenceImage] = useState(null);
   const [referencePreview, setReferencePreview] = useState(null);
   const [preset, setPreset] = useState("ceo");
@@ -143,8 +144,27 @@ export default function Home() {
       return;
     }
 
+    const objectUrl = URL.createObjectURL(file);
+
+    const img = new Image();
+    img.onload = () => {
+      const orientation =
+        img.width > img.height
+          ? "landscape"
+          : img.height > img.width
+          ? "portrait"
+          : "square";
+
+      setImageMeta({
+        width: img.width,
+        height: img.height,
+        orientation,
+      });
+    };
+    img.src = objectUrl;
+
     setImage(file);
-    setPreview(URL.createObjectURL(file));
+    setPreview(objectUrl);
     setOutput(null);
     setError("");
   };
