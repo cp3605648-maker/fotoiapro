@@ -37,10 +37,7 @@ function isRateLimited(ip) {
   };
 
   if (now - record.start > LIMIT_WINDOW) {
-    rateLimitStore.set(ip, {
-      count: 1,
-      start: now,
-    });
+    rateLimitStore.set(ip, { count: 1, start: now });
     return false;
   }
 
@@ -96,9 +93,22 @@ export default async function handler(req, res) {
     });
   }
 
-  const { image, prompt, preset, isPaid = false, credits = 0 } = req.body || {};
+  const {
+    image,
+    prompt,
+    preset,
+    userId,
+    isPaid = true,
+  } = req.body || {};
 
   const userPrompt = prompt || preset;
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Usuario no autenticado",
+      details: "Inicia sesión para generar imágenes.",
+    });
+  }
 
   if (!image || !userPrompt) {
     return res.status(400).json({
@@ -115,16 +125,28 @@ export default async function handler(req, res) {
     });
   }
 
-  const numericCredits = Number(credits);
-
-  if (!Number.isFinite(numericCredits) || numericCredits <= 0) {
-    return res.status(403).json({
-      error: "Sin créditos",
-      details: "Compra más créditos para continuar.",
-    });
-  }
-
   try {
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("credits")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      return res.status(404).json({
+        error: "Perfil no encontrado",
+      });
+    }
+
+    const currentCredits = Number(profile.credits || 0);
+
+    if (currentCredits <= 0) {
+      return res.status(403).json({
+        error: "Sin créditos",
+        details: "Compra más créditos para continuar.",
+      });
+    }
+
     const { prompt: finalPrompt, negativePrompt } = buildPrompt(
       userPrompt,
       isPaid
@@ -157,27 +179,40 @@ export default async function handler(req, res) {
     }
 
     const imageUrl = Array.isArray(output) ? output[0] : output;
+    const creditsLeft = currentCredits - 1;
 
-    try {
-      await supabaseAdmin.from("generations").insert({
+    const { error: updateError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        credits: creditsLeft,
+      })
+      .eq("id", userId);
+
+    if (updateError) throw updateError;
+
+    const { error: generationError } = await supabaseAdmin
+      .from("generations")
+      .insert({
+        user_id: userId,
         prompt: userPrompt,
         model_used: selectedModel,
         image_url: imageUrl,
         credits_used: 1,
         status: "completed",
       });
-    } catch (dbError) {
-      console.warn("No se pudo guardar en Supabase:", dbError.message);
+
+    if (generationError) {
+      console.warn("No se pudo guardar generación:", generationError.message);
     }
 
     return res.status(200).json({
       output: imageUrl,
-      creditsLeft: numericCredits - 1,
-      isDemo: !isPaid,
+      creditsLeft,
+      isDemo: false,
       modelUsed: selectedModel,
     });
   } catch (error) {
-    console.error("Error Replicate:", error);
+    console.error("Error generate:", error);
 
     return res.status(500).json({
       error: "Error al generar",
