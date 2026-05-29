@@ -26,6 +26,7 @@ export default async function handler(req, res) {
     }
 
     const stripeUserId = session.metadata?.userId;
+    const packageType = session.metadata?.packageType;
     const credits = Number(session.metadata?.credits || 0);
 
     if (stripeUserId !== userId) {
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
       .insert({
         user_id: userId,
         stripe_session_id: session.id,
+        package_type: packageType,
         credits,
         currency: session.currency,
         amount: session.amount_total,
