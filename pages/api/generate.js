@@ -1,3 +1,4 @@
+import { File } from "node:buffer";
 import Replicate from "replicate";
 import { buildPrompt } from "../../lib/ai/router";
 import { detectModel } from "../../lib/ai/modelRouter";
@@ -16,7 +17,6 @@ const replicate = new Replicate({
 });
 
 const rateLimitStore = new Map();
-
 const LIMIT_WINDOW = 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 3;
 const MAX_IMAGE_LENGTH = 7_500_000;
@@ -31,10 +31,7 @@ function getClientIp(req) {
 
 function isRateLimited(ip) {
   const now = Date.now();
-  const record = rateLimitStore.get(ip) || {
-    count: 0,
-    start: now,
-  };
+  const record = rateLimitStore.get(ip) || { count: 0, start: now };
 
   if (now - record.start > LIMIT_WINDOW) {
     rateLimitStore.set(ip, { count: 1, start: now });
@@ -69,6 +66,21 @@ function validateImage(image) {
   }
 
   return null;
+}
+
+function dataUrlToFile(dataUrl) {
+  if (!dataUrl.startsWith("data:")) return dataUrl;
+
+  const [header, base64Data] = dataUrl.split(",");
+  const mimeMatch = header.match(/data:(.*?);base64/);
+  const mimeType = mimeMatch?.[1] || "image/jpeg";
+  const extension = mimeType.split("/")[1] || "jpg";
+
+  const buffer = Buffer.from(base64Data, "base64");
+
+  return new File([buffer], `fotoia-input.${extension}`, {
+    type: mimeType,
+  });
 }
 
 export default async function handler(req, res) {
@@ -147,6 +159,8 @@ export default async function handler(req, res) {
       });
     }
 
+    const replicateImage = dataUrlToFile(image);
+
     const { prompt: finalPrompt, negativePrompt } = buildPrompt(
       userPrompt,
       isPaid
@@ -159,7 +173,7 @@ export default async function handler(req, res) {
     if (selectedModel === "instantid") {
       output = await replicate.run("zsxkib/instant-id", {
         input: {
-          image,
+          image: replicateImage,
           prompt: finalPrompt,
           negative_prompt: negativePrompt,
           enhance_face_region: true,
@@ -170,7 +184,7 @@ export default async function handler(req, res) {
         input: {
           prompt: finalPrompt,
           negative_prompt: negativePrompt,
-          input_image: image,
+          input_image: replicateImage,
           output_format: "jpg",
           guidance_scale: isPaid ? 3.5 : 2.5,
           num_inference_steps: isPaid ? 30 : 20,
