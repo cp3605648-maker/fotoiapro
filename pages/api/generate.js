@@ -1,4 +1,3 @@
-import { File } from "node:buffer";
 import Replicate from "replicate";
 import { buildPrompt } from "../../lib/ai/router";
 import { detectModel } from "../../lib/ai/modelRouter";
@@ -68,19 +67,16 @@ function validateImage(image) {
   return null;
 }
 
-function dataUrlToFile(dataUrl) {
+function dataUrlToBuffer(dataUrl) {
   if (!dataUrl.startsWith("data:")) return dataUrl;
 
-  const [header, base64Data] = dataUrl.split(",");
-  const mimeMatch = header.match(/data:(.*?);base64/);
-  const mimeType = mimeMatch?.[1] || "image/jpeg";
-  const extension = mimeType.split("/")[1] || "jpg";
+  const base64Data = dataUrl.split(",")[1];
 
-  const buffer = Buffer.from(base64Data, "base64");
+  if (!base64Data) {
+    throw new Error("Imagen base64 inválida.");
+  }
 
-  return new File([buffer], `fotoia-input.${extension}`, {
-    type: mimeType,
-  });
+  return Buffer.from(base64Data, "base64");
 }
 
 export default async function handler(req, res) {
@@ -159,7 +155,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const replicateImage = dataUrlToFile(image);
+    const replicateImage = dataUrlToBuffer(image);
 
     const { prompt: finalPrompt, negativePrompt } = buildPrompt(
       userPrompt,
