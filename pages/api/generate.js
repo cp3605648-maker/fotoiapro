@@ -170,6 +170,29 @@ export default async function handler(req, res) {
           safety_tolerance: 2,
         },
       });
+    } else if (poseRequest) {
+      modelUsed = "pose-aware-kontext-pro";
+
+      output = await replicate.run("black-forest-labs/flux-kontext-pro", {
+        input: {
+          prompt: `${finalPrompt}
+
+POSE INTERPRETATION MODE:
+The user is asking for a pose, movement, body action, orientation or composition change.
+Interpret the request intelligently and create the requested body pose even without a second reference image.
+If the user asks standing, make the person standing.
+If the user asks waving or greeting, raise the requested hand naturally.
+If the user asks full body, show the complete body.
+Preserve the exact face and identity from the original image.
+Do not keep the original body pose if it conflicts with the requested action.
+The requested movement has priority over the original pose.`,
+          negative_prompt: negativePrompt,
+          input_image: image,
+          output_format: "jpg",
+          guidance_scale: 4.8,
+          num_inference_steps: 40,
+        },
+      });
     } else if (selectedModel === "instantid") {
       output = await replicate.run("zsxkib/instant-id", {
         input: {
