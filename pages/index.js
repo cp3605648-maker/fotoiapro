@@ -501,7 +501,8 @@ export default function Home() {
 
         <div className="creditsGrid">
           {creditPackages.map((pack) => (
-            <div key={pack.id} className="creditCard">
+            <div key={pack.id} className={`creditCard ${pack.id === "pro_mxn" ? "popularCard" : ""}`}>
+              <div className="creditIcon">{pack.id === "pro_mxn" ? "👑" : "✨"}</div>
               {pack.id === "pro_mxn" && <div className="popularBadge">🔥 MÁS POPULAR</div>}
               <h3>{pack.name}</h3>
               <strong>{pack.price}</strong>
@@ -998,7 +999,15 @@ export default function Home() {
           gap: 18px;
         }
 
-        .creditsGrid { grid-template-columns: repeat(2, minmax(260px, 360px)); justify-content: center; }
+        
+        .creditsGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(280px, 380px));
+          justify-content: center;
+          gap: 28px;
+          margin-top: 42px;
+        }
+
         .historyGrid { grid-template-columns: repeat(3, 1fr); }
 
         .features {
@@ -1006,7 +1015,21 @@ export default function Home() {
           padding: 20px 6vw 90px;
         }
 
-        .creditCard { text-align: center; }
+        
+        .creditCard {
+          position: relative;
+          padding: 34px 30px;
+          border-radius: 28px;
+          background:
+            radial-gradient(circle at top, rgba(124,58,237,0.22), transparent 45%),
+            linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+          border: 1px solid rgba(255,255,255,0.14);
+          box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+          text-align: center;
+          overflow: hidden;
+          transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+
         .creditCard strong { display: block; font-size: 28px; margin-bottom: 18px; }
         .creditCard button { width: 100%; padding: 14px 18px; color: white; }
 
