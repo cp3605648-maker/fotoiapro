@@ -1,3 +1,4 @@
+import FeaturesBanner from "../components/FeaturesBanner";
 import FreeCreditBanner from "../components/FreeCreditBanner";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -309,7 +310,7 @@ export default function Home() {
   return (
     <main className="page">
       <FreeCreditBanner />
-      <section className="hero">
+<section className="hero">
         <div className="glow glowOne" />
         <div className="glow glowTwo" />
 
@@ -494,7 +495,9 @@ export default function Home() {
       <section id="credits" className="creditsSection">
         <div className="sectionHeader">
           <span>Créditos</span>
-          <h2>Compra paquetes en MXN o USD</h2>
+          <FeaturesBanner />
+
+<h2>Compra paquetes en MXN o USD</h2>
           <p>1 crédito = 1 imagen generada.</p>
         </div>
 
