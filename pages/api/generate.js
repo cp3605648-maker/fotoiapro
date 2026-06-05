@@ -51,7 +51,13 @@ export default async function handler(req, res) {
     const poseRequest = isPoseRequest(userPrompt || "");
 
     const {
-      prompt: finalPrompt,
+      prompt: `${finalPrompt}
+
+CRITICAL FACE LOCK:
+Preserve the exact same face, identity, eyes, nose, mouth, facial shape, age, skin tone, and expression from the original image unless the user explicitly requested a facial expression change.
+
+CRITICAL POSE CONTROL:
+If pose or movement is requested, modify body posture naturally while keeping the original face unchanged. Maintain realistic anatomy, hands, fingers, proportions, lighting, and camera perspective.`,
       negativePrompt
     } = buildPrompt(
       userPrompt || "",
@@ -60,7 +66,13 @@ export default async function handler(req, res) {
     );
 
     let input = {
-      prompt: `${finalPrompt}
+      prompt: `${`${finalPrompt}
+
+CRITICAL FACE LOCK:
+Preserve the exact same face, identity, eyes, nose, mouth, facial shape, age, skin tone, and expression from the original image unless the user explicitly requested a facial expression change.
+
+CRITICAL POSE CONTROL:
+If pose or movement is requested, modify body posture naturally while keeping the original face unchanged. Maintain realistic anatomy, hands, fingers, proportions, lighting, and camera perspective.`}
 
 STRICT FACE LOCK:
 Preserve the exact same face from the original image.
@@ -69,7 +81,13 @@ Only transform body pose, clothing, background, lighting or objects.
 The person must remain clearly recognizable as the same person.
 Avoid face beautification, face replacement or face redesign.`,
       input_image: image,
-      negative_prompt: `${negativePrompt}, changed face, different face, different person, altered identity, face swap, deformed face, distorted eyes, distorted mouth, bad teeth`,
+      negative_prompt: `${`${`${negativePrompt}, changed face, different face, different person, altered identity, deformed face, distorted face, changed eyes, changed nose, changed mouth, changed smile, changed age, bad anatomy, bad hands, extra fingers, missing fingers, fused fingers, twisted limbs, unnatural pose`}
+
+CRITICAL FACE LOCK:
+Preserve the exact same face, identity, eyes, nose, mouth, facial shape, age, skin tone, and expression from the original image unless the user explicitly requested a facial expression change.
+
+CRITICAL POSE CONTROL:
+If pose or movement is requested, modify body posture naturally while keeping the original face unchanged. Maintain realistic anatomy, hands, fingers, proportions, lighting, and camera perspective.`}, changed face, different face, different person, altered identity, face swap, deformed face, distorted eyes, distorted mouth, bad teeth`,
       output_format: "jpg"
     };
 
