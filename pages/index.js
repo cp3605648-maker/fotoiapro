@@ -1,3 +1,4 @@
+import PremiumStylesGrid from "../components/PremiumStylesGrid";
 import TrustBanner from "../components/TrustBanner";
 import FeaturesBanner from "../components/FeaturesBanner";
 import FreeCreditBanner from "../components/FreeCreditBanner";
@@ -497,6 +498,7 @@ export default function Home() {
           <span>Créditos</span>
           <FeaturesBanner />
       <TrustBanner />
+      <PremiumStylesGrid />
 
 <h2>Compra paquetes en MXN</h2>
           <p>✨ 1 crédito = 1 transformación profesional con IA.</p>
