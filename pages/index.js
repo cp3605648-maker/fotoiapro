@@ -1,3 +1,4 @@
+import PromptHelperChips from "../components/PromptHelperChips";
 import WhatCanYouAskBanner from "../components/WhatCanYouAskBanner";
 import SocialReadyBanner from "../components/SocialReadyBanner";
 import PremiumStylesGrid from "../components/PremiumStylesGrid";
@@ -18,6 +19,7 @@ const presets = [
   { id: "cinematic", name: "Cinemático", desc: "Luces, drama y calidad película.", emoji: "🎬" },
   { id: "anime", name: "Anime", desc: "Transformación artística anime.", emoji: "🌸" },
   { id: "cyberpunk", name: "Cyberpunk", desc: "Neón, futurista y visual.", emoji: "🌃" },
+  { id: "social", name: "Redes Sociales", desc: "Instagram, TikTok, WhatsApp, YouTube, LinkedIn.", emoji: "📱" },
 ];
 
 const creditPackages = [
@@ -448,6 +450,10 @@ export default function Home() {
 
             <div className="promptBox">
               <label>Describe exactamente qué quieres transformar</label>
+              <div className="freePromptNotice">
+                <strong>✨ Describe tu idea con total libertad</strong>
+                <span>Puedes pedir fondos, ropa, ciudades, accesorios, poses, objetos, iluminación, estilos y formatos para redes sociales. Tu identidad siempre será preservada.</span>
+              </div>
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
@@ -481,7 +487,13 @@ export default function Home() {
               ) : (
                 <div className="emptyResult">
                   <span>✨</span>
-                  <p>Tu imagen generada aparecerá aquí.</p>
+                  <div className="emptyResultText">
+                  <h3>✨ Resultado profesional generado por IA</h3>
+                  <p>✔ Conserva tu identidad</p>
+                  <p>✔ Optimizado para redes sociales</p>
+                  <p>✔ Calidad premium</p>
+                  <p>✔ Descarga inmediata</p>
+                </div>
                 </div>
               )}
             </div>
