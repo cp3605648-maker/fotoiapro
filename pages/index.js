@@ -19,8 +19,6 @@ const presets = [
 const creditPackages = [
   { id: "basic_mxn", name: "10 créditos", price: "$99 MXN" },
   { id: "pro_mxn", name: "30 créditos", price: "$199 MXN" },
-  { id: "basic_usd", name: "", price: "" },
-  { id: "pro_usd", name: "", price: "" },
 ];
 
 export default function Home() {
