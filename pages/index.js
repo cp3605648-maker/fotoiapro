@@ -1,3 +1,4 @@
+import WhatCanYouAskBanner from "../components/WhatCanYouAskBanner";
 import SocialReadyBanner from "../components/SocialReadyBanner";
 import PremiumStylesGrid from "../components/PremiumStylesGrid";
 import TrustBanner from "../components/TrustBanner";
@@ -499,6 +500,7 @@ export default function Home() {
           <span>Créditos</span>
           <FeaturesBanner />
       <TrustBanner />
+      <WhatCanYouAskBanner />
       <PremiumStylesGrid />
       <SocialReadyBanner />
 
