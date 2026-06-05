@@ -451,7 +451,7 @@ export default function Home() {
             </div>
 
             <div className="promptBox">
-              <label>Describe exactamente qué quieres transformar</label>
+              <label>Describe tu idea con total libertad</label>
               <div className="freePromptNotice">
                 <strong>✨ Describe tu idea con total libertad</strong>
                 <span>Puedes pedir fondos, ropa, ciudades, accesorios, poses, objetos, iluminación, estilos y formatos para redes sociales. Tu identidad siempre será preservada.</span>
