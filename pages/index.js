@@ -1,3 +1,4 @@
+import SocialReadyBanner from "../components/SocialReadyBanner";
 import PremiumStylesGrid from "../components/PremiumStylesGrid";
 import TrustBanner from "../components/TrustBanner";
 import FeaturesBanner from "../components/FeaturesBanner";
@@ -499,6 +500,7 @@ export default function Home() {
           <FeaturesBanner />
       <TrustBanner />
       <PremiumStylesGrid />
+      <SocialReadyBanner />
 
 <h2>Compra paquetes en MXN</h2>
           <p>✨ 1 crédito = 1 transformación profesional con IA.</p>
