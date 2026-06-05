@@ -1,3 +1,4 @@
+import UseCases from "../components/UseCases";
 import HeroShowcase from "../components/HeroShowcase";
 import PromptHelperChips from "../components/PromptHelperChips";
 import WhatCanYouAskBanner from "../components/WhatCanYouAskBanner";
@@ -377,6 +378,8 @@ export default function Home() {
           <HeroShowcase />
         </div>
       </section>
+
+      <UseCases />
 
       <section id="studio" className="studio">
         <div className="sectionHeader">
