@@ -1,3 +1,4 @@
+import FreeCreditBanner from "../components/FreeCreditBanner";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { uploadImage } from "../lib/uploadImage";
@@ -307,6 +308,7 @@ export default function Home() {
 
   return (
     <main className="page">
+      <FreeCreditBanner />
       <section className="hero">
         <div className="glow glowOne" />
         <div className="glow glowTwo" />
