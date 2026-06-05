@@ -19,6 +19,7 @@ const presets = [
 const creditPackages = [
   { id: "basic_mxn", name: "10 créditos", price: "$99 MXN" },
   { id: "pro_mxn", name: "30 créditos", price: "$199 MXN" },
+  { id: "premium_mxn", name: "100 créditos", price: "$499 MXN" },
 ];
 
 export default function Home() {
@@ -496,15 +497,18 @@ export default function Home() {
           <FeaturesBanner />
 
 <h2>Compra paquetes en MXN</h2>
-          <p>1 crédito = 1 imagen generada.</p>
+          <p>✨ 1 crédito = 1 transformación profesional con IA.</p>
         </div>
 
         <div className="creditsGrid">
           {creditPackages.map((pack) => (
-            <div key={pack.id} className={`creditCard ${pack.id === "pro_mxn" ? "popularCard" : ""}`}>
+            <div key={pack.id} className={`creditCard ${pack.id === "pro_mxn" ? "popularCard" : ""} ${pack.id === "premium_mxn" ? "premiumCard" : ""}`}>
               <div className="creditIcon">{pack.id === "pro_mxn" ? "👑" : "✨"}</div>
               {pack.id === "pro_mxn" && <div className="popularBadge">🔥 MÁS POPULAR</div>}
+              {pack.id === "premium_mxn" && <div className="popularBadge valueBadge">👑 MEJOR VALOR</div>}
               <h3>{pack.name}</h3>
+              {pack.id === "pro_mxn" && <p className="savingsText">🔥 El favorito de nuestros clientes</p>}
+              {pack.id === "premium_mxn" && <p className="savingsText">🚀 Ideal para agencias, creadores y negocios</p>}
               <strong>{pack.price}</strong>
               <button onClick={() => buyCredits(pack.id)}>Comprar</button>
             </div>
@@ -1000,9 +1004,9 @@ export default function Home() {
         }
 
         
-        .creditsGrid {
+                .creditsGrid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(280px, 380px));
+          grid-template-columns: repeat(3, minmax(260px, 360px));
           justify-content: center;
           gap: 28px;
           margin-top: 42px;
