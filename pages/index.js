@@ -19,8 +19,8 @@ const presets = [
 const creditPackages = [
   { id: "basic_mxn", name: "10 créditos", price: "$99 MXN" },
   { id: "pro_mxn", name: "30 créditos", price: "$199 MXN" },
-  { id: "basic_usd", name: "10 credits", price: "$9 USD" },
-  { id: "pro_usd", name: "30 credits", price: "$19 USD" },
+  { id: "basic_usd", name: "", price: "" },
+  { id: "pro_usd", name: "", price: "" },
 ];
 
 export default function Home() {
@@ -497,13 +497,14 @@ export default function Home() {
           <span>Créditos</span>
           <FeaturesBanner />
 
-<h2>Compra paquetes en MXN o USD</h2>
+<h2>Compra paquetes en MXN</h2>
           <p>1 crédito = 1 imagen generada.</p>
         </div>
 
         <div className="creditsGrid">
           {creditPackages.map((pack) => (
             <div key={pack.id} className="creditCard">
+              {pack.id === "pro_mxn" && <div className="popularBadge">🔥 MÁS POPULAR</div>}
               <h3>{pack.name}</h3>
               <strong>{pack.price}</strong>
               <button onClick={() => buyCredits(pack.id)}>Comprar</button>
@@ -999,7 +1000,7 @@ export default function Home() {
           gap: 18px;
         }
 
-        .creditsGrid { grid-template-columns: repeat(4, 1fr); }
+        .creditsGrid { grid-template-columns: repeat(2, minmax(260px, 360px)); justify-content: center; }
         .historyGrid { grid-template-columns: repeat(3, 1fr); }
 
         .features {
@@ -1077,7 +1078,7 @@ export default function Home() {
             padding-top: 48px;
           }
         }
-      `}</style>
+      `}      </style>
     </main>
   );
 }
