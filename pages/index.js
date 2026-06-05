@@ -1,3 +1,4 @@
+import TrustBanner from "../components/TrustBanner";
 import FeaturesBanner from "../components/FeaturesBanner";
 import FreeCreditBanner from "../components/FreeCreditBanner";
 import { useEffect, useState } from "react";
@@ -495,6 +496,7 @@ export default function Home() {
         <div className="sectionHeader">
           <span>Créditos</span>
           <FeaturesBanner />
+      <TrustBanner />
 
 <h2>Compra paquetes en MXN</h2>
           <p>✨ 1 crédito = 1 transformación profesional con IA.</p>
