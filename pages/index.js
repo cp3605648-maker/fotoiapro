@@ -1,3 +1,4 @@
+import HeroShowcase from "../components/HeroShowcase";
 import PromptHelperChips from "../components/PromptHelperChips";
 import WhatCanYouAskBanner from "../components/WhatCanYouAskBanner";
 import SocialReadyBanner from "../components/SocialReadyBanner";
@@ -349,10 +350,9 @@ export default function Home() {
         <div className="heroGrid">
           <div className="heroText">
             <div className="badge">IA para retratos premium</div>
-            <h1>Transforma tus fotos en imágenes profesionales con IA.</h1>
+            <h1>Convierte cualquier foto en una imagen profesional lista para redes, ventas o marca personal.</h1>
             <p>
-              Sube una foto, elige un estilo, describe los cambios que quieres
-              y genera retratos listos para redes, branding y contenido viral.
+              Escribe lo que quieres: LinkedIn, Instagram, Shopify, YouTube, fondos, ropa, accesorios, iluminación o estilo premium. FotoIA.pro interpreta tu idea y preserva tu identidad.
             </p>
 
             <div className="heroActions">
@@ -367,15 +367,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="heroCard">
-            <div className="mockImage">
-              <div className="mockFace">AI</div>
-            </div>
-            <div className="mockInfo">
-              <strong>Retrato estilo Luxury</strong>
-              <span>Resultado premium generado con FotoIA Pro</span>
-            </div>
-          </div>
+          <HeroShowcase />
         </div>
       </section>
 
