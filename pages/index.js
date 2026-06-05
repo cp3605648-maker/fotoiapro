@@ -350,14 +350,21 @@ export default function Home() {
         <div className="heroGrid">
           <div className="heroText">
             <div className="badge">IA para retratos premium</div>
-            <h1>Convierte cualquier foto en una imagen profesional lista para redes, ventas o marca personal.</h1>
+            <h1>Sube una foto y describe tu idea. FotoIA Pro entiende tu petición, conserva tu identidad y genera imágenes listas para vender, publicar o promocionar tu marca.</h1>
             <p>
               Escribe lo que quieres: LinkedIn, Instagram, Shopify, YouTube, fondos, ropa, accesorios, iluminación o estilo premium. FotoIA.pro interpreta tu idea y preserva tu identidad.
             </p>
 
             <div className="heroActions">
-              <a href="#studio" className="primaryBtn">Crear imagen</a>
-              <a href="#credits" className="secondaryBtn">Comprar créditos</a>
+              <a href="#studio" className="primaryBtn">🚀 Probar gratis</a>
+              <a href="#credits" className="secondaryBtn">💎 Ver planes</a>
+            </div>
+
+            <div className="heroTrustBar">
+              <span>⭐ Más de 20 estilos</span>
+              <span>🔒 Conserva tu identidad</span>
+              <span>📱 Redes y ecommerce</span>
+              <span>⚡ Generación rápida</span>
             </div>
 
             <div className="trust">
