@@ -115,6 +115,9 @@ export default function Login() {
               ? "Entrar"
               : "Crear cuenta"}
           </button>
+          <a href="/forgot-password" style={{ display: "block", marginTop: "14px", color: "#22d3ee", textAlign: "center" }}>
+            ¿Olvidaste tu contraseña?
+          </a>
         </form>
 
         {message && <div className="message">{message}</div>}
