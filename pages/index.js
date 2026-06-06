@@ -451,17 +451,22 @@ export default function Home() {
             </div>
 
             <div className="promptBox">
-              <label>Describe tu idea con total libertad</label>
+              
               <div className="freePromptNotice">
                 <strong>✨ Describe tu idea con total libertad</strong>
-                <span>Puedes pedir fondos, ropa, ciudades, accesorios, poses, objetos, iluminación, estilos y formatos para redes sociales. Tu identidad siempre será preservada.</span>
+                <span>Pide fondos, ropa, ciudades, accesorios, poses, objetos, iluminación, estilos y formatos para redes sociales. Tu identidad siempre será preservada.</span>
               </div>
+
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Ejemplo: ponla de pie saludando con la mano derecha, cuerpo completo, postura natural, rostro idéntico, fondo premium e iluminación realista."
+                placeholder="Ejemplos:
+• Hazme una foto LinkedIn profesional con fondo ejecutivo.
+• Ponme en una playa con lentes negros.
+• Agrega un Lamborghini negro estilo luxury.
+• Hazme una miniatura para YouTube cinematográfica."
               />
-              <small>Puedes pedir ropa, fondo, lugar, colores, objetos, iluminación o estilo visual.</small>
+              <small>Escribe cualquier idea: fondos, ropa, objetos, plataformas, iluminación o estilo.</small>
             </div>
           </div>
 
@@ -511,7 +516,7 @@ export default function Home() {
 
       <section id="credits" className="creditsSection">
         <div className="sectionHeader">
-          <span>Créditos</span>
+          
           <FeaturesBanner />
       <TrustBanner />
       <WhatCanYouAskBanner />
