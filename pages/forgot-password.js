@@ -18,7 +18,7 @@ export default function ForgotPassword() {
     setLoading(false);
 
     if (error) {
-      setMsg(error.message);
+      setMsg("Error: " + error.message);
       return;
     }
 
