@@ -4,86 +4,109 @@ import { supabase } from "../lib/supabaseClient";
 export default function UpdatePassword() {
   const [password, setPassword] = useState("");
   const [ready, setReady] = useState(false);
-  const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    async function initRecovery() {
-      try {
-        const hash = window.location.hash;
-        const params = new URLSearchParams(hash.replace("#", ""));
-
-        const access_token = params.get("access_token");
-        const refresh_token = params.get("refresh_token");
-
-        if (access_token && refresh_token) {
-          await supabase.auth.setSession({
-            access_token,
-            refresh_token,
-          });
-        }
-
-        setReady(true);
-      } catch (err) {
-        console.error(err);
-        setMsg("El enlace no es válido o ya expiró. Solicita uno nuevo.");
-      }
+    async function checkUser() {
+      const { data } = await supabase.auth.getUser();
+      setReady(!!data?.user);
     }
 
-    initRecovery();
+    checkUser();
   }, []);
 
-  async function handleUpdate(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setMsg("");
+
+    const { data: userData } = await supabase.auth.getUser();
 
     const { error } = await supabase.auth.updateUser({
       password,
     });
 
-    setLoading(false);
-
     if (error) {
       setMsg(error.message);
+      setLoading(false);
       return;
     }
 
-    setMsg("Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
-    setPassword("");
+    try {
+      if (userData?.user?.email) {
+        await fetch("/api/password-updated-notify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userData.user.email,
+          }),
+        });
+      }
+    } catch (err) {
+      console.error("Error notificando cambio de contraseña:", err);
+    }
 
-    setTimeout(() => {
-      window.location.href = "/login";
-    }, 1800);
+    setMsg("Contraseña actualizada correctamente. Te enviamos un correo de confirmación.");
+    setLoading(false);
+    setPassword("");
   }
 
   return (
-    <main style={{ minHeight:"100vh", background:"#050816", color:"white", display:"grid", placeItems:"center", padding:"20px" }}>
-      <form onSubmit={handleUpdate} style={{ width:"100%", maxWidth:"420px", padding:"28px", borderRadius:"24px", background:"rgba(255,255,255,.06)", border:"1px solid rgba(255,255,255,.12)" }}>
-        <h1>Nueva contraseña</h1>
-        <p>Escribe tu nueva contraseña para recuperar tu cuenta.</p>
+    <main style={{ maxWidth: "460px", margin: "80px auto", padding: "24px" }}>
+      <h1>Crear nueva contraseña</h1>
 
-        <input
-          type="password"
-          required
-          minLength="6"
-          placeholder="Nueva contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={!ready || loading}
-          style={{ width:"100%", padding:"14px", borderRadius:"14px", margin:"16px 0", border:"1px solid rgba(255,255,255,.15)", background:"#111827", color:"white" }}
-        />
+      {!ready && (
+        <p>
+          Verificando enlace de recuperación...
+        </p>
+      )}
 
-        <button disabled={!ready || loading} style={{ width:"100%", padding:"14px", borderRadius:"999px", border:0, background:"linear-gradient(135deg,#7c3aed,#06b6d4)", color:"white", fontWeight:900 }}>
-          {loading ? "Actualizando..." : "Actualizar contraseña"}
-        </button>
+      {ready && (
+        <form onSubmit={handleSubmit}>
+          <input
+            type="password"
+            required
+            minLength="6"
+            placeholder="Nueva contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={!ready || loading}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: "14px",
+              margin: "16px 0",
+              border: "1px solid rgba(255,255,255,.15)",
+              background: "#111827",
+              color: "white",
+            }}
+          />
 
-        {msg && <p style={{ marginTop:"16px" }}>{msg}</p>}
+          <button
+            disabled={!ready || loading}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: "999px",
+              border: 0,
+              background: "linear-gradient(135deg,#7c3aed,#06b6d4)",
+              color: "white",
+              fontWeight: 900,
+            }}
+          >
+            {loading ? "Actualizando..." : "Actualizar contraseña"}
+          </button>
+        </form>
+      )}
 
-        <a href="/login" style={{ display:"block", marginTop:"18px", color:"#22d3ee" }}>
-          Ir a iniciar sesión
-        </a>
-      </form>
+      {msg && <p style={{ marginTop: "16px" }}>{msg}</p>}
+
+      <a href="/login" style={{ display: "block", marginTop: "18px", color: "#22d3ee" }}>
+        Ir a iniciar sesión
+      </a>
     </main>
   );
 }
