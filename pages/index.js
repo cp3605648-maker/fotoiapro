@@ -64,11 +64,6 @@ export default function Home() {
           .single();
 
         if (!profile) {
-          await supabase.from("profiles").insert({
-            id: currentUser.id,
-            email: currentUser.email,
-            credits: 0,
-          });
           setCredits(0);
         } else {
           setCredits(profile.credits || 0);
