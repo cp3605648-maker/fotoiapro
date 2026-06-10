@@ -27,33 +27,25 @@ export default function Login() {
           password,
         });
 
-      // FREE_TRIAL_CREDIT_ADDED
-      try {
-        const newUserId = data?.user?.id || authData?.user?.id || user?.id;
-        const newUserEmail = data?.user?.email || authData?.user?.email || email;
-
-        if (newUserId) {
-          await supabase.from("profiles").upsert({
-            id: newUserId,
-            email: newUserEmail,
-            credits: 1
-          });
-        }
-      } catch (trialError) {
-        console.error("No se pudo asignar crédito gratis:", trialError);
-      }
-
         if (error) throw error;
 
-        if (data?.user) {
-          await supabase.from("profiles").insert({
-            id: data.user.id,
-            email: data.user.email,
-            credits: 0,
-          });
+        if (data?.user?.id) {
+          const { data: existingProfile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", data.user.id)
+            .maybeSingle();
+
+          if (!existingProfile) {
+            await supabase.from("profiles").insert({
+              id: data.user.id,
+              email: data.user.email || email,
+              credits: 1,
+            });
+          }
         }
 
-        setMessage("Cuenta creada correctamente. Ya puedes usar FotoIA Pro.");
+        setMessage("Cuenta creada correctamente. Recibiste 1 crédito gratis de bienvenida.");
         router.push("/");
         return;
       }
