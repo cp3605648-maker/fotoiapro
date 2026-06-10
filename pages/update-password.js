@@ -35,7 +35,7 @@ export default function UpdatePassword() {
 
     try {
       if (userData?.user?.email) {
-        await fetch("/api/password-updated-notify", {
+        await fetch("https://www.fotoia.pro/api/password-updated-notify", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -50,19 +50,15 @@ export default function UpdatePassword() {
     }
 
     setMsg("Contraseña actualizada correctamente. Te enviamos un correo de confirmación.");
-    setLoading(false);
     setPassword("");
+    setLoading(false);
   }
 
   return (
     <main style={{ maxWidth: "460px", margin: "80px auto", padding: "24px" }}>
       <h1>Crear nueva contraseña</h1>
 
-      {!ready && (
-        <p>
-          Verificando enlace de recuperación...
-        </p>
-      )}
+      {!ready && <p>Verificando enlace de recuperación...</p>}
 
       {ready && (
         <form onSubmit={handleSubmit}>
@@ -73,7 +69,7 @@ export default function UpdatePassword() {
             placeholder="Nueva contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={!ready || loading}
+            disabled={loading}
             style={{
               width: "100%",
               padding: "14px",
@@ -86,7 +82,7 @@ export default function UpdatePassword() {
           />
 
           <button
-            disabled={!ready || loading}
+            disabled={loading}
             style={{
               width: "100%",
               padding: "14px",
