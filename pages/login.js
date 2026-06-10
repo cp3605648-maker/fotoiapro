@@ -22,28 +22,12 @@ export default function Login() {
       setError("");
 
       if (mode === "register") {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
         });
 
         if (error) throw error;
-
-        if (data?.user?.id) {
-          const { data: existingProfile } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("id", data.user.id)
-            .maybeSingle();
-
-          if (!existingProfile) {
-            await supabase.from("profiles").insert({
-              id: data.user.id,
-              email: data.user.email || email,
-              credits: 1,
-            });
-          }
-        }
 
         setMessage("Cuenta creada correctamente. Recibiste 1 crédito gratis de bienvenida.");
         router.push("/");
