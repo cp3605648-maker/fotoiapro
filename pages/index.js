@@ -253,6 +253,11 @@ export default function Home() {
       const newCredits =
         data.creditsLeft !== undefined ? data.creditsLeft : Math.max(credits - 1, 0);
 
+      await supabase
+        .from("profiles")
+        .update({ credits: newCredits })
+        .eq("id", user.id);
+
       setCredits(newCredits);
 
       const newItem = {
