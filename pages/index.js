@@ -358,7 +358,7 @@ export default function Home() {
 
             <div className="heroActions">
               <a href="#studio" className="primaryBtn">🚀 Probar gratis</a>
-              <a href="#planes" className="secondaryBtn">💎 Ver planes</a>
+              <button type="button" className="secondaryBtn" onClick={() => document.getElementById("planes")?.scrollIntoView({ behavior: "smooth", block: "start" })}>💎 Ver planes</button>
             </div>
 
             <div className="heroTrustBar">
@@ -527,7 +527,7 @@ export default function Home() {
           <p>✨ 1 crédito = 1 transformación profesional con IA.</p>
         </div>
 
-        <div className="creditsGrid">
+        <div id="planes" className="creditsGrid">
           {creditPackages.map((pack) => (
             <div key={pack.id} className={`creditCard ${pack.id === "pro_mxn" ? "popularCard" : ""} ${pack.id === "premium_mxn" ? "premiumCard" : ""}`}>
               <div className="creditIcon">{pack.id === "pro_mxn" ? "👑" : "✨"}</div>
