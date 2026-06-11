@@ -358,7 +358,7 @@ export default function Home() {
 
             <div className="heroActions">
               <a href="#studio" className="primaryBtn">🚀 Probar gratis</a>
-              <a href="#credits" className="secondaryBtn">💎 Ver planes</a>
+              <a href="#planes" className="secondaryBtn">💎 Ver planes</a>
             </div>
 
             <div className="heroTrustBar">

@@ -5,6 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const packages = {
   basic_mxn: { credits: 10, price: 9900, currency: "mxn", name: "Pack 10 Créditos FotoIA Pro" },
   pro_mxn: { credits: 30, price: 19900, currency: "mxn", name: "Pack 30 Créditos FotoIA Pro" },
+  premium_mxn: { credits: 100, price: 49900, currency: "mxn", name: "Pack 100 Créditos FotoIA Pro" },
   basic_usd: { credits: 10, price: 900, currency: "usd", name: "Pack 10 Credits FotoIA Pro" },
   pro_usd: { credits: 30, price: 1900, currency: "usd", name: "Pack 30 Credits FotoIA Pro" },
 };
