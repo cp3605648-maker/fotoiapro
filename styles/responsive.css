@@ -1,0 +1,117 @@
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+  main,
+  section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  h1 {
+    font-size: clamp(34px, 8vw, 58px) !important;
+    line-height: 1.05 !important;
+  }
+
+  h2 {
+    font-size: clamp(26px, 6vw, 42px) !important;
+  }
+
+  p {
+    font-size: 16px !important;
+  }
+
+  .hero,
+  .heroGrid,
+  .studioGrid,
+  .pricingGrid,
+  .plansGrid,
+  .creditsGrid,
+  .featuresGrid,
+  .useCasesGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .card,
+  .studioCard,
+  .pricingCard,
+  .planCard,
+  .creditCard {
+    width: 100% !important;
+  }
+}
+
+/* CELULAR */
+@media (max-width: 600px) {
+  main,
+  section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  h1 {
+    font-size: clamp(32px, 10vw, 46px) !important;
+  }
+
+  h2 {
+    font-size: clamp(24px, 8vw, 34px) !important;
+  }
+
+  button,
+  a {
+    max-width: 100%;
+  }
+
+  .primaryBtn,
+  .secondaryBtn,
+  .generateBtn,
+  .buyBtn,
+  .ctaButton {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 15px !important;
+    padding: 14px 18px !important;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+    width: 100% !important;
+  }
+
+  textarea {
+    min-height: 130px !important;
+  }
+
+  .heroActions,
+  .ctaRow,
+  .buttonRow,
+  .actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .preview,
+  .imagePreview,
+  .resultImage,
+  .uploadBox {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
