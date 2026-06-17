@@ -12,6 +12,7 @@ import { supabase } from "../lib/supabaseClient";
 import { uploadImage } from "../lib/uploadImage";
 
 const presets = [
+  { id: "with_person", name: "Foto con otra persona", desc: "Usa una referencia para aparecer junto a alguien.", emoji: "👥" },
   { id: "pose", name: "Pose / Movimiento", desc: "Cambia postura, acción o encuadre.", emoji: "🕺" },
   { id: "fashion", name: "Outfit / Moda", desc: "Cambia ropa, estilo y look.", emoji: "👗" },
   { id: "location", name: "Lugar / Fondo", desc: "Cambia escenario o ciudad.", emoji: "🌆" },
