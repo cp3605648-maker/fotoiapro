@@ -297,11 +297,12 @@ export default function Home() {
     }
 
     try {
+      setLoading(true);
       setError("");
       setNotice("");
 
       trackEvent("InitiateCheckout", {
-        package_id: selectedPackage,
+        package_id: packageType,
       });
 
       const res = await fetch("/api/checkout", {
@@ -319,9 +320,14 @@ export default function Home() {
         throw new Error(data?.details || data?.error || "No se pudo iniciar el pago.");
       }
 
-      if (data?.url) window.location.href = data.url;
+      if (!data?.url) {
+        throw new Error("Stripe no devolvió URL de pago.");
+      }
+
+      window.location.assign(data.url);
     } catch (err) {
       setError(err.message || "Error al conectar con Stripe.");
+      setLoading(false);
     }
   };
 
