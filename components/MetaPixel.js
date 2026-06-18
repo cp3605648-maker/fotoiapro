@@ -20,7 +20,8 @@ export default function MetaPixel() {
           t.src=v;
           s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s);
-          }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+          }(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
 
           fbq('init', '${PIXEL_ID}');
           fbq('track', 'PageView');
@@ -33,6 +34,7 @@ export default function MetaPixel() {
           width="1"
           style={{ display: "none" }}
           src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`}
+          alt=""
         />
       </noscript>
     </>
