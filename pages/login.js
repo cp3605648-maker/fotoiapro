@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
+import { trackEvent } from "../lib/tracking";
 
 export default function Login() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function Login() {
 
         if (error) throw error;
 
+        trackEvent("Lead", { method: "email_register" });
         setMessage("Cuenta creada correctamente. Recibiste 1 crédito gratis de bienvenida.");
         router.push("/");
         return;

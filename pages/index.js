@@ -10,6 +10,7 @@ import FreeCreditBanner from "../components/FreeCreditBanner";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { uploadImage } from "../lib/uploadImage";
+import { trackEvent } from "../lib/tracking";
 
 const presets = [
   { id: "with_person", name: "Foto con otra persona", desc: "Usa una referencia para aparecer junto a alguien.", emoji: "👥" },
@@ -110,6 +111,11 @@ export default function Home() {
           }
 
           setCredits(data.credits);
+          trackEvent("Purchase", {
+            currency: "MXN",
+            value: data?.amount ? data.amount / 100 : undefined,
+            credits: data?.addedCredits || data?.creditsAdded || undefined,
+          });
           setNotice("Pago exitoso. Tus créditos fueron agregados.");
           window.history.replaceState({}, "", window.location.pathname);
         } catch (err) {
@@ -259,6 +265,11 @@ export default function Home() {
         .update({ credits: newCredits })
         .eq("id", user.id);
 
+      trackEvent("GenerateImage", {
+        preset,
+        credits_left: newCredits,
+      });
+
       setCredits(newCredits);
 
       const newItem = {
@@ -288,6 +299,10 @@ export default function Home() {
     try {
       setError("");
       setNotice("");
+
+      trackEvent("InitiateCheckout", {
+        package_id: selectedPackage,
+      });
 
       const res = await fetch("/api/checkout", {
         method: "POST",
