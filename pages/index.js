@@ -50,6 +50,13 @@ export default function Home() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
+    trackEvent("ViewContent", {
+      content_name: "FotoIA Pro Home",
+      content_category: "AI Photo Editing",
+    });
+  }, []);
+
+  useEffect(() => {
     const loadUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user || null;
