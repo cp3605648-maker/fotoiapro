@@ -1,4 +1,4 @@
-const SITE_URL = "https://www.fotoia.pro";
+const SITE_URL = "https://fotoia.pro";
 
 function generateSitemap() {
   const routes = [
