@@ -357,3 +357,98 @@ export const seoPages = [
     ],
   }),
 ];
+
+
+const extraSeoPages = [
+  ["foto-cv", "Foto para CV con IA", "foto para CV", "profesional"],
+  ["foto-profesional", "Foto Profesional con IA", "foto profesional", "profesional"],
+  ["foto-pasaporte", "Foto para Pasaporte con IA", "foto para pasaporte", "profesional"],
+  ["foto-curriculum", "Foto para Currículum con IA", "foto para currículum", "profesional"],
+  ["foto-ejecutiva", "Foto Ejecutiva con IA", "foto ejecutiva", "profesional"],
+  ["foto-perfil-profesional", "Foto de Perfil Profesional con IA", "foto de perfil profesional", "profesional"],
+  ["foto-empresa", "Foto para Empresa con IA", "foto para empresa", "profesional"],
+  ["foto-marca-personal", "Foto para Marca Personal con IA", "foto para marca personal", "profesional"],
+
+  ["foto-facebook", "Foto para Facebook con IA", "foto para Facebook", "redes-sociales"],
+  ["foto-x-twitter", "Foto para X Twitter con IA", "foto para X Twitter", "redes-sociales"],
+  ["foto-pinterest", "Foto para Pinterest con IA", "foto para Pinterest", "redes-sociales"],
+  ["foto-twitch", "Foto para Twitch con IA", "foto para Twitch", "redes-sociales"],
+  ["foto-discord", "Foto para Discord con IA", "foto para Discord", "redes-sociales"],
+  ["foto-telegram", "Foto para Telegram con IA", "foto para Telegram", "redes-sociales"],
+  ["foto-perfil", "Foto de Perfil con IA", "foto de perfil", "redes-sociales"],
+  ["foto-redes-sociales", "Foto para Redes Sociales con IA", "foto para redes sociales", "redes-sociales"],
+
+  ["foto-producto", "Foto de Producto con IA", "foto de producto", "ecommerce"],
+  ["foto-amazon", "Foto para Amazon con IA", "foto para Amazon", "ecommerce"],
+  ["foto-mercado-libre", "Foto para Mercado Libre con IA", "foto para Mercado Libre", "ecommerce"],
+  ["foto-etsy", "Foto para Etsy con IA", "foto para Etsy", "ecommerce"],
+  ["foto-catalogo", "Foto para Catálogo con IA", "foto para catálogo", "ecommerce"],
+  ["foto-ecommerce", "Foto Ecommerce con IA", "foto ecommerce", "ecommerce"],
+  ["foto-restaurante", "Foto para Restaurante con IA", "foto para restaurante", "ecommerce"],
+  ["foto-comida", "Foto de Comida con IA", "foto de comida", "ecommerce"],
+
+  ["foto-cinematica", "Foto Cinemática con IA", "foto cinematográfica", "estilos"],
+  ["foto-cyberpunk", "Foto Cyberpunk con IA", "foto cyberpunk", "estilos"],
+  ["foto-editorial", "Foto Editorial con IA", "foto editorial", "estilos"],
+  ["foto-revista", "Foto para Revista con IA", "foto para revista", "estilos"],
+  ["foto-vintage", "Foto Vintage con IA", "foto vintage", "estilos"],
+  ["foto-futurista", "Foto Futurista con IA", "foto futurista", "estilos"],
+  ["foto-minimalista", "Foto Minimalista con IA", "foto minimalista", "estilos"],
+  ["foto-artistica", "Foto Artística con IA", "foto artística", "estilos"],
+
+  ["cambiar-fondo-foto", "Cambiar Fondo de Foto con IA", "cambiar fondo de foto", "lugares"],
+  ["foto-oficina", "Foto en Oficina con IA", "foto en oficina", "lugares"],
+  ["foto-ciudad", "Foto en Ciudad con IA", "foto en ciudad", "lugares"],
+  ["foto-paris", "Foto en París con IA", "foto en París", "lugares"],
+  ["foto-nueva-york", "Foto en Nueva York con IA", "foto en Nueva York", "lugares"],
+  ["foto-tokio", "Foto en Tokio con IA", "foto en Tokio", "lugares"],
+  ["foto-montana", "Foto en Montaña con IA", "foto en montaña", "lugares"],
+  ["foto-hotel", "Foto en Hotel con IA", "foto en hotel", "lugares"],
+
+  ["cambiar-ropa-con-ia", "Cambiar Ropa con IA", "cambiar ropa con IA", "estilos"],
+  ["foto-con-traje", "Foto con Traje con IA", "foto con traje", "profesional"],
+  ["foto-vestido", "Foto con Vestido con IA", "foto con vestido", "estilos"],
+  ["foto-casual", "Foto Casual con IA", "foto casual", "estilos"],
+  ["foto-deportiva", "Foto Deportiva con IA", "foto deportiva", "estilos"],
+
+  ["mejorar-calidad-foto", "Mejorar Calidad de Foto con IA", "mejorar calidad de foto", "estilos"],
+  ["mejorar-selfie", "Mejorar Selfie con IA", "mejorar selfie", "redes-sociales"],
+  ["quitar-fondo-foto", "Quitar Fondo de Foto con IA", "quitar fondo de foto", "ecommerce"],
+  ["agregar-objetos-foto", "Agregar Objetos a una Foto con IA", "agregar objetos a una foto", "estilos"],
+  ["foto-con-otra-persona", "Foto con Otra Persona con IA", "foto con otra persona", "estilos"],
+];
+
+extraSeoPages.forEach(([slug, titleBase, keyword, category]) => {
+  if (!seoPages.some((page) => page.slug === slug)) {
+    seoPages.push(
+      createSeoPage({
+        slug,
+        name: titleBase,
+        title: `${titleBase} | FotoIA Pro`,
+        description: `Crea ${keyword} usando inteligencia artificial. Mejora fondo, iluminación, estilo y calidad visual con FotoIA Pro.`,
+        h1: `${titleBase}`,
+        subtitle: `Transforma tus imágenes para crear ${keyword} de forma rápida, profesional y sencilla con inteligencia artificial.`,
+        badge: "Edición de fotos con IA",
+        cta: `Crear ${keyword}`,
+        keyword,
+        category,
+        benefits: [
+          { title: "Resultado profesional", text: "Mejora la apariencia de tus imágenes con inteligencia artificial." },
+          { title: "Fácil de usar", text: "Solo sube tu foto y describe el resultado que quieres." },
+          { title: "Listo para usar", text: "Ideal para redes sociales, perfiles, negocios, ecommerce o marca personal." },
+        ],
+        useCases: [
+          { title: "Perfil digital", text: "Crea imágenes para redes sociales y plataformas profesionales." },
+          { title: "Contenido visual", text: "Genera fotos más atractivas para publicaciones o anuncios." },
+          { title: "Imagen profesional", text: "Mejora fondo, iluminación, ropa, estilo o calidad." },
+        ],
+        prompts: [
+          `Convierte esta imagen en ${keyword}, conserva los rasgos principales y mejora la iluminación.`,
+          `Crea ${keyword} con estilo profesional, fondo limpio y apariencia realista.`,
+          `Mejora esta foto para lograr ${keyword} con alta calidad visual.`,
+        ],
+      })
+    );
+  }
+});
+
