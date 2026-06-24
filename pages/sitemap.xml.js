@@ -1,4 +1,6 @@
 import { seoPages } from "../data/seoPages";
+import { blogPosts } from "../data/blogPosts";
+import { promptLibrary } from "../data/promptLibrary";
 
 const SITE_URL = "https://www.fotoia.pro";
 
@@ -11,16 +13,16 @@ function generateSitemap() {
     "/terms",
     "/refunds",
     ...seoPages.map((page) => `/${page.slug}`),
+    ...blogPosts.map((post) => `/blog/${post.slug}`),
+    ...promptLibrary.map((page) => `/prompts/${page.slug}`),
   ];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${routes
-  .map((route) => {
-    return `  <url>
+  .map((route) => `  <url>
     <loc>${SITE_URL}${route}</loc>
-  </url>`;
-  })
+  </url>`)
   .join("\n")}
 </urlset>`;
 }
@@ -30,9 +32,7 @@ export async function getServerSideProps({ res }) {
   res.write(generateSitemap());
   res.end();
 
-  return {
-    props: {},
-  };
+  return { props: {} };
 }
 
 export default function Sitemap() {
