@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import SeoRelatedPages from "./SeoRelatedPages";
 
 export default function SeoLandingPage({
   title,
@@ -14,6 +15,7 @@ export default function SeoLandingPage({
   useCases = [],
   prompts = [],
   faqs = [],
+  relatedPages = [],
 }) {
   const faqSchema = {
     "@context": "https://schema.org",
@@ -151,6 +153,8 @@ export default function SeoLandingPage({
             ))}
           </section>
         )}
+
+        <SeoRelatedPages pages={relatedPages} />
 
         <section className="seoCta">
           <h2>Empieza a crear imágenes profesionales con FotoIA Pro</h2>
