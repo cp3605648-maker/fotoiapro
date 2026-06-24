@@ -1,3 +1,5 @@
+import { seoPages } from "../data/seoPages";
+
 const SITE_URL = "https://www.fotoia.pro";
 
 function generateSitemap() {
@@ -8,7 +10,7 @@ function generateSitemap() {
     "/privacy",
     "/terms",
     "/refunds",
-    "/foto-linkedin",
+    ...seoPages.map((page) => `/${page.slug}`),
   ];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
