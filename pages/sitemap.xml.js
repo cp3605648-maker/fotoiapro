@@ -8,6 +8,7 @@ function generateSitemap() {
     "/privacy",
     "/terms",
     "/refunds",
+    "/foto-linkedin",
   ];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
