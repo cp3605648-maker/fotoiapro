@@ -1,11 +1,3 @@
-import UseCases from "../components/UseCases";
-import HeroShowcase from "../components/HeroShowcase";
-import PromptHelperChips from "../components/PromptHelperChips";
-import WhatCanYouAskBanner from "../components/WhatCanYouAskBanner";
-import SocialReadyBanner from "../components/SocialReadyBanner";
-import PremiumStylesGrid from "../components/PremiumStylesGrid";
-import TrustBanner from "../components/TrustBanner";
-import FeaturesBanner from "../components/FeaturesBanner";
 import FreeCreditBanner from "../components/FreeCreditBanner";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -13,17 +5,42 @@ import { uploadImage } from "../lib/uploadImage";
 import { trackEvent } from "../lib/tracking";
 
 const presets = [
-  { id: "with_person", name: "Foto con otra persona", desc: "Usa una referencia para aparecer junto a alguien.", emoji: "👥" },
-  { id: "pose", name: "Pose / Movimiento", desc: "Cambia postura, acción o encuadre.", emoji: "🕺" },
-  { id: "fashion", name: "Outfit / Moda", desc: "Cambia ropa, estilo y look.", emoji: "👗" },
-  { id: "location", name: "Lugar / Fondo", desc: "Cambia escenario o ciudad.", emoji: "🌆" },
-  { id: "luxury", name: "Luxury Branding", desc: "Look premium y elegante.", emoji: "✨" },
-  { id: "magazine", name: "Portada Revista", desc: "Estilo editorial profesional.", emoji: "📰" },
-  { id: "object", name: "Agregar Objeto", desc: "Añade autos, accesorios u objetos.", emoji: "🏎️" },
-  { id: "cinematic", name: "Cinemático", desc: "Luces, drama y calidad película.", emoji: "🎬" },
-  { id: "anime", name: "Anime", desc: "Transformación artística anime.", emoji: "🌸" },
-  { id: "cyberpunk", name: "Cyberpunk", desc: "Neón, futurista y visual.", emoji: "🌃" },
-  { id: "social", name: "Redes Sociales", desc: "Instagram, TikTok, WhatsApp, YouTube, LinkedIn.", emoji: "📱" },
+  {
+    id: "menu",
+    name: "Menú",
+    desc: "Presenta tus productos de forma atractiva para vender más.",
+    emoji: "🍔",
+  },
+  {
+    id: "ad",
+    name: "Anuncio",
+    desc: "Crea publicidad profesional para atraer nuevos clientes.",
+    emoji: "📢",
+  },
+  {
+    id: "flyer",
+    name: "Flyer",
+    desc: "Crea una pieza promocional lista para compartir.",
+    emoji: "📰",
+  },
+  {
+    id: "social",
+    name: "Redes sociales",
+    desc: "Contenido visual para Instagram, Facebook y TikTok.",
+    emoji: "📱",
+  },
+  {
+    id: "catalog",
+    name: "Catálogo",
+    desc: "Convierte tus fotos de producto en imágenes comerciales.",
+    emoji: "🛍️",
+  },
+  {
+    id: "promotion",
+    name: "Promoción",
+    desc: "Destaca ofertas, descuentos y lanzamientos.",
+    emoji: "🔥",
+  },
 ];
 
 const creditPackages = [
@@ -40,7 +57,7 @@ export default function Home() {
   const [imageMeta, setImageMeta] = useState(null);
   const [referenceImage, setReferenceImage] = useState(null);
   const [referencePreview, setReferencePreview] = useState(null);
-  const [preset, setPreset] = useState("ceo");
+  const [preset, setPreset] = useState("menu");
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState(null);
@@ -357,9 +374,8 @@ export default function Home() {
           </div>
 
           <div className="navLinks">
-            <a href="/terms">Términos</a>
-            <a href="/privacy">Privacidad</a>
-            <a href="/refunds">Reembolsos</a>
+            <a href="#studio">Crear publicidad</a>
+            <a href="#planes">Precios</a>
             <a href="/contact">Contacto</a>
           </div>
 
@@ -379,42 +395,86 @@ export default function Home() {
 
         <div className="heroGrid">
           <div className="heroText">
-            <div className="badge">IA para retratos premium</div>
-            <h1>Sube una foto y describe tu idea. FotoIA Pro entiende tu petición, conserva tu identidad y genera imágenes listas para vender, publicar o promocionar tu marca.</h1>
+            <div className="badge">🚀 Marketing visual con IA para negocios</div>
+
+            <h1>
+              Convierte las fotos de tus productos en publicidad que vende.
+            </h1>
+
             <p>
-              Escribe lo que quieres: LinkedIn, Instagram, Shopify, YouTube, fondos, ropa, accesorios, iluminación o estilo premium. FotoIA.pro interpreta tu idea y preserva tu identidad.
+              Sube una foto de tu producto y crea menús, anuncios, flyers,
+              promociones, catálogos y contenido para redes sociales en minutos.
             </p>
 
             <div className="heroActions">
-              <a href="#studio" className="primaryBtn">🚀 Probar gratis</a>
-              <button type="button" className="secondaryBtn" onClick={() => document.getElementById("planes")?.scrollIntoView({ behavior: "smooth", block: "start" })}>💎 Ver planes</button>
+              <a href="#studio" className="primaryBtn">🚀 Crear mi publicidad</a>
+
+              <button
+                type="button"
+                className="secondaryBtn"
+                onClick={() =>
+                  document.getElementById("planes")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                  })
+                }
+              >
+                💎 Ver precios
+              </button>
             </div>
 
             <div className="heroTrustBar">
-              <span>⭐ Más de 20 estilos</span>
-              <span>🔒 Conserva tu identidad</span>
-              <span>📱 Redes y ecommerce</span>
+              <span>📸 Una foto de producto</span>
+              <span>🤖 IA para marketing</span>
+              <span>📱 Lista para redes</span>
               <span>⚡ Generación rápida</span>
             </div>
 
             <div className="trust">
-              <span>⚡ Generación rápida</span>
-              <span>🔒 Créditos persistentes</span>
-              <span>🎨 Presets premium</span>
+              <span>💰 Diseñado para vender</span>
+              <span>🔒 Créditos seguros</span>
+              <span>🇲🇽 Precios en MXN</span>
             </div>
           </div>
 
-          <HeroShowcase />
+          <div className="heroProductCard">
+            <div className="heroProductHeader">
+              <span>ANTES</span>
+              <span>→</span>
+              <span>PUBLICIDAD IA</span>
+            </div>
+
+            <div className="productMockup">
+              <div className="productMockupImage">
+                <span>🍔</span>
+              </div>
+
+              <div className="productMockupContent">
+                <small>PUBLICIDAD PARA TU NEGOCIO</small>
+                <h3>Tu producto puede verse así.</h3>
+                <p>
+                  Imagen profesional para menú, redes sociales,
+                  promociones o anuncios.
+                </p>
+                <div className="mockupTags">
+                  <span>Instagram</span>
+                  <span>WhatsApp</span>
+                  <span>Menú</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-
-      <UseCases />
 
       <section id="studio" className="studio">
         <div className="sectionHeader">
           <span>Estudio IA</span>
-          <h2>Crea tu transformación</h2>
-          <p>Sube una foto, elige qué quieres transformar y describe ropa, fondo, lugar, color, objeto o estilo.</p>
+          <h2>Crea publicidad para tu negocio</h2>
+          <p>
+            Sube la foto de tu producto, elige qué quieres crear y describe
+            cómo quieres que se vea tu publicidad.
+          </p>
         </div>
 
         {notice && <p className="notice">{notice}</p>}
@@ -422,7 +482,7 @@ export default function Home() {
         <div className="studioGrid">
           <div className="panel">
             <div className="panelTop">
-              <h3>1. Sube tu foto</h3>
+              <h3>1. Sube tu producto</h3>
               <span>{credits} créditos</span>
             </div>
 
@@ -431,7 +491,7 @@ export default function Home() {
                 <img src={preview} alt="Vista previa" />
               ) : (
                 <div>
-                  <strong>Haz clic para subir una imagen</strong>
+                  <strong>Haz clic para subir la foto de tu producto</strong>
                   <small>JPG, PNG o WEBP · máximo 5MB</small>
                 </div>
               )}
@@ -440,7 +500,10 @@ export default function Home() {
 
             <div className="referenceTitle">
               <strong>Referencia visual opcional</strong>
-              <small>Sube ropa, fondo, objeto, estilo o escena de ejemplo.</small>
+              <small>
+                Sube un ejemplo de diseño, ambiente, estilo o publicidad que
+                quieras tomar como inspiración.
+              </small>
             </div>
 
             <label className="uploadBox referenceBox">
@@ -449,21 +512,23 @@ export default function Home() {
               ) : (
                 <div>
                   <strong>Subir referencia</strong>
-                  <small>Ejemplo: outfit, auto, fondo, actor, objeto o estilo.</small>
+                  <small>
+                    Ejemplo: un anuncio, menú, fondo, composición o estilo visual.
+                  </small>
                 </div>
               )}
               <input type="file" accept="image/*" onChange={handleReferenceImage} />
             </label>
 
             <button onClick={generateImage} disabled={loading} className="generateBtn">
-              {loading ? "Generando imagen..." : "Generar con IA"}
+              {loading ? "Creando publicidad..." : "Crear publicidad con IA"}
             </button>
 
             {error && <p className="error">{error}</p>}
           </div>
 
           <div className="panel">
-            <h3>2. Elige qué transformar</h3>
+            <h3>2. ¿Qué quieres crear?</h3>
 
             <div className="presetGrid">
               {presets.map((item) => (
@@ -482,31 +547,37 @@ export default function Home() {
             <div className="promptBox">
               
               <div className="freePromptNotice">
-                <strong>✨ Describe tu idea con total libertad</strong>
-                <span>Pide fondos, ropa, ciudades, accesorios, poses, objetos, iluminación, estilos y formatos para redes sociales. Tu identidad siempre será preservada.</span>
+                <strong>✨ Describe tu publicidad</strong>
+                <span>
+                  Indica qué quieres comunicar, qué estilo buscas, colores,
+                  oferta, texto, ambiente, público y plataforma.
+                </span>
               </div>
 
               <textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 placeholder="Ejemplos:
-• Hazme una foto LinkedIn profesional con fondo ejecutivo.
-• Ponme en una playa con lentes negros.
-• Agrega un Lamborghini negro estilo luxury.
-• Hazme una miniatura para YouTube cinematográfica."
+• Crea un anuncio moderno para Instagram con este producto.
+• Haz un menú elegante para un restaurante.
+• Crea una promoción de 20% de descuento con estilo llamativo.
+• Presenta este producto sobre un fondo premium para redes sociales."
               />
-              <small>Escribe cualquier idea: fondos, ropa, objetos, plataformas, iluminación o estilo.</small>
+              <small>
+                Describe tu objetivo, oferta, estilo, formato o mensaje.
+                La IA utilizará tu indicación para crear la pieza visual.
+              </small>
             </div>
           </div>
 
           <div className="panel">
-            <h3>3. Resultado</h3>
+            <h3>3. Tu publicidad</h3>
 
             <div className="resultBox">
               {loading ? (
                 <div className="loading">
                   <div className="spinner" />
-                  <p>Creando tu imagen premium...</p>
+                  <p>Creando tu publicidad con IA...</p>
                 </div>
               ) : output ? (
                 <div className="beforeAfter">
@@ -522,21 +593,21 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="emptyResult">
-                  <span>✨</span>
+                  <span>📢</span>
                   <div className="emptyResultText">
-                  <h3>✨ Resultado profesional generado por IA</h3>
-                  <p>✔ Conserva tu identidad</p>
-                  <p>✔ Optimizado para redes sociales</p>
-                  <p>✔ Calidad premium</p>
-                  <p>✔ Descarga inmediata</p>
-                </div>
+                    <h3>Tu publicidad aparecerá aquí</h3>
+                    <p>✔ Imagen profesional para tu negocio</p>
+                    <p>✔ Diseñada para vender y comunicar</p>
+                    <p>✔ Lista para redes sociales</p>
+                    <p>✔ Descarga inmediata</p>
+                  </div>
                 </div>
               )}
             </div>
 
             {output && (
               <a href={output} download className="downloadBtn">
-                Descargar imagen
+                Descargar publicidad
               </a>
             )}
           </div>
@@ -546,14 +617,10 @@ export default function Home() {
       <section id="credits" className="creditsSection">
         <div className="sectionHeader">
           
-          <FeaturesBanner />
-      <TrustBanner />
-      <WhatCanYouAskBanner />
-      <PremiumStylesGrid />
-      <SocialReadyBanner />
-
-<h2>Compra paquetes en MXN</h2>
-          <p>✨ 1 crédito = 1 transformación profesional con IA.</p>
+<h2>Publicidad profesional sin mensualidad</h2>
+          <p>
+            Compra créditos cuando los necesites. 1 crédito = 1 generación con IA.
+          </p>
         </div>
 
         <div id="planes" className="creditsGrid">
@@ -574,13 +641,13 @@ export default function Home() {
 
       <section className="historySection">
         <div className="sectionHeader">
-          <span>Galería</span>
-          <h2>Últimas imágenes generadas</h2>
+          <span>Tu biblioteca</span>
+          <h2>Últimas publicidades creadas</h2>
           <p>Historial temporal guardado en este dispositivo.</p>
         </div>
 
         {history.length === 0 ? (
-          <p className="emptyHistory">Aún no has generado imágenes.</p>
+          <p className="emptyHistory">Aún no has creado ninguna publicidad.</p>
         ) : (
           <>
             <div className="historyGrid">
@@ -591,7 +658,7 @@ export default function Home() {
                     <strong>{item.preset}</strong>
                     <small>{item.createdAt}</small>
                   </div>
-                  <a href={item.image} download>Descargar</a>
+                  <a href={item.image} download>Descargar publicidad</a>
                 </div>
               ))}
             </div>
@@ -605,21 +672,27 @@ export default function Home() {
 
       <section className="features">
         <div className="feature">
-          <span>💼</span>
-          <h3>Profesional</h3>
-          <p>Ideal para LinkedIn, CV, marca personal y perfiles de negocio.</p>
+          <span>🍔</span>
+          <h3>Restaurantes</h3>
+          <p>
+            Crea menús, promociones y contenido visual para atraer clientes.
+          </p>
         </div>
 
         <div className="feature">
-          <span>🎬</span>
-          <h3>Cinemático</h3>
-          <p>Presets visuales con estética moderna, viral y premium.</p>
+          <span>🛍️</span>
+          <h3>Tiendas y ecommerce</h3>
+          <p>
+            Convierte fotos sencillas de productos en imágenes comerciales.
+          </p>
         </div>
 
         <div className="feature">
-          <span>⚡</span>
-          <h3>Simple</h3>
-          <p>Sin edición compleja. Sube, elige estilo, describe y genera.</p>
+          <span>📱</span>
+          <h3>Negocios locales</h3>
+          <p>
+            Crea anuncios y contenido para Instagram, Facebook y WhatsApp.
+          </p>
         </div>
       </section>
 
@@ -716,6 +789,98 @@ export default function Home() {
           gap: 56px;
           align-items: center;
         }
+
+        .heroProductCard {
+          position: relative;
+          padding: 18px;
+          border-radius: 32px;
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.12);
+          box-shadow: 0 30px 90px rgba(0,0,0,0.4);
+          backdrop-filter: blur(18px);
+        }
+
+        .heroProductHeader {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 14px;
+          padding: 0 6px;
+          color: rgba(255,255,255,0.55);
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+        }
+
+        .productMockup {
+          overflow: hidden;
+          border-radius: 24px;
+          background: #111827;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .productMockupImage {
+          min-height: 330px;
+          display: grid;
+          place-items: center;
+          background:
+            radial-gradient(circle at 50% 35%, rgba(245,158,11,0.5), transparent 28%),
+            radial-gradient(circle at 50% 70%, rgba(239,68,68,0.42), transparent 35%),
+            linear-gradient(145deg, #1f2937, #111827);
+        }
+
+        .productMockupImage span {
+          width: 150px;
+          height: 150px;
+          display: grid;
+          place-items: center;
+          border-radius: 42px;
+          font-size: 82px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.18);
+          box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+        }
+
+        .productMockupContent {
+          padding: 22px;
+        }
+
+        .productMockupContent small {
+          color: #a78bfa;
+          font-weight: 900;
+          letter-spacing: 0.08em;
+        }
+
+        .productMockupContent h3 {
+          margin: 8px 0;
+          font-size: 28px;
+          letter-spacing: -0.04em;
+        }
+
+        .productMockupContent p {
+          margin: 0;
+          color: rgba(255,255,255,0.58);
+          line-height: 1.5;
+        }
+
+        .mockupTags {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 16px;
+        }
+
+        .mockupTags span {
+          padding: 7px 10px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.75);
+          font-size: 12px;
+          font-weight: 700;
+        }
+
 
         .badge {
           display: inline-flex;
@@ -1140,9 +1305,24 @@ export default function Home() {
             grid-template-columns: 1fr;
           }
 
-          .nav { align-items: flex-start; flex-wrap: wrap; }
-          .navLinks { display: none; }
-          .mockImage { height: 360px; }
+          .nav {
+            align-items: flex-start;
+            flex-wrap: wrap;
+          }
+
+          .navLinks {
+            display: none;
+          }
+
+          .mockImage {
+            height: 360px;
+          }
+
+          .heroProductCard {
+            max-width: 720px;
+            margin: 0 auto;
+            width: 100%;
+          }
         }
 
         @media (max-width: 620px) {
