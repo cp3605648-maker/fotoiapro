@@ -8,37 +8,37 @@ const presets = [
   {
     id: "menu",
     name: "Menú",
-    desc: "Presenta tus productos de forma atractiva para vender más.",
-    emoji: "🍔",
+    desc: "Diseño gastronómico profesional para restaurantes, cafeterías y negocios de comida.",
+    emoji: "🍽️",
   },
   {
     id: "ad",
     name: "Anuncio",
-    desc: "Crea publicidad profesional para atraer nuevos clientes.",
+    desc: "Publicidad profesional para presentar tu producto y atraer clientes.",
     emoji: "📢",
   },
   {
     id: "flyer",
     name: "Flyer",
-    desc: "Crea una pieza promocional lista para compartir.",
+    desc: "Pieza promocional completa para imprimir o publicar en internet.",
     emoji: "📰",
   },
   {
     id: "social",
     name: "Redes sociales",
-    desc: "Contenido visual para Instagram, Facebook y TikTok.",
+    desc: "Contenido comercial para Instagram, Facebook y TikTok.",
     emoji: "📱",
   },
   {
     id: "catalog",
     name: "Catálogo",
-    desc: "Convierte tus fotos de producto en imágenes comerciales.",
+    desc: "Presentación profesional de producto para tiendas y ecommerce.",
     emoji: "🛍️",
   },
   {
     id: "promotion",
     name: "Promoción",
-    desc: "Destaca ofertas, descuentos y lanzamientos.",
+    desc: "Diseños de ofertas, descuentos, lanzamientos y campañas de venta.",
     emoji: "🔥",
   },
 ];
@@ -79,7 +79,7 @@ export default function Home() {
   useEffect(() => {
     trackEvent("ViewContent", {
       content_name: "FotoIA Pro Home",
-      content_category: "AI Photo Editing",
+      content_category: "Commercial Product Marketing",
     });
   }, []);
 
