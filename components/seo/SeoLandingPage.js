@@ -99,18 +99,18 @@ export default function SeoLandingPage({
           <div className="seoSteps">
             <article>
               <strong>1</strong>
-              <h3>Sube tu foto</h3>
-              <p>Elige una imagen donde el rostro o producto se vea claro.</p>
+              <h3>Sube la foto de tu producto</h3>
+              <p>Elige una foto donde el producto se vea claro y con buena iluminación.</p>
             </article>
             <article>
               <strong>2</strong>
               <h3>Describe tu idea</h3>
-              <p>Escribe el estilo, fondo, ropa o resultado que quieres.</p>
+              <p>Describe el estilo, fondo, ambiente, oferta o resultado comercial que quieres.</p>
             </article>
             <article>
               <strong>3</strong>
               <h3>Descarga el resultado</h3>
-              <p>Obtén una imagen mejorada con inteligencia artificial.</p>
+              <p>Obtén una imagen comercial profesional lista para utilizar en tu negocio.</p>
             </article>
           </div>
         </section>
