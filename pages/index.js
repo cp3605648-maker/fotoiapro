@@ -266,7 +266,9 @@ export default function Home() {
 
       const uploadedUrl = await uploadImage(image, user.id);
       const uploadedReferenceUrl = referenceImage
-        ? await uploadImage(referenceImage, `${user.id}/references`)
+        ? typeof referenceImage === "string"
+          ? referenceImage
+          : await uploadImage(referenceImage, `${user.id}/references`)
         : null;
 
       const res = await fetch("/api/generate", {
@@ -280,6 +282,7 @@ export default function Home() {
           credits,
           isPaid: true,
           userId: user.id,
+          imageMeta,
         }),
       });
 
@@ -293,11 +296,6 @@ export default function Home() {
 
       const newCredits =
         data.creditsLeft !== undefined ? data.creditsLeft : Math.max(credits - 1, 0);
-
-      await supabase
-        .from("profiles")
-        .update({ credits: newCredits })
-        .eq("id", user.id);
 
       trackEvent("GenerateImage", {
         preset,
@@ -692,6 +690,7 @@ export default function Home() {
                     type="button"
                     className="useLogoBtn"
                     onClick={() => {
+                      setReferenceImage(generatedLogo);
                       setReferencePreview(generatedLogo);
                       setNotice("✨ Logotipo seleccionado. Ahora puedes crear tu publicidad.");
                       setShowLogoCreator(false);
