@@ -498,27 +498,40 @@ export default function Home() {
               <input type="file" accept="image/*" onChange={handleImage} />
             </label>
 
-            <div className="referenceTitle">
-              <strong>Referencia visual opcional</strong>
-              <small>
-                Sube un ejemplo de diseño, ambiente, estilo o publicidad que
-                quieras tomar como inspiración.
-              </small>
+            <div className="referenceTitle logoTitle">
+              <div>
+                <strong>🏷️ Logotipo de tu negocio</strong>
+                <small>
+                  Opcional. Sube el logotipo de tu empresa para utilizarlo como
+                  referencia en flyers, menús, promociones y otras piezas publicitarias.
+                </small>
+              </div>
             </div>
 
-            <label className="uploadBox referenceBox">
+            <label className="uploadBox referenceBox logoUploadBox">
               {referencePreview ? (
-                <img src={referencePreview} alt="Referencia visual" />
+                <img src={referencePreview} alt="Logotipo del negocio" />
               ) : (
                 <div>
-                  <strong>Subir referencia</strong>
+                  <span className="logoUploadIcon">🏷️</span>
+                  <strong>Subir logotipo</strong>
                   <small>
-                    Ejemplo: un anuncio, menú, fondo, composición o estilo visual.
+                    JPG, PNG o WEBP · máximo 5MB
                   </small>
                 </div>
               )}
               <input type="file" accept="image/*" onChange={handleReferenceImage} />
             </label>
+
+            <button
+              type="button"
+              className="createLogoBtn"
+              onClick={() =>
+                setNotice("El creador de logotipos con IA estará disponible próximamente.")
+              }
+            >
+              ✨ ¿No tienes logotipo? Crear uno con IA
+            </button>
 
             <button onClick={generateImage} disabled={loading} className="generateBtn">
               {loading ? "Creando publicidad..." : "Crear publicidad con IA"}
@@ -1065,6 +1078,44 @@ export default function Home() {
           margin-top: 5px;
           color: rgba(255,255,255,0.55);
           line-height: 1.4;
+        }
+
+        .logoTitle {
+          margin-top: 24px;
+        }
+
+        .logoUploadBox {
+          min-height: 180px;
+          border-style: dashed;
+        }
+
+        .logoUploadBox > div {
+          padding: 24px;
+        }
+
+        .logoUploadIcon {
+          display: block;
+          font-size: 36px;
+          margin-bottom: 10px;
+        }
+
+        .createLogoBtn {
+          width: 100%;
+          margin-top: 12px;
+          padding: 14px 16px;
+          border-radius: 16px;
+          border: 1px solid rgba(139,92,246,0.4);
+          background: rgba(139,92,246,0.12);
+          color: #ddd6fe;
+          cursor: pointer;
+          font-weight: 800;
+          transition: 0.2s ease;
+        }
+
+        .createLogoBtn:hover {
+          background: rgba(139,92,246,0.22);
+          border-color: rgba(139,92,246,0.75);
+          transform: translateY(-1px);
         }
 
         .referenceBox {
