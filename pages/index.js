@@ -66,6 +66,16 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [history, setHistory] = useState([]);
 
+  // Creador de logotipos
+  const [showLogoCreator, setShowLogoCreator] = useState(false);
+  const [logoBusinessName, setLogoBusinessName] = useState("");
+  const [logoBusinessType, setLogoBusinessType] = useState("Restaurante");
+  const [logoStyle, setLogoStyle] = useState("Moderno");
+  const [logoColors, setLogoColors] = useState("");
+  const [logoDescription, setLogoDescription] = useState("");
+  const [logoLoading, setLogoLoading] = useState(false);
+  const [generatedLogo, setGeneratedLogo] = useState(null);
+
   useEffect(() => {
     trackEvent("ViewContent", {
       content_name: "FotoIA Pro Home",
@@ -314,6 +324,89 @@ export default function Home() {
     }
   };
 
+  const generateLogo = async () => {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
+    const businessName = logoBusinessName.trim();
+
+    if (!businessName) {
+      setError("Escribe el nombre de tu negocio.");
+      return;
+    }
+
+    if (credits <= 0) {
+      setError("No tienes créditos disponibles para crear un logotipo.");
+      return;
+    }
+
+    try {
+      setLogoLoading(true);
+      setError("");
+      setNotice("");
+
+      const res = await fetch("/api/generate-logo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          businessName,
+          businessType: logoBusinessType.trim(),
+          style: logoStyle.trim(),
+          colors: logoColors.trim(),
+          description: logoDescription.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.details ||
+          data?.error ||
+          "No se pudo crear el logotipo."
+        );
+      }
+
+      if (!data?.output) {
+        throw new Error("La IA no devolvió un logotipo.");
+      }
+
+      setGeneratedLogo(data.output);
+
+      const newCredits =
+        typeof data.creditsLeft === "number"
+          ? data.creditsLeft
+          : Math.max(credits - 1, 0);
+
+      setCredits(newCredits);
+
+      trackEvent("GenerateLogo", {
+        business_name: businessName,
+        business_type: logoBusinessType.trim(),
+        credits_left: newCredits,
+      });
+
+      setNotice(
+        "✨ Logotipo creado correctamente. Ahora puedes utilizarlo en tus flyers, menús, anuncios y otras piezas publicitarias."
+      );
+    } catch (err) {
+      console.error("LOGO_ERROR:", err);
+
+      setError(
+        err.message ||
+        "Ocurrió un error al crear el logotipo."
+      );
+    } finally {
+      setLogoLoading(false);
+    }
+  };
+
+
   const buyCredits = async (packageType) => {
     if (!user) {
       window.location.href = "/login";
@@ -467,6 +560,176 @@ export default function Home() {
         </div>
       </section>
 
+      {showLogoCreator && (
+        <div className="logoModalOverlay">
+          <div className="logoModal">
+            <button
+              type="button"
+              className="logoModalClose"
+              onClick={() => setShowLogoCreator(false)}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+
+            <div className="logoModalHeader">
+              <span>✨ CREACIÓN DE LOGOTIPO</span>
+              <h2>Crea el logotipo de tu negocio con IA</h2>
+              <p>
+                Este proceso es independiente de la creación de publicidad.
+                No necesitas subir una foto. Solo dinos cómo quieres que sea
+                tu marca y la IA creará una propuesta de logotipo.
+              </p>
+            </div>
+
+            {!generatedLogo ? (
+              <div className="logoForm">
+                <label>
+                  Nombre del negocio
+                  <input
+                    type="text"
+                    value={logoBusinessName}
+                    onChange={(e) => setLogoBusinessName(e.target.value)}
+                    placeholder="Ej. La Casa de la Hamburguesa"
+                    maxLength={80}
+                  />
+                </label>
+
+                <label>
+                  Tipo de negocio
+                  <select
+                    value={logoBusinessType}
+                    onChange={(e) => setLogoBusinessType(e.target.value)}
+                  >
+                    <option>Restaurante</option>
+                    <option>Cafetería</option>
+                    <option>Bar</option>
+                    <option>Panadería</option>
+                    <option>Tienda</option>
+                    <option>Ropa y moda</option>
+                    <option>Salón de belleza</option>
+                    <option>Barbería</option>
+                    <option>Construcción</option>
+                    <option>Servicios profesionales</option>
+                    <option>Ecommerce</option>
+                    <option>Otro</option>
+                  </select>
+                </label>
+
+                <label>
+                  Estilo del logotipo
+                  <select
+                    value={logoStyle}
+                    onChange={(e) => setLogoStyle(e.target.value)}
+                  >
+                    <option>Moderno</option>
+                    <option>Minimalista</option>
+                    <option>Elegante</option>
+                    <option>Premium</option>
+                    <option>Divertido</option>
+                    <option>Artesanal</option>
+                    <option>Corporativo</option>
+                    <option>Juvenil</option>
+                    <option>Lujo</option>
+                  </select>
+                </label>
+
+                <label>
+                  Colores
+                  <input
+                    type="text"
+                    value={logoColors}
+                    onChange={(e) => setLogoColors(e.target.value)}
+                    placeholder="Ej. Negro y dorado"
+                    maxLength={120}
+                  />
+                </label>
+
+                <label>
+                  Describe tu idea
+                  <textarea
+                    value={logoDescription}
+                    onChange={(e) => setLogoDescription(e.target.value)}
+                    placeholder="Ej. Quiero un logo con una hamburguesa sencilla, elegante y fácil de reconocer."
+                    maxLength={500}
+                  />
+                </label>
+
+                <div className="logoCreditInfo">
+                  ✨ Crear un logotipo consume <strong>1 crédito</strong>.
+                </div>
+
+                <button
+                  type="button"
+                  className="generateLogoBtn"
+                  onClick={generateLogo}
+                  disabled={logoLoading}
+                >
+                  {logoLoading
+                    ? "Creando tu logotipo..."
+                    : "✨ Generar logotipo"}
+                </button>
+              </div>
+            ) : (
+              <div className="generatedLogoArea">
+                <div className="generatedLogoPreview">
+                  <img
+                    src={generatedLogo}
+                    alt={`Logotipo generado para ${logoBusinessName}`}
+                  />
+                </div>
+
+                <h3>Tu logotipo está listo</h3>
+
+                <p>
+                  Tu logotipo fue creado de forma independiente y ya puedes
+                  utilizarlo en flyers, menús, promociones, anuncios,
+                  redes sociales y otras piezas de tu negocio.
+                </p>
+
+                <div className="logoResultActions">
+                  <button
+                    type="button"
+                    className="useLogoBtn"
+                    onClick={() => {
+                      setReferencePreview(generatedLogo);
+                      setNotice("✨ Logotipo seleccionado. Ahora puedes crear tu publicidad.");
+                      setShowLogoCreator(false);
+                      document
+                        .getElementById("studio")
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                    }}
+                  >
+                    ✅ Usar este logotipo
+                  </button>
+
+                  <a
+                    href={generatedLogo}
+                    download={`${logoBusinessName || "logotipo"}-logo.png`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="downloadLogoBtn"
+                  >
+                    Descargar logotipo
+                  </a>
+
+                  <button
+                    type="button"
+                    className="generateAnotherLogoBtn"
+                    onClick={() => setGeneratedLogo(null)}
+                  >
+                    🔄 Generar otro
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <section id="studio" className="studio">
         <div className="sectionHeader">
           <span>Estudio IA</span>
@@ -502,8 +765,9 @@ export default function Home() {
               <div>
                 <strong>🏷️ Logotipo de tu negocio</strong>
                 <small>
-                  Opcional. Sube el logotipo de tu empresa para utilizarlo como
-                  referencia en flyers, menús, promociones y otras piezas publicitarias.
+                  Opcional. Sube el logotipo de tu empresa para incorporarlo
+                  a tus flyers, menús, promociones, anuncios y otras piezas
+                  publicitarias.
                 </small>
               </div>
             </div>
@@ -523,15 +787,29 @@ export default function Home() {
               <input type="file" accept="image/*" onChange={handleReferenceImage} />
             </label>
 
-            <button
-              type="button"
-              className="createLogoBtn"
-              onClick={() =>
-                setNotice("El creador de logotipos con IA estará disponible próximamente.")
-              }
-            >
-              ✨ ¿No tienes logotipo? Crear uno con IA
-            </button>
+            <div className="logoCreatorCallout">
+              <div className="logoCreatorIcon">✨</div>
+
+              <div className="logoCreatorText">
+                <strong>¿Tu negocio no tiene logotipo?</strong>
+                <span>
+                  Créalo desde cero con IA. No necesitas subir ninguna foto.
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="createLogoBtn"
+                onClick={() => {
+                  setError("");
+                  setNotice("");
+                  setGeneratedLogo(null);
+                  setShowLogoCreator(true);
+                }}
+              >
+                Crear mi logotipo
+              </button>
+            </div>
 
             <button onClick={generateImage} disabled={loading} className="generateBtn">
               {loading ? "Creando publicidad..." : "Crear publicidad con IA"}
@@ -1099,6 +1377,56 @@ export default function Home() {
           margin-bottom: 10px;
         }
 
+        .logoCreatorCallout {
+          margin-top: 14px;
+          padding: 18px;
+          border-radius: 20px;
+          background:
+            linear-gradient(
+              135deg,
+              rgba(139,92,246,0.12),
+              rgba(6,182,212,0.08)
+            );
+          border: 1px solid rgba(139,92,246,0.25);
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: 12px;
+          align-items: center;
+        }
+
+        .logoCreatorIcon {
+          width: 46px;
+          height: 46px;
+          display: grid;
+          place-items: center;
+          border-radius: 14px;
+          background: rgba(139,92,246,0.18);
+          font-size: 24px;
+        }
+
+        .logoCreatorText {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        .logoCreatorText strong {
+          color: white;
+          font-size: 14px;
+        }
+
+        .logoCreatorText span {
+          color: rgba(255,255,255,0.55);
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        .logoCreatorCallout .createLogoBtn {
+          grid-column: 1 / -1;
+          margin-top: 2px;
+        }
+
         .createLogoBtn {
           width: 100%;
           margin-top: 12px;
@@ -1117,6 +1445,209 @@ export default function Home() {
           border-color: rgba(139,92,246,0.75);
           transform: translateY(-1px);
         }
+
+        .logoModalOverlay {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: grid;
+          place-items: center;
+          padding: 24px;
+          background: rgba(0,0,0,0.78);
+          backdrop-filter: blur(14px);
+        }
+
+        .logoModal {
+          position: relative;
+          width: min(720px, 100%);
+          max-height: 90vh;
+          overflow-y: auto;
+          padding: 34px;
+          border-radius: 30px;
+          background:
+            radial-gradient(circle at top right, rgba(6,182,212,0.12), transparent 35%),
+            radial-gradient(circle at top left, rgba(124,58,237,0.18), transparent 40%),
+            #0c0c18;
+          border: 1px solid rgba(255,255,255,0.14);
+          box-shadow: 0 40px 120px rgba(0,0,0,0.55);
+        }
+
+        .logoModalClose {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.07);
+          color: white;
+          font-size: 24px;
+          cursor: pointer;
+        }
+
+        .logoModalHeader {
+          padding-right: 45px;
+          margin-bottom: 28px;
+        }
+
+        .logoModalHeader > span {
+          color: #a78bfa;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .logoModalHeader h2 {
+          margin: 8px 0;
+          font-size: clamp(30px, 5vw, 44px);
+          letter-spacing: -0.05em;
+        }
+
+        .logoModalHeader p {
+          margin: 0;
+          color: rgba(255,255,255,0.6);
+          line-height: 1.6;
+        }
+
+        .logoForm {
+          display: grid;
+          gap: 16px;
+        }
+
+        .logoForm label {
+          display: grid;
+          gap: 8px;
+          color: rgba(255,255,255,0.9);
+          font-weight: 800;
+          font-size: 14px;
+        }
+
+        .logoForm input,
+        .logoForm select,
+        .logoForm textarea {
+          width: 100%;
+          box-sizing: border-box;
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 16px;
+          background: rgba(255,255,255,0.06);
+          color: white;
+          padding: 14px;
+          font: inherit;
+          outline: none;
+        }
+
+        .logoForm select option {
+          color: #111827;
+        }
+
+        .logoForm textarea {
+          min-height: 110px;
+          resize: vertical;
+        }
+
+        .logoForm input:focus,
+        .logoForm select:focus,
+        .logoForm textarea:focus {
+          border-color: rgba(139,92,246,0.7);
+        }
+
+        .logoCreditInfo {
+          padding: 13px 15px;
+          border-radius: 14px;
+          color: rgba(255,255,255,0.7);
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .logoCreditInfo strong {
+          color: #ddd6fe;
+        }
+
+        .generateLogoBtn,
+        .useLogoBtn {
+          width: 100%;
+          padding: 16px 18px;
+          border: 0;
+          border-radius: 17px;
+          background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+          color: white;
+          font-weight: 900;
+          cursor: pointer;
+          font-size: 15px;
+        }
+
+        .generateLogoBtn:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+
+        .generatedLogoArea {
+          text-align: center;
+        }
+
+        .generatedLogoPreview {
+          min-height: 320px;
+          display: grid;
+          place-items: center;
+          padding: 20px;
+          border-radius: 24px;
+          background:
+            linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%),
+            linear-gradient(-45deg, rgba(255,255,255,0.04) 25%, transparent 25%),
+            rgba(255,255,255,0.03);
+          background-size: 28px 28px;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .generatedLogoPreview img {
+          width: 100%;
+          max-width: 500px;
+          max-height: 420px;
+          object-fit: contain;
+          border-radius: 18px;
+        }
+
+        .generatedLogoArea h3 {
+          margin: 24px 0 8px;
+          font-size: 26px;
+        }
+
+        .generatedLogoArea > p {
+          color: rgba(255,255,255,0.6);
+          line-height: 1.6;
+        }
+
+        .logoResultActions {
+          display: grid;
+          gap: 10px;
+          margin-top: 22px;
+        }
+
+        .downloadLogoBtn,
+        .generateAnotherLogoBtn {
+          display: block;
+          width: 100%;
+          box-sizing: border-box;
+          padding: 14px 18px;
+          border-radius: 16px;
+          text-align: center;
+          text-decoration: none;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .downloadLogoBtn {
+          color: white;
+          background: rgba(255,255,255,0.09);
+          border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .generateAnotherLogoBtn {
+          color: #ddd6fe;
+          background: rgba(139,92,246,0.1);
+          border: 1px solid rgba(139,92,246,0.25);
+        }
+
 
         .referenceBox {
           min-height: 190px;
@@ -1377,6 +1908,19 @@ export default function Home() {
         }
 
         @media (max-width: 620px) {
+          .logoModalOverlay {
+            padding: 10px;
+          }
+
+          .logoModal {
+            padding: 24px 18px;
+            border-radius: 24px;
+          }
+
+          .generatedLogoPreview {
+            min-height: 240px;
+          }
+
           .hero { padding-top: 22px; }
           .presetGrid { grid-template-columns: 1fr; }
           .heroActions { flex-direction: column; }
