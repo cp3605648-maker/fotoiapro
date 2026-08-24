@@ -277,7 +277,7 @@ export default function Home() {
         body: JSON.stringify({
           image: uploadedUrl,
           referenceImage: uploadedReferenceUrl,
-          prompt: customPrompt.trim() || preset,
+          prompt: customPrompt.trim(),
           preset,
           credits,
           isPaid: true,
@@ -308,7 +308,7 @@ export default function Home() {
         id: Date.now(),
         image: data.output,
         preset,
-        prompt: customPrompt.trim() || preset,
+        prompt: customPrompt.trim(),
         createdAt: new Date().toLocaleString(),
       };
 
