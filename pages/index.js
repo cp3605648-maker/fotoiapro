@@ -43,6 +43,60 @@ const presets = [
   },
 ];
 
+
+const socialFormats = [
+  {
+    id: "instagram_post",
+    name: "Instagram Post",
+    aspectRatio: "1:1",
+  },
+  {
+    id: "instagram_story",
+    name: "Instagram Story",
+    aspectRatio: "9:16",
+  },
+  {
+    id: "instagram_reel",
+    name: "Instagram Reel",
+    aspectRatio: "9:16",
+  },
+  {
+    id: "facebook_post",
+    name: "Facebook Post",
+    aspectRatio: "1:1",
+  },
+  {
+    id: "facebook_story",
+    name: "Facebook Story",
+    aspectRatio: "9:16",
+  },
+  {
+    id: "tiktok",
+    name: "TikTok",
+    aspectRatio: "9:16",
+  },
+  {
+    id: "whatsapp_status",
+    name: "WhatsApp Status",
+    aspectRatio: "9:16",
+  },
+  {
+    id: "linkedin_post",
+    name: "LinkedIn Post",
+    aspectRatio: "16:9",
+  },
+  {
+    id: "x_post",
+    name: "X / Twitter",
+    aspectRatio: "16:9",
+  },
+  {
+    id: "pinterest_pin",
+    name: "Pinterest Pin",
+    aspectRatio: "2:3",
+  },
+];
+
 const creditPackages = [
   { id: "basic_mxn", name: "10 créditos", price: "$99 MXN" },
   { id: "pro_mxn", name: "30 créditos", price: "$199 MXN" },
@@ -58,6 +112,7 @@ export default function Home() {
   const [referenceImage, setReferenceImage] = useState(null);
   const [referencePreview, setReferencePreview] = useState(null);
   const [preset, setPreset] = useState("menu");
+  const [socialFormat, setSocialFormat] = useState("instagram_post");
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState(null);
@@ -279,6 +334,7 @@ export default function Home() {
           referenceImage: uploadedReferenceUrl,
           prompt: customPrompt.trim(),
           preset,
+          socialFormat,
           credits,
           isPaid: true,
           userId: user.id,
@@ -833,6 +889,23 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {preset === "social" && (
+              <div className="socialFormatBox">
+                <strong>Formato de red social</strong>
+
+                <select
+                  value={socialFormat}
+                  onChange={(e) => setSocialFormat(e.target.value)}
+                >
+                  {socialFormats.map((format) => (
+                    <option key={format.id} value={format.id}>
+                      {format.name} · {format.aspectRatio}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="promptBox">
               

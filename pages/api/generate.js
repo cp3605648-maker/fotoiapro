@@ -6,6 +6,27 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+function getSocialAspectRatio(preset, socialFormat) {
+  if (preset !== "social") {
+    return "match_input_image";
+  }
+
+  const ratios = {
+    instagram_post: "1:1",
+    instagram_story: "9:16",
+    instagram_reel: "9:16",
+    facebook_post: "1:1",
+    facebook_story: "9:16",
+    tiktok: "9:16",
+    whatsapp_status: "9:16",
+    linkedin_post: "16:9",
+    x_post: "16:9",
+    pinterest_pin: "2:3",
+  };
+
+  return ratios[socialFormat] || "1:1";
+}
+
 function getOutputUrl(output) {
   const raw = Array.isArray(output) ? output[0] : output;
 
@@ -41,6 +62,7 @@ export default async function handler(req, res) {
       referenceImage,
       prompt: userPrompt,
       preset,
+      socialFormat,
       isPaid,
       imageMeta,
       userId,
@@ -93,7 +115,13 @@ export default async function handler(req, res) {
       Boolean(isPaid),
       imageMeta || null,
       preset || "ad",
-      hasReferenceImage
+      hasReferenceImage,
+      socialFormat || ""
+    );
+
+    const aspectRatio = getSocialAspectRatio(
+      preset || "ad",
+      socialFormat || ""
     );
 
     let output;
@@ -108,7 +136,7 @@ export default async function handler(req, res) {
       const input = {
         prompt: finalPrompt,
         input_image: image,
-        aspect_ratio: "match_input_image",
+        aspect_ratio: aspectRatio,
         output_format: "png",
         safety_tolerance: 2,
         prompt_upsampling: true,
@@ -154,7 +182,7 @@ COMBINATION INSTRUCTION:
         prompt: multiImagePrompt,
         input_image_1: image,
         input_image_2: referenceImage,
-        aspect_ratio: "match_input_image",
+        aspect_ratio: aspectRatio,
         output_format: "png",
         safety_tolerance: 2,
       };
