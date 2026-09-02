@@ -1074,7 +1074,12 @@ export default function Home() {
                     <strong>{item.preset}</strong>
                     <small>{item.createdAt}</small>
                   </div>
-                  <a href={item.image} download>Descargar publicidad</a>
+                  <button
+                    type="button"
+                    onClick={() => downloadGeneratedImage(item.image)}
+                  >
+                    Descargar publicidad
+                  </button>
                 </div>
               ))}
             </div>
