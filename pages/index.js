@@ -298,6 +298,55 @@ export default function Home() {
       reader.onerror = reject;
     });
 
+  const downloadGeneratedImage = (imageUrl) => {
+    try {
+      setError("");
+
+      const socialNames = {
+        instagram_post: "instagram-post",
+        instagram_story: "instagram-story",
+        instagram_reel: "instagram-reel",
+        facebook_post: "facebook-post",
+        facebook_story: "facebook-story",
+        tiktok: "tiktok",
+        whatsapp_status: "whatsapp-status",
+        linkedin_post: "linkedin-post",
+        x_post: "x-twitter-post",
+        pinterest_pin: "pinterest-pin",
+      };
+
+      const presetNames = {
+        menu: "menu",
+        ad: "anuncio",
+        flyer: "flyer",
+        social: socialNames[socialFormat] || "redes-sociales",
+        catalog: "catalogo",
+        promotion: "promocion",
+      };
+
+      const fileName =
+        `fotoia-${presetNames[preset] || "publicidad"}.png`;
+
+      const downloadUrl =
+        `/api/download-image?url=${encodeURIComponent(imageUrl)}` +
+        `&filename=${encodeURIComponent(fileName)}`;
+
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("DOWNLOAD ERROR:", err);
+
+      setError(
+        "No se pudo descargar la imagen. Intenta nuevamente."
+      );
+    }
+  };
+
   const generateImage = async () => {
     if (!user) {
       window.location.href = "/login";
@@ -969,9 +1018,13 @@ export default function Home() {
             </div>
 
             {output && (
-              <a href={output} download className="downloadBtn">
+              <button
+                type="button"
+                onClick={() => downloadGeneratedImage(output)}
+                className="downloadBtn"
+              >
                 Descargar publicidad
-              </a>
+              </button>
             )}
           </div>
         </div>
