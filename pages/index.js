@@ -1196,123 +1196,181 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
             </div>
 
             {preset === "menu" && (
-              <div className="socialFormatBox">
-                <strong>Tipo de menú</strong>
-                <select
-                  value={menuType}
-                  onChange={(e) => setMenuType(e.target.value)}
-                >
+              <div className="categoryOptionsPanel">
+                <div className="categoryOptionsHeader">
+                  <strong>Elige el tipo de menú</strong>
+                  <small>Selecciona la opción que mejor se adapte a tu negocio.</small>
+                </div>
+
+                <div className="categoryOptionsGrid">
                   {menuTypes.map((item) => (
-                    <option key={item.id} value={item.id}>
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setMenuType(item.id)}
+                      className={
+                        menuType === item.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
                       {item.name}
-                    </option>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             )}
 
             {preset === "ad" && (
-              <div className="socialFormatBox">
-                <strong>Tipo de anuncio</strong>
-                <select
-                  value={adType}
-                  onChange={(e) => setAdType(e.target.value)}
-                >
+              <div className="categoryOptionsPanel">
+                <div className="categoryOptionsHeader">
+                  <strong>Elige el tipo de anuncio</strong>
+                  <small>Define qué tipo de publicidad quieres generar.</small>
+                </div>
+
+                <div className="categoryOptionsGrid">
                   {adTypes.map((item) => (
-                    <option key={item.id} value={item.id}>
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setAdType(item.id)}
+                      className={
+                        adType === item.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
                       {item.name}
-                    </option>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             )}
 
             {preset === "flyer" && (
-              <div className="socialFormatBox">
-                <strong>Tipo de flyer</strong>
-                <select
-                  value={flyerType}
-                  onChange={(e) => setFlyerType(e.target.value)}
-                >
+              <div className="categoryOptionsPanel">
+                <div className="categoryOptionsHeader">
+                  <strong>Elige el tipo de flyer</strong>
+                  <small>Selecciona el formato comercial que necesitas.</small>
+                </div>
+
+                <div className="categoryOptionsGrid">
                   {flyerTypes.map((item) => (
-                    <option key={item.id} value={item.id}>
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setFlyerType(item.id)}
+                      className={
+                        flyerType === item.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
                       {item.name}
-                    </option>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             )}
 
             {preset === "promotion" && (
-              <div className="socialFormatBox">
-                <strong>Tipo de promoción</strong>
-                <select
-                  value={promotionType}
-                  onChange={(e) => setPromotionType(e.target.value)}
-                >
+              <div className="categoryOptionsPanel">
+                <div className="categoryOptionsHeader">
+                  <strong>Elige el tipo de promoción</strong>
+                  <small>Selecciona cómo quieres presentar tu oferta.</small>
+                </div>
+
+                <div className="categoryOptionsGrid">
                   {promotionTypes.map((item) => (
-                    <option key={item.id} value={item.id}>
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setPromotionType(item.id)}
+                      className={
+                        promotionType === item.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
                       {item.name}
-                    </option>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             )}
 
             {preset === "marketplace" && (
-              <>
-                <div className="socialFormatBox">
-                  <label htmlFor="marketplacePlatform">
-                    Marketplace
-                  </label>
-
-                  <select
-                    id="marketplacePlatform"
-                    value={marketplacePlatform}
-                    onChange={(e) => setMarketplacePlatform(e.target.value)}
-                  >
-                    {marketplacePlatforms.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
+              <div className="categoryOptionsPanel">
+                <div className="categoryOptionsHeader">
+                  <strong>Elige tu marketplace</strong>
+                  <small>Selecciona primero dónde vas a publicar tu producto.</small>
                 </div>
 
-                <div className="socialFormatBox">
-                  <label htmlFor="marketplaceImageType">
-                    Tipo de imagen
-                  </label>
-
-                  <select
-                    id="marketplaceImageType"
-                    value={marketplaceImageType}
-                    onChange={(e) => setMarketplaceImageType(e.target.value)}
-                  >
-                    {marketplaceImageTypes.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
+                <div className="categoryOptionsGrid">
+                  {marketplacePlatforms.map((item) => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setMarketplacePlatform(item.id)}
+                      className={
+                        marketplacePlatform === item.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
+                      {item.name}
+                    </button>
+                  ))}
                 </div>
-              </>
+
+                <div className="categoryOptionsHeader secondary">
+                  <strong>Ahora elige el tipo de imagen</strong>
+                  <small>Define qué presentación necesitas para ese marketplace.</small>
+                </div>
+
+                <div className="categoryOptionsGrid">
+                  {marketplaceImageTypes.map((item) => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      onClick={() => setMarketplaceImageType(item.id)}
+                      className={
+                        marketplaceImageType === item.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
 
             {preset === "social" && (
-              <div className="socialFormatBox">
-                <strong>Formato de red social</strong>
+              <div className="categoryOptionsPanel">
+                <div className="categoryOptionsHeader">
+                  <strong>Elige el formato de red social</strong>
+                  <small>Selecciona dónde vas a publicar tu diseño.</small>
+                </div>
 
-                <select
-                  value={socialFormat}
-                  onChange={(e) => setSocialFormat(e.target.value)}
-                >
+                <div className="categoryOptionsGrid">
                   {socialFormats.map((format) => (
-                    <option key={format.id} value={format.id}>
-                      {format.name} · {format.aspectRatio}
-                    </option>
+                    <button
+                      type="button"
+                      key={format.id}
+                      onClick={() => setSocialFormat(format.id)}
+                      className={
+                        socialFormat === format.id
+                          ? "categoryOption active"
+                          : "categoryOption"
+                      }
+                    >
+                      <strong>{format.name}</strong>
+                      <small>{format.aspectRatio}</small>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
             )}
 
@@ -2192,6 +2250,123 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
         .preset strong { display: block; margin: 8px 0 5px; }
         .preset small { color: rgba(255,255,255,0.55); line-height: 1.4; }
 
+        .categoryOptionsPanel {
+          margin-top: 18px;
+          padding: 18px;
+          border: 1px solid rgba(124, 92, 255, 0.28);
+          border-radius: 18px;
+          background:
+            linear-gradient(
+              180deg,
+              rgba(124, 92, 255, 0.08),
+              rgba(255, 255, 255, 0.025)
+            );
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.03),
+            0 12px 30px rgba(0, 0, 0, 0.16);
+        }
+
+        .categoryOptionsPanel::before {
+          content: "Paso adicional · Elige una opción";
+          display: inline-flex;
+          align-items: center;
+          margin-bottom: 14px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: rgba(124, 92, 255, 0.12);
+          border: 1px solid rgba(124, 92, 255, 0.24);
+          color: rgba(218, 209, 255, 0.95);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .categoryOptionsHeader {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          margin-bottom: 14px;
+        }
+
+        .categoryOptionsHeader.secondary {
+          margin-top: 22px;
+          padding-top: 18px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .categoryOptionsHeader strong {
+          color: #fff;
+          font-size: 15px;
+          line-height: 1.35;
+        }
+
+        .categoryOptionsHeader small {
+          color: rgba(255, 255, 255, 0.55);
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        .categoryOptionsGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .categoryOption {
+          width: 100%;
+          min-height: 58px;
+          padding: 12px 14px;
+          border: 1px solid rgba(255, 255, 255, 0.09);
+          border-radius: 14px;
+          background: rgba(255, 255,255, 0.035);
+          color: rgba(255, 255, 255, 0.82);
+          cursor: pointer;
+          text-align: left;
+          transition:
+            transform 0.18s ease,
+            border-color 0.18s ease,
+            background 0.18s ease,
+            box-shadow 0.18s ease;
+        }
+
+        .categoryOption:hover {
+          transform: translateY(-1px);
+          border-color: rgba(124, 92, 255, 0.45);
+          background: rgba(124, 92, 255, 0.08);
+        }
+
+        .categoryOption.active {
+          border-color: rgba(139, 108, 255, 0.85);
+          background:
+            linear-gradient(
+              180deg,
+              rgba(124, 92, 255, 0.18),
+              rgba(124, 92, 255, 0.08)
+            );
+          color: #fff;
+          box-shadow:
+            0 0 0 1px rgba(124, 92, 255, 0.1),
+            0 10px 24px rgba(84, 56, 180, 0.14);
+        }
+
+        .categoryOption strong {
+          display: block;
+          margin: 0 0 3px;
+          font-size: 13px;
+          color: inherit;
+        }
+
+        .categoryOption small {
+          display: block;
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 11px;
+        }
+
+        .categoryOption.active small {
+          color: rgba(255, 255, 255, 0.72);
+        }
+
         .promptBox { margin-top: 18px; }
 
         .promptBox label {
@@ -2413,6 +2588,14 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
 
           .hero { padding-top: 22px; }
           .presetGrid { grid-template-columns: 1fr; }
+
+          .categoryOptionsGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .categoryOptionsPanel {
+            padding: 14px;
+          }
           .heroActions { flex-direction: column; }
 
           .primaryBtn, .secondaryBtn {
