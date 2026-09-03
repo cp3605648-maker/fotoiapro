@@ -468,6 +468,21 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
         pinterest_pin: "pinterest-pin",
       };
 
+      const marketplaceNames = {
+        amazon: "amazon",
+        mercadolibre: "mercado-libre",
+        ebay: "ebay",
+        shopify: "shopify",
+      };
+
+      const marketplaceImageNames = {
+        main: "imagen-principal",
+        secondary: "imagen-secundaria",
+        lifestyle: "lifestyle",
+        detail: "detalle-producto",
+        infographic: "infografia",
+      };
+
       const presetNames = {
         menu: "menu",
         ad: "anuncio",
@@ -475,6 +490,9 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
         social: socialNames[socialFormat] || "redes-sociales",
         catalog: "catalogo",
         promotion: "promocion",
+        marketplace:
+          `${marketplaceNames[marketplacePlatform] || "marketplace"}-` +
+          `${marketplaceImageNames[marketplaceImageType] || "producto"}`,
       };
 
       const fileName =

@@ -6,7 +6,20 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-function getSocialAspectRatio(preset, socialFormat) {
+function getOutputAspectRatio(
+  preset,
+  socialFormat,
+  marketplacePlatform,
+  marketplaceImageType
+) {
+  if (
+    preset === "marketplace" &&
+    marketplacePlatform === "amazon" &&
+    marketplaceImageType === "main"
+  ) {
+    return "1:1";
+  }
+
   if (preset !== "social") {
     return "match_input_image";
   }
@@ -131,9 +144,11 @@ export default async function handler(req, res) {
       marketplaceImageType || ""
     );
 
-    const aspectRatio = getSocialAspectRatio(
+    const aspectRatio = getOutputAspectRatio(
       preset || "ad",
-      socialFormat || ""
+      socialFormat || "",
+      marketplacePlatform || "",
+      marketplaceImageType || ""
     );
 
     let output;
@@ -226,20 +241,62 @@ COMBINATION INSTRUCTION:
       );
     }
 
-    const newCredits = currentCredits - 1;
+    let balanceToCharge = currentCredits;
+    let updatedProfile = null;
+    let creditUpdateError = null;
 
-    const {
-      data: updatedProfile,
-      error: creditUpdateError,
-    } = await supabaseAdmin
-      .from("profiles")
-      .update({
-        credits: newCredits,
-      })
-      .eq("id", userId)
-      .eq("credits", currentCredits)
-      .select("credits")
-      .single();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if (balanceToCharge <= 0) {
+        break;
+      }
+
+      const newCredits = balanceToCharge - 1;
+
+      const {
+        data,
+        error,
+      } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          credits: newCredits,
+        })
+        .eq("id", userId)
+        .eq("credits", balanceToCharge)
+        .select("credits")
+        .maybeSingle();
+
+      creditUpdateError = error;
+
+      if (error) {
+        break;
+      }
+
+      if (data) {
+        updatedProfile = data;
+        break;
+      }
+
+      /*
+       * El saldo cambió mientras Replicate generaba la imagen.
+       * Volvemos a leerlo y reintentamos el descuento sin
+       * sobrescribir un saldo más reciente.
+       */
+      const {
+        data: latestProfile,
+        error: latestProfileError,
+      } = await supabaseAdmin
+        .from("profiles")
+        .select("credits")
+        .eq("id", userId)
+        .single();
+
+      if (latestProfileError || !latestProfile) {
+        creditUpdateError = latestProfileError;
+        break;
+      }
+
+      balanceToCharge = Number(latestProfile.credits || 0);
+    }
 
     if (creditUpdateError || !updatedProfile) {
       console.error(
