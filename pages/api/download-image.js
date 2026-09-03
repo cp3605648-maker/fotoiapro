@@ -19,15 +19,35 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "URL inválida." });
     }
 
-    // Seguridad: solo permitimos imágenes entregadas por Replicate
-    const allowedHosts = [
-      "replicate.delivery",
-      "pbxt.replicate.delivery",
-    ];
+    /*
+     * Seguridad:
+     * permitimos imágenes entregadas por Replicate y por
+     * el Storage del propio proyecto Supabase de FotoIA Pro.
+     */
+    const replicateHost =
+      parsedUrl.hostname === "replicate.delivery" ||
+      parsedUrl.hostname === "pbxt.replicate.delivery" ||
+      parsedUrl.hostname.endsWith(".replicate.delivery");
+
+    let supabaseStorageHost = "";
+
+    try {
+      supabaseStorageHost = new URL(
+        process.env.NEXT_PUBLIC_SUPABASE_URL
+      ).hostname;
+    } catch {
+      supabaseStorageHost = "";
+    }
+
+    const isOwnSupabaseStorage =
+      Boolean(supabaseStorageHost) &&
+      parsedUrl.hostname === supabaseStorageHost &&
+      parsedUrl.pathname.startsWith(
+        "/storage/v1/object/public/uploads/"
+      );
 
     const validHost =
-      allowedHosts.includes(parsedUrl.hostname) ||
-      parsedUrl.hostname.endsWith(".replicate.delivery");
+      replicateHost || isOwnSupabaseStorage;
 
     if (!validHost) {
       return res.status(400).json({
