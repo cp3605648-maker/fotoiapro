@@ -181,6 +181,7 @@ export default function Home() {
       const success = params.get("success");
       const cancelled = params.get("cancelled");
       const sessionId = params.get("session_id");
+      const purchase = params.get("purchase");
 
       if (success === "true" && sessionId) {
         try {
@@ -199,22 +200,108 @@ export default function Home() {
             throw new Error(data?.details || data?.error || "No se pudo confirmar el pago.");
           }
 
-          setCredits(data.credits);
-          trackEvent("Purchase", {
-            currency: "MXN",
-            value: data?.amount ? data.amount / 100 : undefined,
-            credits: data?.addedCredits || data?.creditsAdded || undefined,
-          });
-          setNotice("Pago exitoso. Tus créditos fueron agregados.");
-          window.history.replaceState({}, "", window.location.pathname);
+          if (
+            data?.productType === "logo" ||
+            purchase === "logo"
+          ) {
+            const savedLogo = sessionStorage.getItem(
+              "fotoia_pending_logo"
+            );
+
+            if (savedLogo) {
+              try {
+                const logoData = JSON.parse(savedLogo);
+
+                setLogoBusinessName(
+                  logoData.businessName || ""
+                );
+                setLogoBusinessType(
+                  logoData.businessType || "Restaurante"
+                );
+                setLogoStyle(
+                  logoData.style || "Moderno"
+                );
+                setLogoColors(
+                  logoData.colors || ""
+                );
+                setLogoDescription(
+                  logoData.description || ""
+                );
+              } catch (parseError) {
+                console.error(
+                  "LOGO_STORAGE_ERROR:",
+                  parseError
+                );
+              }
+            }
+
+            setLogoPaymentSession(sessionId);
+
+            sessionStorage.setItem(
+              "fotoia_logo_payment_session",
+              sessionId
+            );
+
+            setShowLogoCreator(true);
+
+            trackEvent("Purchase", {
+              currency: "MXN",
+              value:
+                data?.amount
+                  ? data.amount / 100
+                  : 69,
+              product_type: "logo",
+            });
+
+            setNotice(
+              "✅ Pago de $69 MXN confirmado. Ahora pulsa “Generar mi logotipo pagado”."
+            );
+          } else {
+            setCredits(data.credits);
+
+            trackEvent("Purchase", {
+              currency: "MXN",
+              value:
+                data?.amount
+                  ? data.amount / 100
+                  : undefined,
+              credits:
+                data?.addedCredits ||
+                data?.creditsAdded ||
+                undefined,
+            });
+
+            setNotice(
+              "Pago exitoso. Tus créditos fueron agregados."
+            );
+          }
+
+          window.history.replaceState(
+            {},
+            "",
+            window.location.pathname
+          );
         } catch (err) {
           setError(err.message || "Error confirmando pago.");
         }
       }
 
       if (cancelled === "true") {
-        setNotice("Pago cancelado. No se agregaron créditos.");
-        window.history.replaceState({}, "", window.location.pathname);
+        if (purchase === "logo") {
+          setNotice(
+            "Pago del logotipo cancelado. No se realizó ningún cargo."
+          );
+        } else {
+          setNotice(
+            "Pago cancelado. No se agregaron créditos."
+          );
+        }
+
+        window.history.replaceState(
+          {},
+          "",
+          window.location.pathname
+        );
       }
     };
 
@@ -427,6 +514,78 @@ export default function Home() {
     }
   };
 
+  const startLogoCheckout = async () => {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
+    const businessName = logoBusinessName.trim();
+
+    if (!businessName) {
+      setError("Escribe el nombre de tu negocio.");
+      return;
+    }
+
+    try {
+      setLogoLoading(true);
+      setError("");
+      setNotice("");
+
+      const pendingLogo = {
+        businessName,
+        businessType: logoBusinessType.trim(),
+        style: logoStyle.trim(),
+        colors: logoColors.trim(),
+        description: logoDescription.trim(),
+      };
+
+      sessionStorage.setItem(
+        "fotoia_pending_logo",
+        JSON.stringify(pendingLogo)
+      );
+
+      trackEvent("InitiateCheckout", {
+        package_id: "logo_launch_mxn",
+        product_type: "logo",
+        value: 69,
+        currency: "MXN",
+      });
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          packageType: "logo_launch_mxn",
+          userId: user.id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.url) {
+        throw new Error(
+          data?.details ||
+          data?.error ||
+          "No se pudo iniciar el pago."
+        );
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("LOGO_CHECKOUT_ERROR:", err);
+
+      setError(
+        err.message ||
+        "No se pudo iniciar el pago del logotipo."
+      );
+
+      setLogoLoading(false);
+    }
+  };
+
   const generateLogo = async () => {
     if (!user) {
       window.location.href = "/login";
@@ -440,8 +599,10 @@ export default function Home() {
       return;
     }
 
-    if (credits <= 0) {
-      setError("No tienes créditos disponibles para crear un logotipo.");
+    if (!logoPaymentSession) {
+      setError(
+        "Primero debes completar el pago de $69 MXN para crear tu logotipo."
+      );
       return;
     }
 
@@ -457,6 +618,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           userId: user.id,
+          paymentSessionId: logoPaymentSession,
           businessName,
           businessType: logoBusinessType.trim(),
           style: logoStyle.trim(),
@@ -481,21 +643,20 @@ export default function Home() {
 
       setGeneratedLogo(data.output);
 
-      const newCredits =
-        typeof data.creditsLeft === "number"
-          ? data.creditsLeft
-          : Math.max(credits - 1, 0);
-
-      setCredits(newCredits);
-
       trackEvent("GenerateLogo", {
         business_name: businessName,
         business_type: logoBusinessType.trim(),
-        credits_left: newCredits,
+        value: 69,
+        currency: "MXN",
       });
 
+      sessionStorage.removeItem("fotoia_pending_logo");
+      sessionStorage.removeItem("fotoia_logo_payment_session");
+
+      setLogoPaymentSession(null);
+
       setNotice(
-        "✨ Logotipo creado correctamente. Ahora puedes utilizarlo en tus flyers, menús, anuncios y otras piezas publicitarias."
+        "✨ Logotipo creado correctamente. Tu pago fue aplicado y no se descontaron créditos."
       );
     } catch (err) {
       console.error("LOGO_ERROR:", err);
@@ -758,19 +919,42 @@ export default function Home() {
                   />
                 </label>
 
-                <div className="logoCreditInfo">
-                  ✨ Crear un logotipo consume <strong>1 crédito</strong>.
+                <div className="logoLaunchOffer">
+                  <span className="logoLaunchBadge">
+                    🔥 PRECIO ESPECIAL DE LANZAMIENTO
+                  </span>
+
+                  <div className="logoLaunchPrice">
+                    <span className="logoRegularPrice">
+                      $149 MXN
+                    </span>
+
+                    <strong>$69 MXN</strong>
+                  </div>
+
+                  <p>
+                    Pago único por la creación de tu logotipo.
+                    No consume créditos de publicidad.
+                  </p>
                 </div>
 
                 <button
                   type="button"
                   className="generateLogoBtn"
-                  onClick={generateLogo}
+                  onClick={
+                    logoPaymentSession
+                      ? generateLogo
+                      : startLogoCheckout
+                  }
                   disabled={logoLoading}
                 >
                   {logoLoading
-                    ? "Creando tu logotipo..."
-                    : "✨ Generar logotipo"}
+                    ? logoPaymentSession
+                      ? "Creando tu logotipo..."
+                      : "Abriendo pago seguro..."
+                    : logoPaymentSession
+                    ? "✨ Generar mi logotipo pagado"
+                    : "✨ Crear mi logotipo — $69 MXN"}
                 </button>
               </div>
             ) : (

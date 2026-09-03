@@ -1,15 +1,22 @@
 import Replicate from "replicate";
+import Stripe from "stripe";
 import { supabaseAdmin } from "../../lib/supabaseAdmin";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 function clean(value, maxLength = 500) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
 export default async function handler(req, res) {
+  let paymentClaimed = false;
+  let paymentSessionId = "";
+  let userId = "";
+
   try {
     if (req.method !== "POST") {
       return res.status(405).json({
@@ -18,7 +25,8 @@ export default async function handler(req, res) {
     }
 
     const {
-      userId,
+      userId: bodyUserId,
+      paymentSessionId: bodyPaymentSessionId,
       businessName,
       businessType,
       style,
@@ -26,9 +34,18 @@ export default async function handler(req, res) {
       description,
     } = req.body || {};
 
+    userId = clean(bodyUserId, 100);
+    paymentSessionId = clean(bodyPaymentSessionId, 200);
+
     if (!userId) {
       return res.status(401).json({
         error: "Debes iniciar sesión.",
+      });
+    }
+
+    if (!paymentSessionId) {
+      return res.status(402).json({
+        error: "Debes pagar el logotipo antes de generarlo.",
       });
     }
 
@@ -44,26 +61,61 @@ export default async function handler(req, res) {
       });
     }
 
-    // Consultar créditos actuales.
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .select("id,credits")
-      .eq("id", userId)
-      .single();
+    /*
+     * Verificar directamente con Stripe que el pago existe,
+     * está pagado y pertenece a este usuario.
+     */
+    const session = await stripe.checkout.sessions.retrieve(paymentSessionId);
 
-    if (profileError || !profile) {
-      return res.status(404).json({
-        error: "No se encontró el perfil del usuario.",
-      });
-    }
-
-    const currentCredits = Number(profile.credits || 0);
-
-    if (currentCredits <= 0) {
+    if (session.payment_status !== "paid") {
       return res.status(402).json({
-        error: "No tienes créditos disponibles para crear un logotipo.",
+        error: "El pago del logotipo todavía no está confirmado.",
       });
     }
+
+    if (session.metadata?.userId !== userId) {
+      return res.status(403).json({
+        error: "Este pago no pertenece al usuario.",
+      });
+    }
+
+    if (
+      session.metadata?.productType !== "logo" ||
+      session.metadata?.packageType !== "logo_launch_mxn"
+    ) {
+      return res.status(403).json({
+        error: "Este pago no corresponde a un logotipo.",
+      });
+    }
+
+    /*
+     * El pago debe existir también en purchases.
+     * Cambiamos completed -> processing para evitar usar
+     * la misma compra varias veces simultáneamente.
+     */
+    const { data: claimedPurchase, error: claimError } = await supabaseAdmin
+      .from("purchases")
+      .update({
+        status: "processing",
+      })
+      .eq("stripe_session_id", paymentSessionId)
+      .eq("user_id", userId)
+      .eq("status", "completed")
+      .select("id")
+      .maybeSingle();
+
+    if (claimError) {
+      throw claimError;
+    }
+
+    if (!claimedPurchase) {
+      return res.status(409).json({
+        error:
+          "Este pago ya fue utilizado o todavía no ha sido confirmado.",
+      });
+    }
+
+    paymentClaimed = true;
 
     const prompt = `
 Create a professional commercial logo for a real business.
@@ -106,11 +158,11 @@ LOGO REQUIREMENTS:
 - Square 1:1 composition.
 `;
 
-    console.log("GENERATE_LOGO:", {
+    console.log("GENERATE_PAID_LOGO:", {
       userId,
       businessName: cleanName,
       businessType: cleanType,
-      style: cleanStyle,
+      paymentSessionId,
     });
 
     const output = await replicate.run(
@@ -138,38 +190,56 @@ LOGO REQUIREMENTS:
     }
 
     if (!outputUrl || outputUrl === "[object Object]") {
-      throw new Error("Replicate no devolvió una URL válida para el logotipo.");
+      throw new Error(
+        "Replicate no devolvió una URL válida para el logotipo."
+      );
     }
 
-    // Descontar exactamente 1 crédito después de generar correctamente.
-    // Se comprueba nuevamente el saldo para evitar descontar un saldo negativo.
-    const newCredits = currentCredits - 1;
-
-    const { data: updatedProfile, error: updateError } = await supabaseAdmin
-      .from("profiles")
+    /*
+     * Marcar la compra como utilizada.
+     */
+    const { error: usedError } = await supabaseAdmin
+      .from("purchases")
       .update({
-        credits: newCredits,
+        status: "used",
       })
-      .eq("id", userId)
-      .eq("credits", currentCredits)
-      .select("credits")
-      .single();
+      .eq("stripe_session_id", paymentSessionId)
+      .eq("user_id", userId);
 
-    if (updateError || !updatedProfile) {
-      console.error("LOGO_CREDIT_UPDATE_ERROR:", updateError);
-
-      return res.status(409).json({
-        error: "El logotipo fue generado, pero no pudimos actualizar tus créditos. Intenta nuevamente.",
-      });
+    if (usedError) {
+      console.error("LOGO_PURCHASE_USED_ERROR:", usedError);
     }
+
+    paymentClaimed = false;
 
     return res.status(200).json({
       success: true,
       output: outputUrl,
-      creditsLeft: updatedProfile.credits,
     });
   } catch (error) {
     console.error("GENERATE_LOGO_ERROR:", error);
+
+    /*
+     * Si Replicate falla después de reservar el pago,
+     * permitimos que el cliente vuelva a intentar.
+     */
+    if (paymentClaimed && paymentSessionId && userId) {
+      try {
+        await supabaseAdmin
+          .from("purchases")
+          .update({
+            status: "completed",
+          })
+          .eq("stripe_session_id", paymentSessionId)
+          .eq("user_id", userId)
+          .eq("status", "processing");
+      } catch (restoreError) {
+        console.error(
+          "LOGO_PAYMENT_RESTORE_ERROR:",
+          restoreError
+        );
+      }
+    }
 
     return res.status(500).json({
       error: "Error al generar el logotipo.",

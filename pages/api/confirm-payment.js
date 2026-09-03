@@ -5,7 +5,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método no permitido" });
+    return res.status(405).json({
+      error: "Método no permitido",
+    });
   }
 
   const { sessionId, userId } = req.body || {};
@@ -27,6 +29,7 @@ export default async function handler(req, res) {
 
     const stripeUserId = session.metadata?.userId;
     const packageType = session.metadata?.packageType;
+    const productType = session.metadata?.productType || "credits";
     const credits = Number(session.metadata?.credits || 0);
 
     if (stripeUserId !== userId) {
@@ -35,32 +38,92 @@ export default async function handler(req, res) {
       });
     }
 
-    const { data: existing } = await supabaseAdmin
+    const { data: existing, error: existingError } = await supabaseAdmin
       .from("purchases")
-      .select("id")
+      .select("id,status")
       .eq("stripe_session_id", session.id)
       .maybeSingle();
 
+    if (existingError) {
+      throw existingError;
+    }
+
+    /*
+     * COMPRA DE LOGOTIPO
+     * No agrega créditos.
+     */
+    if (productType === "logo") {
+      if (!existing) {
+        const { error: purchaseError } = await supabaseAdmin
+          .from("purchases")
+          .insert({
+            user_id: userId,
+            stripe_session_id: session.id,
+            package_type: packageType,
+            credits_added: 0,
+            credits: 0,
+            amount: session.amount_total,
+            currency: session.currency,
+            status: "completed",
+          });
+
+        if (purchaseError) {
+          throw purchaseError;
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        productType: "logo",
+        packageType,
+        sessionId: session.id,
+        amount: session.amount_total,
+        currency: session.currency,
+        alreadyConfirmed: Boolean(existing),
+      });
+    }
+
+    /*
+     * COMPRA DE CRÉDITOS
+     */
     if (existing) {
-      const { data: profile } = await supabaseAdmin
+      const { data: profile, error: profileError } = await supabaseAdmin
         .from("profiles")
         .select("credits")
         .eq("id", userId)
         .single();
 
+      if (profileError) {
+        throw profileError;
+      }
+
       return res.status(200).json({
+        success: true,
+        productType: "credits",
         alreadyConfirmed: true,
         credits: profile?.credits || 0,
+        amount: session.amount_total,
+        currency: session.currency,
       });
     }
 
-    const { data: profile } = await supabaseAdmin
+    if (credits <= 0) {
+      return res.status(400).json({
+        error: "La compra no contiene créditos válidos.",
+      });
+    }
+
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("credits")
       .eq("id", userId)
       .single();
 
-    const newCredits = (profile?.credits || 0) + credits;
+    if (profileError || !profile) {
+      throw profileError || new Error("Perfil no encontrado");
+    }
+
+    const newCredits = Number(profile.credits || 0) + credits;
 
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
@@ -69,7 +132,9 @@ export default async function handler(req, res) {
       })
       .eq("id", userId);
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      throw updateError;
+    }
 
     const { error: purchaseError } = await supabaseAdmin
       .from("purchases")
@@ -78,22 +143,26 @@ export default async function handler(req, res) {
         stripe_session_id: session.id,
         package_type: packageType,
         credits_added: credits,
-        credits: credits,
+        credits,
         amount: session.amount_total,
         currency: session.currency,
         status: "completed",
       });
 
-    if (purchaseError) throw purchaseError;
+    if (purchaseError) {
+      throw purchaseError;
+    }
 
     return res.status(200).json({
       success: true,
+      productType: "credits",
       addedCredits: credits,
       credits: newCredits,
+      amount: session.amount_total,
+      currency: session.currency,
     });
-
   } catch (err) {
-    console.error(err);
+    console.error("CONFIRM PAYMENT ERROR:", err);
 
     return res.status(500).json({
       error: "No se pudo confirmar el pago",
