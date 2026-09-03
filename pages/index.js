@@ -130,6 +130,7 @@ export default function Home() {
   const [logoDescription, setLogoDescription] = useState("");
   const [logoLoading, setLogoLoading] = useState(false);
   const [generatedLogo, setGeneratedLogo] = useState(null);
+  const [logoPaymentSession, setLogoPaymentSession] = useState(null);
 
   useEffect(() => {
     trackEvent("ViewContent", {
