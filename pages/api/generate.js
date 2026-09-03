@@ -63,6 +63,12 @@ export default async function handler(req, res) {
       prompt: userPrompt,
       preset,
       socialFormat,
+      marketplacePlatform,
+      marketplaceImageType,
+      menuType,
+      adType,
+      flyerType,
+      promotionType,
       isPaid,
       imageMeta,
       userId,
@@ -116,7 +122,13 @@ export default async function handler(req, res) {
       imageMeta || null,
       preset || "ad",
       hasReferenceImage,
-      socialFormat || ""
+      socialFormat || "",
+      menuType || "",
+      adType || "",
+      flyerType || "",
+      promotionType || "",
+      marketplacePlatform || "",
+      marketplaceImageType || ""
     );
 
     const aspectRatio = getSocialAspectRatio(

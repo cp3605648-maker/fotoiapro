@@ -30,6 +30,12 @@ const presets = [
     emoji: "📱",
   },
   {
+    id: "marketplace",
+    name: "Marketplace",
+    desc: "Imágenes profesionales optimizadas para vender en marketplaces y tiendas online.",
+    emoji: "🛒",
+  },
+  {
     id: "catalog",
     name: "Catálogo",
     desc: "Presentación profesional de producto para tiendas y ecommerce.",
@@ -43,6 +49,59 @@ const presets = [
   },
 ];
 
+
+const menuTypes = [
+  { id: "full_menu", name: "Menú completo" },
+  { id: "restaurant", name: "Restaurante" },
+  { id: "cafe", name: "Cafetería" },
+  { id: "fast_food", name: "Comida rápida" },
+  { id: "drinks", name: "Bebidas" },
+  { id: "desserts", name: "Postres" },
+  { id: "combos", name: "Combos / promociones" },
+  { id: "whatsapp_menu", name: "Menú para WhatsApp" },
+  { id: "screen_menu", name: "Menú para pantalla" },
+];
+
+const adTypes = [
+  { id: "product_ad", name: "Anuncio de producto" },
+  { id: "service_ad", name: "Anuncio de servicio" },
+  { id: "launch", name: "Lanzamiento" },
+  { id: "commercial_offer", name: "Oferta comercial" },
+  { id: "brand_ad", name: "Publicidad de marca" },
+];
+
+const flyerTypes = [
+  { id: "product_flyer", name: "Flyer de producto" },
+  { id: "service_flyer", name: "Flyer de servicio" },
+  { id: "event_flyer", name: "Flyer de evento" },
+  { id: "business_flyer", name: "Flyer de negocio" },
+  { id: "informational_flyer", name: "Flyer informativo" },
+];
+
+const promotionTypes = [
+  { id: "discount", name: "Descuento" },
+  { id: "special_offer", name: "Oferta especial" },
+  { id: "two_for_one", name: "2x1" },
+  { id: "combo", name: "Combo" },
+  { id: "clearance", name: "Liquidación" },
+  { id: "seasonal", name: "Temporada" },
+  { id: "featured_product", name: "Producto destacado" },
+];
+
+const marketplacePlatforms = [
+  { id: "amazon", name: "Amazon" },
+  { id: "mercadolibre", name: "Mercado Libre" },
+  { id: "ebay", name: "eBay" },
+  { id: "shopify", name: "Shopify" },
+];
+
+const marketplaceImageTypes = [
+  { id: "main", name: "Imagen principal" },
+  { id: "secondary", name: "Imagen secundaria" },
+  { id: "lifestyle", name: "Producto en uso / Lifestyle" },
+  { id: "detail", name: "Detalle del producto" },
+  { id: "infographic", name: "Infografía comercial" },
+];
 
 const socialFormats = [
   {
@@ -113,6 +172,12 @@ export default function Home() {
   const [referencePreview, setReferencePreview] = useState(null);
   const [preset, setPreset] = useState("menu");
   const [socialFormat, setSocialFormat] = useState("instagram_post");
+const [marketplacePlatform, setMarketplacePlatform] = useState("amazon");
+const [marketplaceImageType, setMarketplaceImageType] = useState("main");
+  const [menuType, setMenuType] = useState("full_menu");
+  const [adType, setAdType] = useState("product_ad");
+  const [flyerType, setFlyerType] = useState("product_flyer");
+  const [promotionType, setPromotionType] = useState("discount");
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState(null);
@@ -472,6 +537,12 @@ export default function Home() {
           prompt: customPrompt.trim(),
           preset,
           socialFormat,
+          marketplacePlatform,
+          marketplaceImageType,
+          menuType,
+          adType,
+          flyerType,
+          promotionType,
           credits,
           isPaid: true,
           userId: user.id,
@@ -1123,6 +1194,110 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {preset === "menu" && (
+              <div className="socialFormatBox">
+                <strong>Tipo de menú</strong>
+                <select
+                  value={menuType}
+                  onChange={(e) => setMenuType(e.target.value)}
+                >
+                  {menuTypes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {preset === "ad" && (
+              <div className="socialFormatBox">
+                <strong>Tipo de anuncio</strong>
+                <select
+                  value={adType}
+                  onChange={(e) => setAdType(e.target.value)}
+                >
+                  {adTypes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {preset === "flyer" && (
+              <div className="socialFormatBox">
+                <strong>Tipo de flyer</strong>
+                <select
+                  value={flyerType}
+                  onChange={(e) => setFlyerType(e.target.value)}
+                >
+                  {flyerTypes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {preset === "promotion" && (
+              <div className="socialFormatBox">
+                <strong>Tipo de promoción</strong>
+                <select
+                  value={promotionType}
+                  onChange={(e) => setPromotionType(e.target.value)}
+                >
+                  {promotionTypes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {preset === "marketplace" && (
+              <>
+                <div className="socialFormatBox">
+                  <label htmlFor="marketplacePlatform">
+                    Marketplace
+                  </label>
+
+                  <select
+                    id="marketplacePlatform"
+                    value={marketplacePlatform}
+                    onChange={(e) => setMarketplacePlatform(e.target.value)}
+                  >
+                    {marketplacePlatforms.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="socialFormatBox">
+                  <label htmlFor="marketplaceImageType">
+                    Tipo de imagen
+                  </label>
+
+                  <select
+                    id="marketplaceImageType"
+                    value={marketplaceImageType}
+                    onChange={(e) => setMarketplaceImageType(e.target.value)}
+                  >
+                    {marketplaceImageTypes.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
 
             {preset === "social" && (
               <div className="socialFormatBox">
