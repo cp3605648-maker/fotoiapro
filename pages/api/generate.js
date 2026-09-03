@@ -63,6 +63,65 @@ function getOutputUrl(output) {
   return String(raw);
 }
 
+
+async function runReplicateWithRetry(
+  replicate,
+  model,
+  options,
+  maxRetries = 3
+) {
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    try {
+      return await replicate.run(model, options);
+    } catch (error) {
+      const status =
+        error?.response?.status ||
+        error?.status ||
+        null;
+
+      if (status !== 429 || attempt >= maxRetries) {
+        throw error;
+      }
+
+      let retryAfter = Number(
+        error?.response?.headers?.get?.("retry-after")
+      );
+
+      if (!Number.isFinite(retryAfter) || retryAfter <= 0) {
+        const message = String(error?.message || "");
+
+        const jsonMatch = message.match(
+          /"retry_after"\s*:\s*(\d+)/
+        );
+
+        const resetMatch = message.match(
+          /resets in ~?(\d+)s/i
+        );
+
+        retryAfter = Number(
+          jsonMatch?.[1] ||
+          resetMatch?.[1] ||
+          8
+        );
+      }
+
+      const waitSeconds = Math.max(retryAfter + 1, 2);
+
+      console.log(
+        `REPLICATE_RATE_LIMIT: esperando ${waitSeconds}s antes del reintento ${attempt + 1}/${maxRetries}`
+      );
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, waitSeconds * 1000)
+      );
+    }
+  }
+
+  throw new Error(
+    "Replicate agotó los reintentos disponibles."
+  );
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -159,6 +218,11 @@ export default async function handler(req, res) {
       marketplacePlatform === "amazon" &&
       marketplaceImageType === "main";
 
+    const isAmazonSecondary =
+      preset === "marketplace" &&
+      marketplacePlatform === "amazon" &&
+      marketplaceImageType === "secondary";
+
     /*
      * AMAZON - IMAGEN PRINCIPAL
      *
@@ -178,11 +242,152 @@ export default async function handler(req, res) {
       console.log("AMAZON_MAIN_BACKGROUND_REMOVAL:", true);
       console.log("PRESET:", "marketplace");
 
-      output = await replicate.run(
+      output = await runReplicateWithRetry(replicate,
         "851-labs/background-remover:a029dff38972b5fda4ec5d75d7d1cd25aeff621d2cf4946a41055d7db66b80bc",
         {
           input: {
             image,
+            format: "png",
+            reverse: false,
+            threshold: 0,
+            background_type: "rgba",
+          },
+        }
+      );
+    }
+
+    /*
+     * AMAZON - IMAGEN SECUNDARIA
+     *
+     * Flujo especial:
+     * 1. elimina caja y entorno original,
+     * 2. conserva únicamente el producto,
+     * 3. genera una vista limpia 3/4,
+     * 4. vuelve a aislar el producto,
+     * 5. posteriormente Sharp lo coloca en lienzo blanco 1:1.
+     */
+    else if (isAmazonSecondary) {
+      console.log("AMAZON_SECONDARY_FLOW:", true);
+      console.log("AMAZON_SECONDARY_STEP:", "ISOLATE_PRODUCT");
+
+      const isolatedOutput = await runReplicateWithRetry(replicate,
+        "851-labs/background-remover:a029dff38972b5fda4ec5d75d7d1cd25aeff621d2cf4946a41055d7db66b80bc",
+        {
+          input: {
+            image,
+            format: "png",
+            reverse: false,
+            threshold: 0,
+            background_type: "rgba",
+          },
+        }
+      );
+
+      const isolatedUrl = getOutputUrl(isolatedOutput);
+
+      if (
+        !isolatedUrl ||
+        isolatedUrl === "[object Object]" ||
+        !String(isolatedUrl).startsWith("http")
+      ) {
+        throw new Error(
+          "No pudimos aislar el producto para la imagen secundaria."
+        );
+      }
+
+      console.log("AMAZON_SECONDARY_STEP:", "CREATE_3_4_VIEW");
+
+      const secondaryPrompt = `
+AMAZON SECONDARY PRODUCT IMAGE.
+
+Use the isolated product from the input image as the ONLY product reference.
+
+ABSOLUTE PRODUCT IDENTITY:
+- Preserve the exact same product.
+- Preserve its real shape.
+- Preserve its real color.
+- Preserve its real materials.
+- Preserve its real proportions.
+- Preserve its real branding and visible product details.
+- Do not redesign the product.
+- Do not replace the product.
+- Do not create another product.
+- Do not invent accessories.
+- Do not invent packaging.
+
+CAMERA VIEW:
+- Present the SAME product from a clean professional three-quarter (3/4) ecommerce angle.
+- The view must clearly show both the front and one side of the product.
+- Create natural depth suitable for professional ecommerce photography.
+- Do not use the exact flat camera perspective from the original photo when a realistic three-quarter presentation can be produced.
+- Keep the product fully visible.
+- Keep the product large and centered.
+
+BACKGROUND:
+- Pure white background #FFFFFF.
+- No retail box.
+- No shoe box.
+- No packaging.
+- No shelves.
+- No table.
+- No store environment.
+- No people.
+- No hands.
+- No props.
+- No decorative objects.
+- No lifestyle scenery.
+
+TEXT:
+- No prices.
+- No stickers.
+- No barcodes.
+- No QR codes.
+- No promotional labels.
+- No advertising text.
+- No invented typography.
+
+FINAL RESULT:
+A clean professional ecommerce studio photograph showing ONLY the exact real product from a three-quarter view on pure white background.
+`;
+
+      const perspectiveOutput = await runReplicateWithRetry(replicate,
+        "black-forest-labs/flux-kontext-pro",
+        {
+          input: {
+            prompt: secondaryPrompt,
+            input_image: isolatedUrl,
+            aspect_ratio: "1:1",
+            output_format: "png",
+            safety_tolerance: 2,
+            prompt_upsampling: false,
+          },
+        }
+      );
+
+      const perspectiveUrl = getOutputUrl(perspectiveOutput);
+
+      if (
+        !perspectiveUrl ||
+        perspectiveUrl === "[object Object]" ||
+        !String(perspectiveUrl).startsWith("http")
+      ) {
+        throw new Error(
+          "No pudimos generar la vista 3/4 del producto."
+        );
+      }
+
+      /*
+       * Segundo aislamiento:
+       * elimina cualquier fondo, sombra ambiental u objeto
+       * que Kontext pudiera haber creado.
+       */
+      console.log("AMAZON_SECONDARY_STEP:", "FINAL_ISOLATION");
+
+      output = await runReplicateWithRetry(replicate,
+        "851-labs/background-remover:a029dff38972b5fda4ec5d75d7d1cd25aeff621d2cf4946a41055d7db66b80bc",
+        {
+          input: {
+            image: perspectiveUrl,
             format: "png",
             reverse: false,
             threshold: 0,
@@ -210,7 +415,7 @@ export default async function handler(req, res) {
       console.log("REFERENCE_IMAGE:", false);
       console.log("PRESET:", preset || "ad");
 
-      output = await replicate.run(
+      output = await runReplicateWithRetry(replicate,
         "black-forest-labs/flux-kontext-pro",
         {
           input,
@@ -258,7 +463,7 @@ COMBINATION INSTRUCTION:
       console.log("REFERENCE_IMAGE:", true);
       console.log("PRESET:", preset || "ad");
 
-      output = await replicate.run(
+      output = await runReplicateWithRetry(replicate,
         "flux-kontext-apps/multi-image-kontext-pro",
         {
           input,
@@ -289,7 +494,7 @@ COMBINATION INSTRUCTION:
      * 4. lo centramos sobre fondo blanco 1600x1600,
      * 5. guardamos el PNG final en Supabase Storage.
      */
-    if (isAmazonMain) {
+    if (isAmazonMain || isAmazonSecondary) {
       const removedResponse = await fetch(outputUrl);
 
       if (!removedResponse.ok) {
@@ -363,8 +568,12 @@ COMBINATION INSTRUCTION:
         .png()
         .toBuffer();
 
+      const amazonImageLabel = isAmazonMain
+        ? "amazon-main"
+        : "amazon-secondary";
+
       const storagePath =
-        `${userId}/amazon-main-${Date.now()}.png`;
+        `${userId}/${amazonImageLabel}-${Date.now()}.png`;
 
       const {
         error: amazonUploadError,
@@ -400,8 +609,8 @@ COMBINATION INSTRUCTION:
 
       outputUrl = amazonPublicData.publicUrl;
 
-      console.log("AMAZON_MAIN_SQUARE:", true);
-      console.log("AMAZON_MAIN_STORAGE_PATH:", storagePath);
+      console.log("AMAZON_FINAL_SQUARE:", true);
+      console.log("AMAZON_FINAL_STORAGE_PATH:", storagePath);
     }
 
     let balanceToCharge = currentCredits;
