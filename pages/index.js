@@ -98,9 +98,6 @@ const marketplacePlatforms = [
 const marketplaceImageTypes = [
   { id: "main", name: "Imagen principal" },
   { id: "secondary", name: "Imagen secundaria" },
-  { id: "lifestyle", name: "Producto en uso / Lifestyle" },
-  { id: "detail", name: "Detalle del producto" },
-  { id: "infographic", name: "Infografía comercial" },
 ];
 
 const socialFormats = [
