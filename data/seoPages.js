@@ -2,7 +2,6 @@ const baseUrl = "https://www.fotoia.pro";
 
 function createSeoPage({
   slug,
-  name,
   title,
   description,
   h1,
@@ -10,9 +9,6 @@ function createSeoPage({
   badge,
   cta,
   keyword,
-  benefits,
-  useCases,
-  prompts,
 }) {
   return {
     slug,
@@ -24,431 +20,680 @@ function createSeoPage({
     badge,
     cta,
     keyword,
-    benefits,
-    useCases,
-    prompts,
+
+    benefits: [
+      {
+        title: "Producto fiel al original",
+        text: `FotoIA Pro prioriza conservar la identidad real del producto al crear ${keyword}.`,
+      },
+      {
+        title: "Presentación comercial",
+        text: "Mejora fondo, iluminación, composición y apariencia para vender online.",
+      },
+      {
+        title: "Lista para tu negocio",
+        text: "Genera imágenes para ecommerce, redes sociales, publicidad y catálogos.",
+      },
+    ],
+
+    useCases: [
+      {
+        title: "Ecommerce",
+        text: `Utiliza ${keyword} para mejorar fichas y publicaciones de producto.`,
+      },
+      {
+        title: "Publicidad",
+        text: "Crea visuales profesionales para campañas, promociones y lanzamientos.",
+      },
+      {
+        title: "Redes sociales",
+        text: "Prepara contenido comercial para atraer atención hacia tus productos.",
+      },
+    ],
+
+    prompts: [
+      `Crea ${keyword} usando exactamente el producto de la imagen. Conserva su forma, color, logotipo, materiales y detalles reales.`,
+      `Convierte esta foto en ${keyword} con iluminación profesional, composición comercial y un fondo que ayude a destacar el producto sin modificarlo.`,
+    ],
+
     faqs: [
       {
         q: `¿Puedo crear ${keyword} con FotoIA Pro?`,
-        a: `Sí. FotoIA Pro te permite transformar una imagen usando inteligencia artificial para crear ${keyword} de forma rápida y sencilla.`,
+        a: `Sí. Sube una fotografía clara de tu producto y utiliza FotoIA Pro para crear ${keyword} con inteligencia artificial.`,
       },
       {
-        q: "¿La IA cambia mi rostro?",
-        a: "La intención es conservar tu identidad y mejorar elementos como fondo, iluminación, estilo, ropa o calidad visual.",
+        q: "¿FotoIA Pro modifica el producto real?",
+        a: "El objetivo es preservar la forma, color, branding y características visibles del producto mientras mejora su presentación comercial.",
       },
       {
-        q: "¿Necesito saber editar fotos?",
-        a: "No. Solo subes tu imagen, describes el resultado que quieres y FotoIA Pro genera la versión editada con IA.",
+        q: "¿Necesito saber diseño o edición?",
+        a: "No. Sube la foto del producto, selecciona lo que quieres crear y describe el resultado comercial que necesitas.",
       },
     ],
   };
 }
 
-export const seoPages = [
-  createSeoPage({
-    slug: "foto-linkedin",
-    name: "LinkedIn",
-    title: "Foto para LinkedIn con IA | FotoIA Pro",
-    description: "Crea una foto profesional para LinkedIn con inteligencia artificial. Mejora fondo, iluminación, ropa y calidad sin perder tu identidad.",
-    h1: "Foto Profesional para LinkedIn con Inteligencia Artificial",
-    subtitle: "Convierte una foto normal en una imagen profesional para LinkedIn, CV, entrevistas, marca personal o perfil corporativo.",
-    badge: "Foto profesional para LinkedIn",
-    cta: "Crear mi foto para LinkedIn",
-    keyword: "foto para LinkedIn",
-    benefits: [
-      { title: "Conserva tu identidad", text: "Mantiene tu rostro y mejora el estilo visual." },
-      { title: "Apariencia profesional", text: "Fondo corporativo, iluminación cuidada y presentación formal." },
-      { title: "Lista para perfiles laborales", text: "Ideal para LinkedIn, CV, entrevistas y marca personal." },
-    ],
-    useCases: [
-      { title: "Perfil LinkedIn", text: "Mejora tu imagen profesional." },
-      { title: "CV", text: "Genera una foto adecuada para empleo." },
-      { title: "Retrato ejecutivo", text: "Crea presencia corporativa." },
-    ],
-    prompts: [
-      "Convierte esta foto en una imagen profesional para LinkedIn, conserva mi rostro, mejora la iluminación y agrega fondo corporativo elegante.",
-      "Hazme una foto estilo ejecutivo para LinkedIn con ropa formal y fondo de oficina moderna.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-instagram",
-    name: "Instagram",
-    title: "Foto para Instagram con IA | FotoIA Pro",
-    description: "Crea fotos atractivas para Instagram con inteligencia artificial. Mejora estilo, fondo, iluminación y calidad visual.",
-    h1: "Foto para Instagram con Inteligencia Artificial",
-    subtitle: "Transforma tus fotos en imágenes llamativas para perfil, publicaciones, historias y contenido de redes sociales.",
-    badge: "Fotos para redes sociales",
-    cta: "Crear foto para Instagram",
-    keyword: "foto para Instagram",
-    benefits: [
-      { title: "Más impacto visual", text: "Crea imágenes más atractivas para redes." },
-      { title: "Estilos personalizados", text: "Pide looks urbanos, lifestyle, luxury o cinematográficos." },
-      { title: "Lista para publicar", text: "Ideal para perfil, feed, historias y marca personal." },
-    ],
-    useCases: [
-      { title: "Foto de perfil", text: "Mejora tu imagen principal." },
-      { title: "Contenido lifestyle", text: "Crea fotos para publicaciones." },
-      { title: "Marca personal", text: "Refuerza tu presencia digital." },
-    ],
-    prompts: [
-      "Haz esta foto más atractiva para Instagram, con iluminación profesional, fondo moderno y estilo lifestyle.",
-      "Convierte esta imagen en una foto de perfil llamativa para redes sociales.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-shopify",
-    name: "Shopify",
-    title: "Foto de Producto para Shopify con IA | FotoIA Pro",
-    description: "Mejora fotos de productos para Shopify con IA. Crea fondos limpios, iluminación profesional y apariencia comercial.",
-    h1: "Foto de Producto para Shopify con Inteligencia Artificial",
-    subtitle: "Optimiza imágenes de productos para tu tienda online con fondos limpios, mejor iluminación y estilo profesional.",
-    badge: "Fotos para ecommerce",
-    cta: "Crear foto para Shopify",
-    keyword: "foto de producto para Shopify",
-    benefits: [
-      { title: "Imagen comercial", text: "Haz que tus productos se vean más profesionales." },
-      { title: "Fondos limpios", text: "Crea fondos blancos, minimalistas o de catálogo." },
-      { title: "Mejor presentación", text: "Ideal para tiendas online y anuncios." },
-    ],
-    useCases: [
-      { title: "Producto ecommerce", text: "Mejora fotos para vender online." },
-      { title: "Catálogo", text: "Crea imágenes limpias y consistentes." },
-      { title: "Anuncios", text: "Prepara imágenes para campañas." },
-    ],
-    prompts: [
-      "Mejora esta foto de producto para Shopify con fondo blanco, iluminación profesional y apariencia de catálogo.",
-      "Convierte esta imagen en una foto comercial limpia para ecommerce.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-youtube",
-    name: "YouTube",
-    title: "Foto para YouTube con IA | FotoIA Pro",
-    description: "Crea imágenes para YouTube con IA. Mejora fotos para perfil, miniaturas, banners y contenido visual.",
-    h1: "Foto para YouTube con Inteligencia Artificial",
-    subtitle: "Crea imágenes atractivas para canal, miniaturas, banners y contenido de YouTube usando IA.",
-    badge: "Contenido para YouTube",
-    cta: "Crear foto para YouTube",
-    keyword: "foto para YouTube",
-    benefits: [
-      { title: "Más presencia visual", text: "Crea imágenes que llamen la atención." },
-      { title: "Ideal para creadores", text: "Perfecta para canal, perfil y contenido." },
-      { title: "Estilo profesional", text: "Mejora calidad, fondo e iluminación." },
-    ],
-    useCases: [
-      { title: "Foto de canal", text: "Mejora tu imagen como creador." },
-      { title: "Miniatura", text: "Crea base visual para thumbnails." },
-      { title: "Banner", text: "Genera imágenes para branding." },
-    ],
-    prompts: [
-      "Convierte esta foto en una imagen profesional para canal de YouTube con estilo moderno y fondo llamativo.",
-      "Mejora esta imagen para usarla como foto de creador de contenido.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-tiktok",
-    name: "TikTok",
-    title: "Foto para TikTok con IA | FotoIA Pro",
-    description: "Crea fotos llamativas para TikTok con inteligencia artificial. Mejora tu perfil, estilo visual y contenido.",
-    h1: "Foto para TikTok con Inteligencia Artificial",
-    subtitle: "Transforma tus imágenes en fotos modernas, creativas y listas para redes sociales.",
-    badge: "Foto para TikTok",
-    cta: "Crear foto para TikTok",
-    keyword: "foto para TikTok",
-    benefits: [
-      { title: "Estilo moderno", text: "Crea imágenes con apariencia actual y atractiva." },
-      { title: "Ideal para perfil", text: "Mejora tu foto principal de TikTok." },
-      { title: "Contenido llamativo", text: "Genera visuales para destacar." },
-    ],
-    useCases: [
-      { title: "Perfil TikTok", text: "Mejora tu primera impresión." },
-      { title: "Contenido viral", text: "Crea imágenes para publicaciones." },
-      { title: "Marca personal", text: "Refuerza tu imagen digital." },
-    ],
-    prompts: [
-      "Haz esta foto más llamativa para TikTok, con estilo moderno, colores vibrantes y buena iluminación.",
-      "Convierte esta selfie en una foto creativa para perfil de TikTok.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-whatsapp",
-    name: "WhatsApp",
-    title: "Foto de Perfil para WhatsApp con IA | FotoIA Pro",
-    description: "Crea una foto de perfil para WhatsApp con IA. Mejora iluminación, fondo y apariencia sin complicarte.",
-    h1: "Foto de Perfil para WhatsApp con Inteligencia Artificial",
-    subtitle: "Mejora tu foto de perfil con un estilo limpio, atractivo y profesional usando IA.",
-    badge: "Foto de perfil",
-    cta: "Crear foto para WhatsApp",
-    keyword: "foto de perfil para WhatsApp",
-    benefits: [
-      { title: "Perfil más cuidado", text: "Mejora tu imagen personal." },
-      { title: "Fondo limpio", text: "Cambia escenarios o elimina distracciones." },
-      { title: "Resultado rápido", text: "Crea una foto lista para usar." },
-    ],
-    useCases: [
-      { title: "Perfil personal", text: "Mejora tu foto cotidiana." },
-      { title: "Perfil profesional", text: "Úsala para trabajo o negocios." },
-      { title: "Foto social", text: "Crea una imagen más atractiva." },
-    ],
-    prompts: [
-      "Mejora esta foto para usarla como perfil de WhatsApp, con fondo limpio y buena iluminación.",
-      "Convierte esta imagen en una foto de perfil natural, clara y atractiva.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-luxury",
-    name: "Luxury",
-    title: "Foto Estilo Luxury con IA | FotoIA Pro",
-    description: "Crea fotos estilo lujo con inteligencia artificial. Genera looks premium, fondos elegantes y estética exclusiva.",
-    h1: "Foto Estilo Luxury con Inteligencia Artificial",
-    subtitle: "Transforma tus fotos con una estética premium, elegante y de alto impacto visual.",
-    badge: "Estilo luxury",
-    cta: "Crear foto luxury",
-    keyword: "foto estilo luxury",
-    benefits: [
-      { title: "Look premium", text: "Crea una imagen elegante y sofisticada." },
-      { title: "Fondos exclusivos", text: "Genera escenarios de lujo o alto nivel." },
-      { title: "Ideal para marca personal", text: "Dale más fuerza visual a tu imagen." },
-    ],
-    useCases: [
-      { title: "Retrato luxury", text: "Imagen elegante para redes." },
-      { title: "Marca personal", text: "Crea presencia premium." },
-      { title: "Contenido aspiracional", text: "Ideal para lifestyle." },
-    ],
-    prompts: [
-      "Convierte esta foto en una imagen estilo luxury, con iluminación elegante, fondo premium y apariencia sofisticada.",
-      "Haz esta foto más exclusiva, con estilo de marca de lujo y acabado profesional.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-playa",
-    name: "Playa",
-    title: "Foto en Playa con IA | FotoIA Pro",
-    description: "Crea fotos en la playa con inteligencia artificial. Cambia el fondo, mejora la luz y genera escenas tropicales.",
-    h1: "Foto en Playa con Inteligencia Artificial",
-    subtitle: "Transforma tu imagen con fondos de playa, luz natural, ambiente tropical y estilo vacacional.",
-    badge: "Fondo de playa",
-    cta: "Crear foto en playa",
-    keyword: "foto en playa con IA",
-    benefits: [
-      { title: "Fondo tropical", text: "Cambia el escenario a una playa realista." },
-      { title: "Luz natural", text: "Mejora colores, brillo y ambiente." },
-      { title: "Estilo vacacional", text: "Ideal para redes y contenido lifestyle." },
-    ],
-    useCases: [
-      { title: "Foto de viaje", text: "Crea una escena vacacional." },
-      { title: "Redes sociales", text: "Genera contenido atractivo." },
-      { title: "Lifestyle", text: "Transforma tu foto con ambiente tropical." },
-    ],
-    prompts: [
-      "Coloca esta foto en una playa tropical al atardecer, conserva mi rostro y mejora la iluminación.",
-      "Cambia el fondo a una playa con mar azul, arena clara y luz natural.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-dubai",
-    name: "Dubái",
-    title: "Foto en Dubái con IA | FotoIA Pro",
-    description: "Crea fotos con fondo de Dubái usando IA. Genera escenarios urbanos, lujo, rascacielos y estilo premium.",
-    h1: "Foto en Dubái con Inteligencia Artificial",
-    subtitle: "Convierte tu foto en una imagen con fondo de Dubái, estilo urbano, lujo moderno y apariencia premium.",
-    badge: "Fondo Dubái",
-    cta: "Crear foto en Dubái",
-    keyword: "foto en Dubái con IA",
-    benefits: [
-      { title: "Escenario premium", text: "Crea fondos urbanos inspirados en Dubái." },
-      { title: "Estética de lujo", text: "Ideal para redes y marca personal." },
-      { title: "Cambio de fondo", text: "Transforma tu entorno sin salir de casa." },
-    ],
-    useCases: [
-      { title: "Foto urbana", text: "Crea fondo de ciudad moderna." },
-      { title: "Contenido luxury", text: "Imagen aspiracional y elegante." },
-      { title: "Redes sociales", text: "Destaca con escenarios premium." },
-    ],
-    prompts: [
-      "Coloca esta foto en Dubái con rascacielos modernos, estilo luxury y luz dorada.",
-      "Cambia el fondo a una ciudad moderna tipo Dubái, conserva mi rostro y mejora la calidad.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-autos",
-    name: "Autos",
-    title: "Foto con Autos con IA | FotoIA Pro",
-    description: "Crea fotos con autos usando inteligencia artificial. Agrega autos deportivos, escenarios urbanos y estilo cinematográfico.",
-    h1: "Foto con Autos con Inteligencia Artificial",
-    subtitle: "Transforma tus imágenes agregando autos, escenarios premium y estilo visual de alto impacto.",
-    badge: "Fotos con autos",
-    cta: "Crear foto con autos",
-    keyword: "foto con autos con IA",
-    benefits: [
-      { title: "Autos deportivos", text: "Agrega vehículos como elemento visual." },
-      { title: "Escena realista", text: "Crea fondos urbanos o cinematográficos." },
-      { title: "Impacto visual", text: "Ideal para redes y contenido aspiracional." },
-    ],
-    useCases: [
-      { title: "Foto con auto", text: "Agrega un vehículo a la escena." },
-      { title: "Estilo deportivo", text: "Crea una imagen más potente." },
-      { title: "Contenido social", text: "Ideal para publicaciones llamativas." },
-    ],
-    prompts: [
-      "Agrega un auto deportivo de lujo junto a mí, con fondo urbano nocturno y estilo cinematográfico.",
-      "Convierte esta foto en una escena con un auto premium, iluminación profesional y acabado realista.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-corporativa",
-    name: "Corporativo",
-    title: "Foto Corporativa con IA | FotoIA Pro",
-    description: "Crea fotos corporativas con inteligencia artificial. Mejora imagen profesional, fondo, ropa e iluminación.",
-    h1: "Foto Corporativa con Inteligencia Artificial",
-    subtitle: "Genera una imagen profesional para empresa, perfil ejecutivo, equipo de trabajo o presentación corporativa.",
-    badge: "Foto corporativa",
-    cta: "Crear foto corporativa",
-    keyword: "foto corporativa",
-    benefits: [
-      { title: "Imagen profesional", text: "Ideal para empresa, perfiles y presentaciones." },
-      { title: "Fondo corporativo", text: "Genera escenarios limpios y elegantes." },
-      { title: "Ropa formal", text: "Crea una apariencia más ejecutiva." },
-    ],
-    useCases: [
-      { title: "Perfil ejecutivo", text: "Mejora tu imagen laboral." },
-      { title: "Equipo empresarial", text: "Crea una estética profesional." },
-      { title: "Presentación", text: "Usa la foto en perfiles y documentos." },
-    ],
-    prompts: [
-      "Convierte esta foto en una imagen corporativa profesional, con fondo de oficina, ropa formal y buena iluminación.",
-      "Hazme una foto ejecutiva para empresa, conservando mi rostro y mejorando la calidad.",
-    ],
-  }),
-
-  createSeoPage({
-    slug: "foto-anime",
-    name: "Anime",
-    title: "Foto estilo Anime con IA | FotoIA Pro",
-    description: "Convierte fotos en estilo anime con inteligencia artificial. Crea imágenes artísticas, creativas y llamativas.",
-    h1: "Foto Estilo Anime con Inteligencia Artificial",
-    subtitle: "Transforma tu imagen en una versión artística estilo anime para redes, avatares o contenido creativo.",
-    badge: "Estilo anime",
-    cta: "Crear foto anime",
-    keyword: "foto estilo anime",
-    benefits: [
-      { title: "Transformación artística", text: "Crea una versión anime de tu imagen." },
-      { title: "Ideal para avatares", text: "Úsala en redes, perfiles o comunidades." },
-      { title: "Estilo creativo", text: "Genera imágenes originales y llamativas." },
-    ],
-    useCases: [
-      { title: "Avatar anime", text: "Crea una imagen para perfil." },
-      { title: "Arte digital", text: "Transforma tu foto en ilustración." },
-      { title: "Redes sociales", text: "Crea contenido diferente." },
-    ],
-    prompts: [
-      "Convierte esta foto en una ilustración estilo anime, conserva rasgos principales y agrega iluminación artística.",
-      "Haz una versión anime de esta imagen con estilo moderno, colores vivos y acabado profesional.",
-    ],
-  }),
-];
-
-
-const extraSeoPages = [
-  ["foto-cv", "Foto para CV con IA", "foto para CV", "profesional"],
-  ["foto-profesional", "Foto Profesional con IA", "foto profesional", "profesional"],
-  ["foto-pasaporte", "Foto para Pasaporte con IA", "foto para pasaporte", "profesional"],
-  ["foto-curriculum", "Foto para Currículum con IA", "foto para currículum", "profesional"],
-  ["foto-ejecutiva", "Foto Ejecutiva con IA", "foto ejecutiva", "profesional"],
-  ["foto-perfil-profesional", "Foto de Perfil Profesional con IA", "foto de perfil profesional", "profesional"],
-  ["foto-empresa", "Foto para Empresa con IA", "foto para empresa", "profesional"],
-  ["foto-marca-personal", "Foto para Marca Personal con IA", "foto para marca personal", "profesional"],
-
-  ["foto-facebook", "Foto para Facebook con IA", "foto para Facebook", "redes-sociales"],
-  ["foto-x-twitter", "Foto para X Twitter con IA", "foto para X Twitter", "redes-sociales"],
-  ["foto-pinterest", "Foto para Pinterest con IA", "foto para Pinterest", "redes-sociales"],
-  ["foto-twitch", "Foto para Twitch con IA", "foto para Twitch", "redes-sociales"],
-  ["foto-discord", "Foto para Discord con IA", "foto para Discord", "redes-sociales"],
-  ["foto-telegram", "Foto para Telegram con IA", "foto para Telegram", "redes-sociales"],
-  ["foto-perfil", "Foto de Perfil con IA", "foto de perfil", "redes-sociales"],
-  ["foto-redes-sociales", "Foto para Redes Sociales con IA", "foto para redes sociales", "redes-sociales"],
-
-  ["foto-producto", "Foto de Producto con IA", "foto de producto", "ecommerce"],
-  ["foto-amazon", "Foto para Amazon con IA", "foto para Amazon", "ecommerce"],
-  ["foto-mercado-libre", "Foto para Mercado Libre con IA", "foto para Mercado Libre", "ecommerce"],
-  ["foto-etsy", "Foto para Etsy con IA", "foto para Etsy", "ecommerce"],
-  ["foto-catalogo", "Foto para Catálogo con IA", "foto para catálogo", "ecommerce"],
-  ["foto-ecommerce", "Foto Ecommerce con IA", "foto ecommerce", "ecommerce"],
-  ["foto-restaurante", "Foto para Restaurante con IA", "foto para restaurante", "ecommerce"],
-  ["foto-comida", "Foto de Comida con IA", "foto de comida", "ecommerce"],
-
-  ["foto-cinematica", "Foto Cinemática con IA", "foto cinematográfica", "estilos"],
-  ["foto-cyberpunk", "Foto Cyberpunk con IA", "foto cyberpunk", "estilos"],
-  ["foto-editorial", "Foto Editorial con IA", "foto editorial", "estilos"],
-  ["foto-revista", "Foto para Revista con IA", "foto para revista", "estilos"],
-  ["foto-vintage", "Foto Vintage con IA", "foto vintage", "estilos"],
-  ["foto-futurista", "Foto Futurista con IA", "foto futurista", "estilos"],
-  ["foto-minimalista", "Foto Minimalista con IA", "foto minimalista", "estilos"],
-  ["foto-artistica", "Foto Artística con IA", "foto artística", "estilos"],
-
-  ["cambiar-fondo-foto", "Cambiar Fondo de Foto con IA", "cambiar fondo de foto", "lugares"],
-  ["foto-oficina", "Foto en Oficina con IA", "foto en oficina", "lugares"],
-  ["foto-ciudad", "Foto en Ciudad con IA", "foto en ciudad", "lugares"],
-  ["foto-paris", "Foto en París con IA", "foto en París", "lugares"],
-  ["foto-nueva-york", "Foto en Nueva York con IA", "foto en Nueva York", "lugares"],
-  ["foto-tokio", "Foto en Tokio con IA", "foto en Tokio", "lugares"],
-  ["foto-montana", "Foto en Montaña con IA", "foto en montaña", "lugares"],
-  ["foto-hotel", "Foto en Hotel con IA", "foto en hotel", "lugares"],
-
-  ["cambiar-ropa-con-ia", "Cambiar Ropa con IA", "cambiar ropa con IA", "estilos"],
-  ["foto-con-traje", "Foto con Traje con IA", "foto con traje", "profesional"],
-  ["foto-vestido", "Foto con Vestido con IA", "foto con vestido", "estilos"],
-  ["foto-casual", "Foto Casual con IA", "foto casual", "estilos"],
-  ["foto-deportiva", "Foto Deportiva con IA", "foto deportiva", "estilos"],
-
-  ["mejorar-calidad-foto", "Mejorar Calidad de Foto con IA", "mejorar calidad de foto", "estilos"],
-  ["mejorar-selfie", "Mejorar Selfie con IA", "mejorar selfie", "redes-sociales"],
-  ["quitar-fondo-foto", "Quitar Fondo de Foto con IA", "quitar fondo de foto", "ecommerce"],
-  ["agregar-objetos-foto", "Agregar Objetos a una Foto con IA", "agregar objetos a una foto", "estilos"],
-  ["foto-con-otra-persona", "Foto con Otra Persona con IA", "foto con otra persona", "estilos"],
-];
-
-extraSeoPages.forEach(([slug, titleBase, keyword, category]) => {
-  if (!seoPages.some((page) => page.slug === slug)) {
-    seoPages.push(
-      createSeoPage({
-        slug,
-        name: titleBase,
-        title: `${titleBase} | FotoIA Pro`,
-        description: `Crea ${keyword} usando inteligencia artificial. Mejora fondo, iluminación, estilo y calidad visual con FotoIA Pro.`,
-        h1: `${titleBase}`,
-        subtitle: `Transforma tus imágenes para crear ${keyword} de forma rápida, profesional y sencilla con inteligencia artificial.`,
-        badge: "Edición de fotos con IA",
-        cta: `Crear ${keyword}`,
-        keyword,
-        category,
-        benefits: [
-          { title: "Resultado profesional", text: "Mejora la apariencia de tus imágenes con inteligencia artificial." },
-          { title: "Fácil de usar", text: "Solo sube tu foto y describe el resultado que quieres." },
-          { title: "Listo para usar", text: "Ideal para redes sociales, perfiles, negocios, ecommerce o marca personal." },
-        ],
-        useCases: [
-          { title: "Perfil digital", text: "Crea imágenes para redes sociales y plataformas profesionales." },
-          { title: "Contenido visual", text: "Genera fotos más atractivas para publicaciones o anuncios." },
-          { title: "Imagen profesional", text: "Mejora fondo, iluminación, ropa, estilo o calidad." },
-        ],
-        prompts: [
-          `Convierte esta imagen en ${keyword}, conserva los rasgos principales y mejora la iluminación.`,
-          `Crea ${keyword} con estilo profesional, fondo limpio y apariencia realista.`,
-          `Mejora esta foto para lograr ${keyword} con alta calidad visual.`,
-        ],
-      })
-    );
+const commercialSeoPages = [
+  {
+    "slug": "foto-producto",
+    "title": "Foto de Producto con IA | FotoIA Pro",
+    "description": "Crea imágenes profesionales de producto para ecommerce, catálogos, anuncios y marketplaces.",
+    "h1": "Foto de Producto con IA",
+    "subtitle": "Crea imágenes profesionales de producto para ecommerce, catálogos, anuncios y marketplaces.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto con IA"
+  },
+  {
+    "slug": "fotos-producto-ecommerce",
+    "title": "Fotos de Producto para Ecommerce | FotoIA Pro",
+    "description": "Prepara imágenes comerciales consistentes para tiendas online y fichas de producto.",
+    "h1": "Fotos de Producto para Ecommerce",
+    "subtitle": "Prepara imágenes comerciales consistentes para tiendas online y fichas de producto.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para ecommerce"
+  },
+  {
+    "slug": "foto-amazon",
+    "title": "Foto para Amazon con IA | FotoIA Pro",
+    "description": "Crea imágenes de producto optimizadas para listings de Amazon.",
+    "h1": "Foto para Amazon con IA",
+    "subtitle": "Crea imágenes de producto optimizadas para listings de Amazon.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto para Amazon"
+  },
+  {
+    "slug": "imagen-principal-amazon",
+    "title": "Imagen Principal para Amazon | FotoIA Pro",
+    "description": "Aísla tu producto sobre fondo blanco con presentación limpia para Amazon.",
+    "h1": "Imagen Principal para Amazon",
+    "subtitle": "Aísla tu producto sobre fondo blanco con presentación limpia para Amazon.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "imagen principal para Amazon"
+  },
+  {
+    "slug": "imagen-secundaria-amazon",
+    "title": "Imagen Secundaria para Amazon | FotoIA Pro",
+    "description": "Genera una vista secundaria profesional y clara de tu producto.",
+    "h1": "Imagen Secundaria para Amazon",
+    "subtitle": "Genera una vista secundaria profesional y clara de tu producto.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "imagen secundaria para Amazon"
+  },
+  {
+    "slug": "foto-mercado-libre",
+    "title": "Foto para Mercado Libre con IA | FotoIA Pro",
+    "description": "Mejora imágenes de producto para publicaciones de Mercado Libre.",
+    "h1": "Foto para Mercado Libre con IA",
+    "subtitle": "Mejora imágenes de producto para publicaciones de Mercado Libre.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto para Mercado Libre"
+  },
+  {
+    "slug": "foto-shopify",
+    "title": "Foto de Producto para Shopify | FotoIA Pro",
+    "description": "Crea imágenes comerciales consistentes para tu tienda Shopify.",
+    "h1": "Foto de Producto para Shopify",
+    "subtitle": "Crea imágenes comerciales consistentes para tu tienda Shopify.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto para Shopify"
+  },
+  {
+    "slug": "foto-etsy",
+    "title": "Foto de Producto para Etsy | FotoIA Pro",
+    "description": "Presenta productos de forma atractiva y profesional para Etsy.",
+    "h1": "Foto de Producto para Etsy",
+    "subtitle": "Presenta productos de forma atractiva y profesional para Etsy.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto para Etsy"
+  },
+  {
+    "slug": "foto-ebay",
+    "title": "Foto de Producto para eBay | FotoIA Pro",
+    "description": "Crea imágenes claras y comerciales para publicaciones de eBay.",
+    "h1": "Foto de Producto para eBay",
+    "subtitle": "Crea imágenes claras y comerciales para publicaciones de eBay.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto para eBay"
+  },
+  {
+    "slug": "foto-tienda-online",
+    "title": "Fotos para Tienda Online | FotoIA Pro",
+    "description": "Mejora la presentación visual de productos en cualquier ecommerce.",
+    "h1": "Fotos para Tienda Online",
+    "subtitle": "Mejora la presentación visual de productos en cualquier ecommerce.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos para tienda online"
+  },
+  {
+    "slug": "foto-catalogo",
+    "title": "Fotos para Catálogo con IA | FotoIA Pro",
+    "description": "Crea imágenes consistentes para catálogos digitales e impresos.",
+    "h1": "Fotos para Catálogo con IA",
+    "subtitle": "Crea imágenes consistentes para catálogos digitales e impresos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos para catálogo"
+  },
+  {
+    "slug": "catalogo-productos-ia",
+    "title": "Catálogo de Productos con IA | FotoIA Pro",
+    "description": "Transforma fotos sencillas en un catálogo comercial coherente.",
+    "h1": "Catálogo de Productos con IA",
+    "subtitle": "Transforma fotos sencillas en un catálogo comercial coherente.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "catálogo de productos con IA"
+  },
+  {
+    "slug": "publicidad-productos-ia",
+    "title": "Publicidad de Productos con IA | FotoIA Pro",
+    "description": "Crea piezas visuales de producto para campañas y promociones.",
+    "h1": "Publicidad de Productos con IA",
+    "subtitle": "Crea piezas visuales de producto para campañas y promociones.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "publicidad de productos con IA"
+  },
+  {
+    "slug": "anuncios-producto-ia",
+    "title": "Anuncios de Producto con IA | FotoIA Pro",
+    "description": "Genera anuncios visuales centrados en el producto para vender online.",
+    "h1": "Anuncios de Producto con IA",
+    "subtitle": "Genera anuncios visuales centrados en el producto para vender online.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "anuncios de producto con IA"
+  },
+  {
+    "slug": "flyer-producto-ia",
+    "title": "Flyer de Producto con IA | FotoIA Pro",
+    "description": "Diseña flyers comerciales a partir de fotos reales de producto.",
+    "h1": "Flyer de Producto con IA",
+    "subtitle": "Diseña flyers comerciales a partir de fotos reales de producto.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "flyer de producto con IA"
+  },
+  {
+    "slug": "promociones-producto-ia",
+    "title": "Promociones de Producto con IA | FotoIA Pro",
+    "description": "Crea piezas promocionales para descuentos, lanzamientos y ofertas.",
+    "h1": "Promociones de Producto con IA",
+    "subtitle": "Crea piezas promocionales para descuentos, lanzamientos y ofertas.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "promociones de producto con IA"
+  },
+  {
+    "slug": "foto-instagram-producto",
+    "title": "Fotos de Producto para Instagram | FotoIA Pro",
+    "description": "Crea contenido comercial de producto para posts y campañas en Instagram.",
+    "h1": "Fotos de Producto para Instagram",
+    "subtitle": "Crea contenido comercial de producto para posts y campañas en Instagram.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para Instagram"
+  },
+  {
+    "slug": "foto-facebook-producto",
+    "title": "Fotos de Producto para Facebook | FotoIA Pro",
+    "description": "Genera imágenes de producto para publicaciones y campañas de Facebook.",
+    "h1": "Fotos de Producto para Facebook",
+    "subtitle": "Genera imágenes de producto para publicaciones y campañas de Facebook.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para Facebook"
+  },
+  {
+    "slug": "foto-tiktok-producto",
+    "title": "Fotos de Producto para TikTok | FotoIA Pro",
+    "description": "Prepara visuales comerciales para TikTok.",
+    "h1": "Fotos de Producto para TikTok",
+    "subtitle": "Prepara visuales comerciales para TikTok.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para TikTok"
+  },
+  {
+    "slug": "foto-whatsapp-negocio",
+    "title": "Fotos de Producto para WhatsApp Business | FotoIA Pro",
+    "description": "Crea imágenes listas para catálogos, estados y ventas por WhatsApp.",
+    "h1": "Fotos de Producto para WhatsApp Business",
+    "subtitle": "Crea imágenes listas para catálogos, estados y ventas por WhatsApp.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para WhatsApp Business"
+  },
+  {
+    "slug": "foto-pinterest-producto",
+    "title": "Fotos de Producto para Pinterest | FotoIA Pro",
+    "description": "Crea imágenes verticales atractivas para productos en Pinterest.",
+    "h1": "Fotos de Producto para Pinterest",
+    "subtitle": "Crea imágenes verticales atractivas para productos en Pinterest.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para Pinterest"
+  },
+  {
+    "slug": "foto-linkedin-empresa",
+    "title": "Imágenes de Producto para LinkedIn | FotoIA Pro",
+    "description": "Presenta productos y marcas con una estética profesional para LinkedIn.",
+    "h1": "Imágenes de Producto para LinkedIn",
+    "subtitle": "Presenta productos y marcas con una estética profesional para LinkedIn.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "imágenes de producto para LinkedIn"
+  },
+  {
+    "slug": "redes-sociales-producto",
+    "title": "Fotos de Producto para Redes Sociales | FotoIA Pro",
+    "description": "Adapta tus productos a formatos comerciales para distintas redes.",
+    "h1": "Fotos de Producto para Redes Sociales",
+    "subtitle": "Adapta tus productos a formatos comerciales para distintas redes.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para redes sociales"
+  },
+  {
+    "slug": "fondos-producto-ia",
+    "title": "Fondos para Productos con IA | FotoIA Pro",
+    "description": "Cambia fondos sin perder la identidad del producto real.",
+    "h1": "Fondos para Productos con IA",
+    "subtitle": "Cambia fondos sin perder la identidad del producto real.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fondos para productos con IA"
+  },
+  {
+    "slug": "quitar-fondo-producto",
+    "title": "Quitar Fondo de Producto | FotoIA Pro",
+    "description": "Aísla productos para ecommerce, catálogos y marketplaces.",
+    "h1": "Quitar Fondo de Producto",
+    "subtitle": "Aísla productos para ecommerce, catálogos y marketplaces.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "quitar fondo de producto"
+  },
+  {
+    "slug": "fondo-blanco-producto",
+    "title": "Fondo Blanco para Producto | FotoIA Pro",
+    "description": "Crea presentaciones limpias sobre blanco para ecommerce.",
+    "h1": "Fondo Blanco para Producto",
+    "subtitle": "Crea presentaciones limpias sobre blanco para ecommerce.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fondo blanco para producto"
+  },
+  {
+    "slug": "fondo-premium-producto",
+    "title": "Fondo Premium para Producto | FotoIA Pro",
+    "description": "Genera escenas elegantes que hagan destacar tu producto.",
+    "h1": "Fondo Premium para Producto",
+    "subtitle": "Genera escenas elegantes que hagan destacar tu producto.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fondo premium para producto"
+  },
+  {
+    "slug": "mejorar-foto-producto",
+    "title": "Mejorar Foto de Producto con IA | FotoIA Pro",
+    "description": "Mejora iluminación, encuadre y presentación comercial del producto.",
+    "h1": "Mejorar Foto de Producto con IA",
+    "subtitle": "Mejora iluminación, encuadre y presentación comercial del producto.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "mejorar foto de producto"
+  },
+  {
+    "slug": "iluminacion-producto-ia",
+    "title": "Iluminación Profesional para Productos | FotoIA Pro",
+    "description": "Mejora la luz de tus fotos para una apariencia de estudio.",
+    "h1": "Iluminación Profesional para Productos",
+    "subtitle": "Mejora la luz de tus fotos para una apariencia de estudio.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "iluminación de producto con IA"
+  },
+  {
+    "slug": "foto-producto-profesional",
+    "title": "Foto de Producto Profesional | FotoIA Pro",
+    "description": "Convierte una foto sencilla en una imagen comercial de alta calidad.",
+    "h1": "Foto de Producto Profesional",
+    "subtitle": "Convierte una foto sencilla en una imagen comercial de alta calidad.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto profesional"
+  },
+  {
+    "slug": "foto-producto-fondo-minimalista",
+    "title": "Foto de Producto con Fondo Minimalista | FotoIA Pro",
+    "description": "Crea composiciones limpias y modernas para ecommerce.",
+    "h1": "Foto de Producto con Fondo Minimalista",
+    "subtitle": "Crea composiciones limpias y modernas para ecommerce.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto con fondo minimalista"
+  },
+  {
+    "slug": "foto-producto-fondo-lujo",
+    "title": "Foto de Producto Estilo Premium | FotoIA Pro",
+    "description": "Presenta tu producto con una estética sofisticada de marca.",
+    "h1": "Foto de Producto Estilo Premium",
+    "subtitle": "Presenta tu producto con una estética sofisticada de marca.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto premium"
+  },
+  {
+    "slug": "foto-producto-3d-look",
+    "title": "Presentación 3D de Producto con IA | FotoIA Pro",
+    "description": "Crea una apariencia tridimensional comercial sin reemplazar el producto real.",
+    "h1": "Presentación 3D de Producto con IA",
+    "subtitle": "Crea una apariencia tridimensional comercial sin reemplazar el producto real.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "presentación 3D de producto"
+  },
+  {
+    "slug": "foto-producto-sombra-realista",
+    "title": "Foto de Producto con Sombra Realista | FotoIA Pro",
+    "description": "Añade profundidad visual conservando el producto fiel al original.",
+    "h1": "Foto de Producto con Sombra Realista",
+    "subtitle": "Añade profundidad visual conservando el producto fiel al original.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "foto de producto con sombra realista"
+  },
+  {
+    "slug": "foto-producto-calzado",
+    "title": "Fotos de Calzado con IA | FotoIA Pro",
+    "description": "Crea imágenes profesionales para tenis, zapatos y sandalias.",
+    "h1": "Fotos de Calzado con IA",
+    "subtitle": "Crea imágenes profesionales para tenis, zapatos y sandalias.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de calzado"
+  },
+  {
+    "slug": "foto-producto-ropa",
+    "title": "Fotos de Ropa para Ecommerce | FotoIA Pro",
+    "description": "Mejora imágenes de prendas para tiendas online y catálogos.",
+    "h1": "Fotos de Ropa para Ecommerce",
+    "subtitle": "Mejora imágenes de prendas para tiendas online y catálogos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de ropa para ecommerce"
+  },
+  {
+    "slug": "foto-producto-cosmeticos",
+    "title": "Fotos de Cosméticos con IA | FotoIA Pro",
+    "description": "Crea imágenes comerciales para skincare, maquillaje y belleza.",
+    "h1": "Fotos de Cosméticos con IA",
+    "subtitle": "Crea imágenes comerciales para skincare, maquillaje y belleza.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de cosméticos"
+  },
+  {
+    "slug": "foto-producto-joyeria",
+    "title": "Fotos de Joyería con IA | FotoIA Pro",
+    "description": "Presenta piezas con fondos limpios e iluminación cuidada.",
+    "h1": "Fotos de Joyería con IA",
+    "subtitle": "Presenta piezas con fondos limpios e iluminación cuidada.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de joyería"
+  },
+  {
+    "slug": "foto-producto-relojes",
+    "title": "Fotos de Relojes con IA | FotoIA Pro",
+    "description": "Crea imágenes premium para relojes y accesorios.",
+    "h1": "Fotos de Relojes con IA",
+    "subtitle": "Crea imágenes premium para relojes y accesorios.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de relojes"
+  },
+  {
+    "slug": "foto-producto-electronica",
+    "title": "Fotos de Electrónica con IA | FotoIA Pro",
+    "description": "Mejora imágenes de gadgets y dispositivos para ecommerce.",
+    "h1": "Fotos de Electrónica con IA",
+    "subtitle": "Mejora imágenes de gadgets y dispositivos para ecommerce.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de electrónica"
+  },
+  {
+    "slug": "foto-producto-muebles",
+    "title": "Fotos de Muebles con IA | FotoIA Pro",
+    "description": "Presenta muebles en composiciones comerciales limpias y atractivas.",
+    "h1": "Fotos de Muebles con IA",
+    "subtitle": "Presenta muebles en composiciones comerciales limpias y atractivas.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de muebles"
+  },
+  {
+    "slug": "foto-producto-decoracion",
+    "title": "Fotos de Decoración con IA | FotoIA Pro",
+    "description": "Crea imágenes de productos para hogar y decoración.",
+    "h1": "Fotos de Decoración con IA",
+    "subtitle": "Crea imágenes de productos para hogar y decoración.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de decoración"
+  },
+  {
+    "slug": "foto-producto-artesanias",
+    "title": "Fotos de Artesanías con IA | FotoIA Pro",
+    "description": "Mejora la presentación visual de productos artesanales.",
+    "h1": "Fotos de Artesanías con IA",
+    "subtitle": "Mejora la presentación visual de productos artesanales.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de artesanías"
+  },
+  {
+    "slug": "foto-producto-bolsos",
+    "title": "Fotos de Bolsos con IA | FotoIA Pro",
+    "description": "Crea imágenes comerciales para bolsos, mochilas y accesorios.",
+    "h1": "Fotos de Bolsos con IA",
+    "subtitle": "Crea imágenes comerciales para bolsos, mochilas y accesorios.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de bolsos"
+  },
+  {
+    "slug": "foto-producto-perfumes",
+    "title": "Fotos de Perfumes con IA | FotoIA Pro",
+    "description": "Presenta fragancias con estética premium y comercial.",
+    "h1": "Fotos de Perfumes con IA",
+    "subtitle": "Presenta fragancias con estética premium y comercial.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de perfumes"
+  },
+  {
+    "slug": "foto-producto-alimentos",
+    "title": "Fotos de Alimentos Empacados | FotoIA Pro",
+    "description": "Mejora empaques y productos alimenticios para venta online.",
+    "h1": "Fotos de Alimentos Empacados",
+    "subtitle": "Mejora empaques y productos alimenticios para venta online.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de alimentos empacados"
+  },
+  {
+    "slug": "foto-restaurante",
+    "title": "Fotos para Restaurante con IA | FotoIA Pro",
+    "description": "Crea imágenes comerciales para platillos, menús y promociones.",
+    "h1": "Fotos para Restaurante con IA",
+    "subtitle": "Crea imágenes comerciales para platillos, menús y promociones.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos para restaurante"
+  },
+  {
+    "slug": "foto-comida",
+    "title": "Fotos de Comida con IA | FotoIA Pro",
+    "description": "Haz que platillos y alimentos se vean más atractivos sin inventar productos.",
+    "h1": "Fotos de Comida con IA",
+    "subtitle": "Haz que platillos y alimentos se vean más atractivos sin inventar productos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de comida"
+  },
+  {
+    "slug": "menu-restaurante-ia",
+    "title": "Menú de Restaurante con IA | FotoIA Pro",
+    "description": "Crea piezas visuales para menús a partir de fotos reales de platillos.",
+    "h1": "Menú de Restaurante con IA",
+    "subtitle": "Crea piezas visuales para menús a partir de fotos reales de platillos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "menú de restaurante con IA"
+  },
+  {
+    "slug": "menu-whatsapp-ia",
+    "title": "Menú para WhatsApp con IA | FotoIA Pro",
+    "description": "Crea imágenes de menú listas para compartir por WhatsApp.",
+    "h1": "Menú para WhatsApp con IA",
+    "subtitle": "Crea imágenes de menú listas para compartir por WhatsApp.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "menú para WhatsApp con IA"
+  },
+  {
+    "slug": "menu-cafeteria-ia",
+    "title": "Menú para Cafetería con IA | FotoIA Pro",
+    "description": "Diseña presentaciones visuales para bebidas, postres y alimentos.",
+    "h1": "Menú para Cafetería con IA",
+    "subtitle": "Diseña presentaciones visuales para bebidas, postres y alimentos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "menú para cafetería con IA"
+  },
+  {
+    "slug": "foto-producto-bebidas",
+    "title": "Fotos de Bebidas con IA | FotoIA Pro",
+    "description": "Crea imágenes comerciales para botellas, vasos y bebidas.",
+    "h1": "Fotos de Bebidas con IA",
+    "subtitle": "Crea imágenes comerciales para botellas, vasos y bebidas.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de bebidas"
+  },
+  {
+    "slug": "foto-producto-postres",
+    "title": "Fotos de Postres con IA | FotoIA Pro",
+    "description": "Mejora imágenes de postres para menús, redes y delivery.",
+    "h1": "Fotos de Postres con IA",
+    "subtitle": "Mejora imágenes de postres para menús, redes y delivery.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de postres"
+  },
+  {
+    "slug": "foto-producto-comida-rapida",
+    "title": "Fotos de Comida Rápida con IA | FotoIA Pro",
+    "description": "Crea imágenes comerciales para hamburguesas, pizzas y combos.",
+    "h1": "Fotos de Comida Rápida con IA",
+    "subtitle": "Crea imágenes comerciales para hamburguesas, pizzas y combos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de comida rápida"
+  },
+  {
+    "slug": "foto-producto-delivery",
+    "title": "Fotos para Delivery con IA | FotoIA Pro",
+    "description": "Prepara imágenes atractivas para apps y ventas de comida a domicilio.",
+    "h1": "Fotos para Delivery con IA",
+    "subtitle": "Prepara imágenes atractivas para apps y ventas de comida a domicilio.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos para delivery"
+  },
+  {
+    "slug": "foto-producto-marca",
+    "title": "Fotos de Producto para Marca | FotoIA Pro",
+    "description": "Crea una presentación visual coherente con la identidad de tu negocio.",
+    "h1": "Fotos de Producto para Marca",
+    "subtitle": "Crea una presentación visual coherente con la identidad de tu negocio.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para marca"
+  },
+  {
+    "slug": "branding-producto-ia",
+    "title": "Branding Visual de Producto con IA | FotoIA Pro",
+    "description": "Integra producto, logotipo y estilo de marca en piezas comerciales.",
+    "h1": "Branding Visual de Producto con IA",
+    "subtitle": "Integra producto, logotipo y estilo de marca en piezas comerciales.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "branding visual de producto con IA"
+  },
+  {
+    "slug": "lanzamiento-producto-ia",
+    "title": "Lanzamiento de Producto con IA | FotoIA Pro",
+    "description": "Crea piezas visuales para presentar nuevos productos.",
+    "h1": "Lanzamiento de Producto con IA",
+    "subtitle": "Crea piezas visuales para presentar nuevos productos.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "lanzamiento de producto con IA"
+  },
+  {
+    "slug": "foto-producto-mayoreo",
+    "title": "Fotos de Producto para Mayoreo | FotoIA Pro",
+    "description": "Crea imágenes consistentes para catálogos y ventas B2B.",
+    "h1": "Fotos de Producto para Mayoreo",
+    "subtitle": "Crea imágenes consistentes para catálogos y ventas B2B.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para mayoreo"
+  },
+  {
+    "slug": "foto-producto-emprendedores",
+    "title": "Fotos de Producto para Emprendedores | FotoIA Pro",
+    "description": "Mejora imágenes sin estudio fotográfico para pequeños negocios.",
+    "h1": "Fotos de Producto para Emprendedores",
+    "subtitle": "Mejora imágenes sin estudio fotográfico para pequeños negocios.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para emprendedores"
+  },
+  {
+    "slug": "foto-producto-pymes",
+    "title": "Fotos de Producto para PyMEs | FotoIA Pro",
+    "description": "Crea contenido comercial accesible para pequeñas y medianas empresas.",
+    "h1": "Fotos de Producto para PyMEs",
+    "subtitle": "Crea contenido comercial accesible para pequeñas y medianas empresas.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "fotos de producto para PyMEs"
+  },
+  {
+    "slug": "estudio-fotografico-virtual",
+    "title": "Estudio Fotográfico Virtual para Productos | FotoIA Pro",
+    "description": "Convierte fotos sencillas en presentaciones de estudio con inteligencia artificial.",
+    "h1": "Estudio Fotográfico Virtual para Productos",
+    "subtitle": "Convierte fotos sencillas en presentaciones de estudio con inteligencia artificial.",
+    "badge": "Imágenes comerciales con IA",
+    "cta": "Crear imagen profesional",
+    "keyword": "estudio fotográfico virtual para productos"
   }
-});
+];
 
+export const seoPages = commercialSeoPages.map(createSeoPage);

@@ -2,42 +2,45 @@ const baseUrl = "https://www.fotoia.pro";
 
 export const promptLibrary = [
   {
-    slug: "prompts-linkedin",
-    title: "Prompts para Fotos de LinkedIn con IA",
-    description: "Prompts listos para crear fotos profesionales para LinkedIn con inteligencia artificial.",
-    canonical: `${baseUrl}/prompts/prompts-linkedin`,
-    category: "Profesional",
-    prompts: [
-      "Convierte esta foto en una imagen profesional para LinkedIn con fondo corporativo elegante.",
-      "Hazme una foto ejecutiva para LinkedIn con ropa formal, iluminación de estudio y fondo de oficina moderna.",
-      "Mejora esta selfie para usarla en LinkedIn, conserva mi rostro y crea una apariencia profesional.",
-    ],
-    ctaUrl: "/foto-linkedin",
-  },
-  {
-    slug: "prompts-instagram",
-    title: "Prompts para Fotos de Instagram con IA",
-    description: "Prompts para crear fotos llamativas para Instagram, perfil, feed e historias.",
-    canonical: `${baseUrl}/prompts/prompts-instagram`,
-    category: "Redes sociales",
-    prompts: [
-      "Haz esta foto más atractiva para Instagram con estilo lifestyle, buena iluminación y fondo moderno.",
-      "Convierte esta imagen en una foto de perfil llamativa para redes sociales.",
-      "Crea una imagen elegante para Instagram con colores vivos y acabado profesional.",
-    ],
-    ctaUrl: "/foto-instagram",
-  },
-  {
     slug: "prompts-producto",
     title: "Prompts para Fotos de Producto con IA",
-    description: "Prompts para mejorar fotos de productos, ecommerce, Shopify y catálogos.",
+    description:
+      "Prompts para crear imágenes profesionales de producto para ecommerce, catálogos y publicidad.",
     canonical: `${baseUrl}/prompts/prompts-producto`,
-    category: "Ecommerce",
+    category: "Producto",
     prompts: [
-      "Mejora esta foto de producto con fondo blanco, iluminación profesional y apariencia de catálogo.",
-      "Convierte esta imagen en una foto comercial limpia para tienda online.",
-      "Crea una foto de producto premium con fondo minimalista y sombras realistas.",
+      "Convierte esta fotografía en una imagen profesional de producto con iluminación de estudio y composición comercial. Conserva exactamente el producto.",
+      "Aísla visualmente el producto y crea una presentación limpia para ecommerce sin modificar forma, color, branding ni detalles.",
+      "Crea una fotografía premium del producto con fondo minimalista, sombras realistas y acabado comercial.",
     ],
     ctaUrl: "/foto-producto",
+  },
+  {
+    slug: "prompts-ecommerce",
+    title: "Prompts para Fotos de Ecommerce con IA",
+    description:
+      "Prompts listos para preparar imágenes de producto para tiendas online y fichas de ecommerce.",
+    canonical: `${baseUrl}/prompts/prompts-ecommerce`,
+    category: "Ecommerce",
+    prompts: [
+      "Crea una imagen limpia para ecommerce manteniendo el producto fiel al original y utilizando iluminación profesional.",
+      "Presenta este producto sobre un fondo limpio y comercial, con encuadre centrado y alta claridad visual.",
+      "Genera una imagen secundaria de ecommerce mostrando el producto claramente desde una perspectiva comercial.",
+    ],
+    ctaUrl: "/fotos-producto-ecommerce",
+  },
+  {
+    slug: "prompts-publicidad-productos",
+    title: "Prompts para Publicidad de Productos con IA",
+    description:
+      "Prompts para crear anuncios, promociones y contenido comercial a partir de fotografías reales de productos.",
+    canonical: `${baseUrl}/prompts/prompts-publicidad-productos`,
+    category: "Publicidad",
+    prompts: [
+      "Crea un anuncio moderno donde este producto sea el elemento principal. Conserva el producto real y utiliza una composición diseñada para publicidad.",
+      "Genera una pieza promocional profesional para redes sociales sin inventar precios, descuentos, claims ni información que no haya proporcionado.",
+      "Presenta este producto en una composición premium de lanzamiento manteniendo intacta su identidad visual.",
+    ],
+    ctaUrl: "/publicidad-productos-ia",
   },
 ];
