@@ -8,10 +8,10 @@ export default function PromptPage({ page }) {
       <Head>
         <title>{page.title} | FotoIA Pro</title>
         <meta name="description" content={page.description} />
-        <link rel="canonical" href={page.canonical} />
+        <link key="canonical" rel="canonical" href={page.canonical} />
         <meta property="og:title" content={`${page.title} | FotoIA Pro`} />
         <meta property="og:description" content={page.description} />
-        <meta property="og:url" content={page.canonical} />
+        <meta key="og:url" property="og:url" content={page.canonical} />
       </Head>
 
       <main className="promptPage">

@@ -10,12 +10,12 @@ export default function App({ Component, pageProps }) {
         <title>FotoIA Pro | Fotos de productos profesionales con IA</title>
         <meta name="description" content="Convierte fotos de tus productos en imágenes profesionales para menús, flyers, anuncios, redes sociales, catálogos y publicidad con inteligencia artificial." />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.fotoia.pro/" />
+        <link key="canonical" rel="canonical" href="https://www.fotoia.pro/" />
 
         <meta property="og:type" content="website" />
         <meta property="og:title" content="FotoIA Pro | Fotos de productos profesionales con IA" />
         <meta property="og:description" content="Convierte fotos de productos en imágenes profesionales para publicidad, redes sociales, menús, flyers y catálogos con IA." />
-        <meta property="og:url" content="https://www.fotoia.pro/" />
+        <meta key="og:url" property="og:url" content="https://www.fotoia.pro/" />
         <meta property="og:site_name" content="FotoIA Pro" />
         <meta property="og:image" content="https://www.fotoia.pro/icon.png" />
 

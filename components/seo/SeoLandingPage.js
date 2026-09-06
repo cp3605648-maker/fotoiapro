@@ -35,11 +35,11 @@ export default function SeoLandingPage({
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href={canonical} />
+        <link key="canonical" rel="canonical" href={canonical} />
 
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:url" content={canonical} />
+        <meta key="og:url" property="og:url" content={canonical} />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://www.fotoia.pro/icon.png" />
 

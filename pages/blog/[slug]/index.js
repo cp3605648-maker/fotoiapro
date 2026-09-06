@@ -25,10 +25,10 @@ export default function BlogPost({ post }) {
       <Head>
         <title>{post.title} | FotoIA Pro</title>
         <meta name="description" content={post.description} />
-        <link rel="canonical" href={post.canonical} />
+        <link key="canonical" rel="canonical" href={post.canonical} />
         <meta property="og:title" content={`${post.title} | FotoIA Pro`} />
         <meta property="og:description" content={post.description} />
-        <meta property="og:url" content={post.canonical} />
+        <meta key="og:url" property="og:url" content={post.canonical} />
         <meta property="og:type" content="article" />
         <script
           type="application/ld+json"
