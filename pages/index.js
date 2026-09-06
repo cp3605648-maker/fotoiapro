@@ -1524,6 +1524,55 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
         )}
       </section>
 
+      <section className="seoHubSection">
+        <div className="sectionHeader">
+          <span>Soluciones por canal</span>
+          <h2>Imágenes profesionales para vender tus productos online</h2>
+          <p>
+            Explora soluciones de FotoIA Pro para ecommerce, marketplaces,
+            publicidad, redes sociales y negocios de alimentos.
+          </p>
+        </div>
+
+        <div className="seoHubGrid">
+          <div className="seoHubGroup">
+            <h3>🛒 Ecommerce y marketplaces</h3>
+            <a href="/foto-producto">Foto de producto con IA</a>
+            <a href="/fotos-producto-ecommerce">Fotos para ecommerce</a>
+            <a href="/foto-amazon">Fotos para Amazon</a>
+            <a href="/foto-mercado-libre">Fotos para Mercado Libre</a>
+            <a href="/foto-shopify">Fotos para Shopify</a>
+          </div>
+
+          <div className="seoHubGroup">
+            <h3>📢 Publicidad y ventas</h3>
+            <a href="/publicidad-productos-ia">Publicidad de productos</a>
+            <a href="/anuncios-producto-ia">Anuncios de producto</a>
+            <a href="/flyer-producto-ia">Flyers de producto</a>
+            <a href="/foto-catalogo">Fotos para catálogo</a>
+            <a href="/promociones-producto-ia">Promociones de producto</a>
+          </div>
+
+          <div className="seoHubGroup">
+            <h3>📱 Redes sociales</h3>
+            <a href="/foto-instagram-producto">Producto para Instagram</a>
+            <a href="/foto-facebook-producto">Producto para Facebook</a>
+            <a href="/foto-tiktok-producto">Producto para TikTok</a>
+            <a href="/foto-whatsapp-negocio">Producto para WhatsApp</a>
+            <a href="/redes-sociales-producto">Fotos para redes sociales</a>
+          </div>
+
+          <div className="seoHubGroup">
+            <h3>🍔 Restaurantes y alimentos</h3>
+            <a href="/foto-restaurante">Fotos para restaurantes</a>
+            <a href="/foto-comida">Fotos de comida</a>
+            <a href="/menu-restaurante-ia">Menús para restaurante</a>
+            <a href="/menu-whatsapp-ia">Menú para WhatsApp</a>
+            <a href="/foto-producto-delivery">Fotos para delivery</a>
+          </div>
+        </div>
+      </section>
+
       <section className="features">
         <div className="feature">
           <span>🍔</span>
@@ -1561,9 +1610,58 @@ const [marketplaceImageType, setMarketplaceImageType] = useState("main");
           font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        .hero, .studio, .creditsSection, .historySection {
+        .hero, .studio, .creditsSection, .historySection, .seoHubSection {
           position: relative;
           padding: 80px 6vw;
+        }
+
+        .seoHubSection {
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .seoHubGrid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+          margin-top: 34px;
+        }
+
+        .seoHubGroup {
+          padding: 24px;
+          border-radius: 22px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .seoHubGroup h3 {
+          margin: 0 0 18px;
+          font-size: 18px;
+        }
+
+        .seoHubGroup a {
+          display: block;
+          margin: 11px 0;
+          color: rgba(255,255,255,0.78);
+          text-decoration: none;
+          line-height: 1.4;
+        }
+
+        .seoHubGroup a:hover {
+          color: white;
+          text-decoration: underline;
+        }
+
+        @media (max-width: 1000px) {
+          .seoHubGrid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .seoHubGrid {
+            grid-template-columns: 1fr;
+          }
         }
 
         .hero { overflow: hidden; padding-top: 28px; }

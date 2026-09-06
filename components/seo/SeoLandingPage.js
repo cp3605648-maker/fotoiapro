@@ -129,16 +129,14 @@ export default function SeoLandingPage({
         <section className="seoSection seoText">
           <h2>{keyword ? `Crear ${keyword} con inteligencia artificial` : "Editar fotos con inteligencia artificial"}</h2>
           <p>
-            FotoIA Pro permite transformar imágenes de forma rápida, sencilla y
-            profesional. Puedes mejorar fotografías para perfiles, currículum,
-            redes sociales, ecommerce, productos, documentos y contenido digital.
-            La herramienta está pensada para personas que quieren resultados de
-            calidad sin usar programas complejos de edición.
+            FotoIA Pro está diseñado para transformar fotografías reales de
+            productos en imágenes comerciales para ecommerce, marketplaces,
+            catálogos, publicidad y redes sociales.
           </p>
           <p>
-            Con ayuda de inteligencia artificial puedes cambiar fondos, mejorar
-            iluminación, ajustar estilo, generar una apariencia más profesional y
-            preparar imágenes listas para usarse en plataformas digitales.
+            La inteligencia artificial ayuda a mejorar fondo, iluminación y
+            composición mientras se prioriza conservar la forma, color, branding,
+            materiales y detalles visibles del producto original.
           </p>
         </section>
 

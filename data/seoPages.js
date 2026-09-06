@@ -1,5 +1,74 @@
 const baseUrl = "https://www.fotoia.pro";
 
+function getSeoCategory(slug) {
+  if (
+    slug.includes("amazon") ||
+    slug.includes("mercado-libre") ||
+    slug.includes("shopify") ||
+    slug.includes("etsy") ||
+    slug.includes("ebay") ||
+    slug.includes("ecommerce") ||
+    slug.includes("tienda-online")
+  ) {
+    return "ecommerce";
+  }
+
+  if (
+    slug.includes("instagram") ||
+    slug.includes("facebook") ||
+    slug.includes("tiktok") ||
+    slug.includes("whatsapp") ||
+    slug.includes("pinterest") ||
+    slug.includes("linkedin") ||
+    slug.includes("redes-sociales")
+  ) {
+    return "redes-sociales";
+  }
+
+  if (
+    slug.includes("restaurante") ||
+    slug.includes("comida") ||
+    slug.includes("menu") ||
+    slug.includes("bebidas") ||
+    slug.includes("postres") ||
+    slug.includes("delivery") ||
+    slug.includes("cafeteria")
+  ) {
+    return "restaurantes";
+  }
+
+  if (
+    slug.includes("publicidad") ||
+    slug.includes("anuncios") ||
+    slug.includes("flyer") ||
+    slug.includes("promociones") ||
+    slug.includes("catalogo") ||
+    slug.includes("branding") ||
+    slug.includes("lanzamiento")
+  ) {
+    return "marketing";
+  }
+
+  if (
+    slug.includes("calzado") ||
+    slug.includes("ropa") ||
+    slug.includes("cosmeticos") ||
+    slug.includes("joyeria") ||
+    slug.includes("relojes") ||
+    slug.includes("electronica") ||
+    slug.includes("muebles") ||
+    slug.includes("decoracion") ||
+    slug.includes("artesanias") ||
+    slug.includes("bolsos") ||
+    slug.includes("perfumes") ||
+    slug.includes("alimentos")
+  ) {
+    return "sectores";
+  }
+
+  return "fotografia-producto";
+}
+
 function createSeoPage({
   slug,
   title,
@@ -20,6 +89,7 @@ function createSeoPage({
     badge,
     cta,
     keyword,
+    category: getSeoCategory(slug),
 
     benefits: [
       {
